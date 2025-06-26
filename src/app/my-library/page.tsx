@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StarIcon } from '@heroicons/react/24/solid';
-import { useTranslation } from '../../utils/useTranslation';
+import { useTranslation } from '@/utils/useTranslation';
 
 // API URL configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -23,14 +23,14 @@ interface Paper {
     downloadUrl: string;
     isInteresting: boolean;
     isDownloaded: boolean;
-    addedDate: string; // Date when paper was added to library
+    addedDate: string;
     doi?: string;
-    bibtex?: string;     // BibTeX citation format
-    sourceCode?: string; // Link to source code repository
+    bibtex?: string;
+    sourceCode?: string;
     datasets?: string[];
-    isUploaded?: boolean; // Flag for uploaded papers
-    fileName?: string; // Original file name for uploaded papers
-    fileSize?: number; // Size of the uploaded file in bytes
+    isUploaded?: boolean;
+    fileName?: string;
+    fileSize?: number;
 }
 
 // Filter types
@@ -65,7 +65,7 @@ interface Dataset {
     category: string;
     paperCount: number;
     downloadUrl: string;
-    addedDate: string; // Date when dataset was added to library
+    addedDate: string;
     tasks?: string[];
     language?: string;
 }
@@ -83,23 +83,18 @@ function createSlug(title: string): string {
 export default function MyLibraryPage() {
     const { t } = useTranslation('my-library');
 
-    // State for showing sections
     const [activeSection, setActiveSection] = useState<'interesting' | 'downloaded' | 'datasets' | 'uploaded' | 'recommended'>('interesting');
 
-    // Add login state to track authentication status
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-    // Add router for navigation
     const router = useRouter();
 
-    // State for filters
     const [activeFilters, setActiveFilters] = useState<Filters>({
         years: [],
         conferences: [],
         fields: [],
     });
 
-    // Dataset filter state
     const [datasetFilters, setDatasetFilters] = useState<DatasetFilters>({
         categories: [],
         tasks: [],
@@ -107,23 +102,19 @@ export default function MyLibraryPage() {
         paperCounts: ['0-100', '101-500', '501-1000', '1000+']
     });
 
-    // State for papers
     const [libraryPapers, setLibraryPapers] = useState<Paper[]>([]);
     const [filteredPapers, setFilteredPapers] = useState<Paper[]>([]);
 
-    // State for datasets
     const [starredDatasets, setStarredDatasets] = useState<Dataset[]>([]);
 
-    // State for uploaded papers modal
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadError, setUploadError] = useState<string | null>(null);
 
-    // File input ref
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // State for expanded filter sections
     const [expandedFilters, setExpandedFilters] = useState<{
         conferences: boolean;
         fields: boolean;

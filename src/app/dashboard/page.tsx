@@ -1,7 +1,7 @@
 'use client';
 
 import DashboardClient from './DashboardClient';
-import { useTranslation } from '../../utils/useTranslation';
+import { useTranslation } from '@/utils/useTranslation';
 
 export default function DashboardPage() {
     const { t } = useTranslation('dashboard');

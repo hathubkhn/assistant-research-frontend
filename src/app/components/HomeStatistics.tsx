@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslation } from '../../utils/useTranslation';
+import { useTranslation } from '@/utils/useTranslation';
 
 interface StatsData {
     totalPapers: number;

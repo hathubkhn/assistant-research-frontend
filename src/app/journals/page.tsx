@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useTranslation } from '../../utils/useTranslation';
+import { useTranslation } from '@/utils/useTranslation';
 
 interface Journal {
     id: string;

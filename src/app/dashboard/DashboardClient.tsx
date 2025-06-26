@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "../../utils/useTranslation";
+import { useTranslation } from "@/utils/useTranslation";
 import {
     LineChart, Line, BarChart, Bar, PieChart, Pie,
     XAxis, YAxis, CartesianGrid, Tooltip, Legend,

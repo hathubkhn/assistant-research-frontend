@@ -3,8 +3,8 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { useTranslation } from '../../utils/useTranslation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/utils/useTranslation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useTranslation } from '../../utils/useTranslation';
+import { useTranslation } from '@/utils/useTranslation';
 
 // The API URL with a fallback to localhost
 const RESEARCH_ASSISTANT_API_URL = process.env.NEXT_PUBLIC_RESEARCH_API_URL || 'http://localhost:8090';

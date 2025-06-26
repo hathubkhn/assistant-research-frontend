@@ -1,9 +1,8 @@
 'use client';
 
-import Image from "next/image";
 import Link from "next/link";
 import { HomeStatistics } from "./components/HomeStatistics";
-import { useTranslation } from "../utils/useTranslation";
+import { useTranslation } from "@/utils/useTranslation";
 
 export default function Home() {
   const { t } = useTranslation('home');

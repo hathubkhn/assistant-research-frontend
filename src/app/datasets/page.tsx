@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { PrismaClient } from '@prisma/client';
-import { fetchApi } from '../utils/api';
-import { getAuthHeaders } from '../../utils/auth';
+import { fetchApi } from '@/utils/api';
+import { getAuthHeaders } from '@/utils/auth';
 import { toast } from 'react-hot-toast';
 import InterestingDatasetButton from '../../components/InterestingDatasetButton';
-import { useTranslation } from '../../utils/useTranslation';
+import { useTranslation } from '@/utils/useTranslation';
 
 // Helper function to create URL-friendly slugs from names
 function createSlug(name: string): string {

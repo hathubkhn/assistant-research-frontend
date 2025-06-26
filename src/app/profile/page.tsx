@@ -3,8 +3,8 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { fetchWithAuth, fetchProfile, hasAuthToken } from '../../utils/auth';
-import { useTranslation } from '../../utils/useTranslation';
+import { fetchWithAuth, fetchProfile, hasAuthToken } from '@/utils/auth';
+import { useTranslation } from '@/utils/useTranslation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
