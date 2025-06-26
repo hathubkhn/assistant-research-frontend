@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Research Assistant Frontend
+
+This is the frontend for the Research Assistant application, which integrates with the backend API to provide a user interface for querying research papers and getting AI-generated answers.
+
+## Integration with Backend
+
+The frontend communicates with the backend through API routes that proxy requests to the backend server. The main API routes are:
+
+- `/api/research-assistant/query` - For querying the research assistant
+- `/api/research-assistant/papers` - For adding or deleting papers
+
+## Configuration
+
+To configure the frontend to connect to the backend, set the following environment variable:
+
+```bash
+# In your .env file
+RESEARCH_ASSISTANT_API_URL=http://localhost:8000
+```
+
+If not specified, it will default to `http://localhost:8000`.
+
+## Features
+
+1. **Query Interface**: Users can enter natural language questions about research topics
+2. **Response Display**: Shows AI-generated answers based on the retrieved papers
+3. **Source Attribution**: Displays the source papers used to generate the answer
+4. **Relevance Scoring**: Shows how relevant each paper is to the query
+
+## How It Works
+
+1. The user enters a query in the search box
+2. The frontend sends the query to the Next.js API route
+3. The API route forwards the request to the backend Research Assistant API
+4. The backend retrieves relevant papers from Qdrant vector database
+5. The backend generates an answer using OpenAI based on the retrieved papers
+6. The response is returned to the frontend and displayed to the user
+
+## Components
+
+- **Search Form**: Allows users to enter queries
+- **Answer Section**: Displays the AI-generated answer
+- **Sources Section**: Shows the papers used to generate the answer, including titles, abstracts, and keywords
 
 ## Getting Started
 
-First, run the development server:
+1. Ensure the backend Research Assistant is running
+2. Set the `RESEARCH_ASSISTANT_API_URL` environment variable
+3. Start the Next.js development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Navigate to the Research Assistant page in your browser 
