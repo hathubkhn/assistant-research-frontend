@@ -3,911 +3,797 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { fetchApi } from '@/utils/api';
 import { getAuthHeaders } from '@/utils/auth';
 import { toast } from 'react-hot-toast';
 import InterestingDatasetButton from '../../components/InterestingDatasetButton';
 import { useTranslation } from '@/utils/useTranslation';
+import DataPagination from '@/app/components/DataPagination';
+import axios from 'axios';
+import {
+  Layout,
+  Card,
+  Input,
+  Button,
+  Typography,
+  Space,
+  Row,
+  Col,
+  Checkbox,
+  Select,
+  Spin,
+  Tag,
+  Segmented,
+  Divider,
+  Image,
+  Badge
+} from 'antd';
+import {
+  SearchOutlined,
+  AppstoreOutlined,
+  BarsOutlined,
+  DownloadOutlined,
+  ClearOutlined,
+  ExportOutlined
+} from '@ant-design/icons';
 
-// Helper function to create URL-friendly slugs from names
-function createSlug(name: string): string {
-    return name
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '') // Remove special characters
-        .replace(/\s+/g, '-')     // Replace spaces with hyphens
-        .replace(/--+/g, '-')     // Replace multiple hyphens with single hyphen
-        .trim();                  // Trim whitespace
+const { Title, Text, Paragraph } = Typography;
+const { Search } = Input;
+const { Content } = Layout;
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface Dataset {
+  id: string;
+  name: string;
+  description: string;
+  tasks: string[];
+  benchmarks: any[];
+  starred?: boolean;
+  [key: string]: any;
 }
 
-// Utility function to safely parse tasks array
+interface DatasetsResponse {
+  results: Dataset[];
+  pagination: {
+    totalItems: number;
+    totalPages: number;
+    page: number;
+    pageSize: number;
+  };
+}
+
+interface FetchDatasetsParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  task?: string;
+  field?: string;
+  venue?: string;
+  venueType?: string;
+  year?: string;
+}
+
+const fetchDatasetsAPI = async (params: FetchDatasetsParams): Promise<DatasetsResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+    if (params.search) queryParams.append('search', params.search);
+    if (params.task) queryParams.append('task', params.task);
+    if (params.field) queryParams.append('field', params.field);
+    if (params.venue) queryParams.append('venue', params.venue);
+    if (params.venueType) queryParams.append('venueType', params.venueType);
+    if (params.year) queryParams.append('year', params.year);
+
+    const response = await axios.get(`${API_URL}/api/datasets/?${queryParams.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching datasets:', error);
+    throw error;
+  }
+};
+
+const fetchInterestingDatasetsAPI = async (): Promise<Dataset[]> => {
+  try {
+    const authHeaders = getAuthHeaders();
+    const response = await axios.get('/api/datasets/interesting/', {
+      headers: authHeaders as Record<string, string>,
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching interesting datasets:', error);
+    throw error;
+  }
+};
+
+const markDatasetInterestingAPI = async (id: string): Promise<void> => {
+  try {
+    const authHeaders = getAuthHeaders(true);
+    await axios.post(`/api/datasets/mark-interesting/${id}/`, {}, {
+      headers: authHeaders as Record<string, string>,
+      withCredentials: true
+    });
+  } catch (error) {
+    console.error('Error marking dataset as interesting:', error);
+    throw error;
+  }
+};
+
+const unmarkDatasetInterestingAPI = async (id: string): Promise<void> => {
+  try {
+    const authHeaders = getAuthHeaders(true);
+    await axios.delete(`/api/datasets/${id}/unmark-interesting/`, {
+      headers: authHeaders as Record<string, string>,
+      withCredentials: true
+    });
+  } catch (error) {
+    console.error('Error unmarking dataset as interesting:', error);
+    throw error;
+  }
+};
+
+const fetchConferencesFilterAPI = async (): Promise<any[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/api/conferences/filter/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching conferences filter:', error);
+    throw error;
+  }
+};
+
+const fetchJournalsFilterAPI = async (): Promise<any[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/api/journals/filter/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching journals filter:', error);
+    throw error;
+  }
+};
+
 function parseTasksArray(tasks: any): string[] {
-    if (!tasks) return [];
+  if (!tasks) return [];
 
-    try {
-        if (typeof tasks === 'string') {
-            return JSON.parse(tasks);
-        }
-        if (Array.isArray(tasks)) {
-            return tasks;
-        }
-    } catch (e) {
-        console.error('Error parsing tasks:', e);
+  try {
+    if (typeof tasks === 'string') {
+      return JSON.parse(tasks);
     }
-
-    return [];
+    if (Array.isArray(tasks)) {
+      return tasks;
+    }
+  } catch (e) {
+    console.error('Error parsing tasks:', e);
+  }
+  return [];
 }
 
-// Utility function to safely get the benchmark count
 function getBenchmarkCount(benchmarks: any): number {
-    if (!benchmarks) return 0;
-
-    try {
-        // Handle the case where benchmarks is already a number
-        if (typeof benchmarks === 'number') {
-            return benchmarks;
-        }
-
-        // Handle array 
-        if (Array.isArray(benchmarks)) {
-            return benchmarks.length;
-        }
-
-        // Handle string
-        if (typeof benchmarks === 'string') {
-            // Try to parse as JSON
-            try {
-                const parsed = JSON.parse(benchmarks);
-                if (typeof parsed === 'number') {
-                    return parsed;
-                }
-                return Array.isArray(parsed) ? parsed.length : 0;
-            } catch (e) {
-                // If parsing fails, try to convert directly to number
-                const num = Number(benchmarks);
-                if (!isNaN(num)) {
-                    return num;
-                }
-            }
-        }
-    } catch (e) {
-        console.error('Error parsing benchmarks:', e);
+  if (!benchmarks) return 0;
+  try {
+    if (typeof benchmarks === 'number') {
+      return benchmarks;
     }
 
-    return 0;
+    if (Array.isArray(benchmarks)) {
+      return benchmarks.length;
+    }
+
+    if (typeof benchmarks === 'string') {
+      try {
+        const parsed = JSON.parse(benchmarks);
+        if (typeof parsed === 'number') {
+          return parsed;
+        }
+        return Array.isArray(parsed) ? parsed.length : 0;
+      } catch (e) {
+        const num = Number(benchmarks);
+        if (!isNaN(num)) {
+          return num;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing benchmarks:', e);
+  }
+  return 0;
 }
 
 interface Dataset {
-    id: string;
-    name: string;
-    abbreviation: string;
-    description: string;
-    downloadUrl: string;
-    link?: string;
-    paper_link?: string;
-    subtitle?: string;
-    paperCount: number;
-    language: string;
-    category: string;
-    tasks: string[];
-    thumbnailUrl?: string;
-    benchmarks: any[];
-    dataloaders?: any[];
-    similar_datasets?: any[];
-    papers?: any[];
-    starred?: boolean;
-    isInteresting?: boolean;
-    associatedConferences?: string[];
+  id: string;
+  name: string;
+  abbreviation: string;
+  description: string;
+  downloadUrl: string;
+  link?: string;
+  paper_link?: string;
+  subtitle?: string;
+  paperCount: number;
+  language: string;
+  category: string;
+  tasks: string[];
+  thumbnailUrl?: string;
+  benchmarks: any[];
+  dataloaders?: any[];
+  similar_datasets?: any[];
+  papers?: any[];
+  starred?: boolean;
+  isInteresting?: boolean;
+  associatedConferences?: string[];
 }
 
 export default function DatasetsPage() {
-    const router = useRouter();
-    const [datasets, setDatasets] = useState<Dataset[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [currentView, setCurrentView] = useState<'grid' | 'list'>('list');
-    const [activeFilters, setActiveFilters] = useState<{
-        categories: string[];
-        tasks: string[];
-        languages: string[];
-    }>({
-        categories: [],
-        tasks: [],
-        languages: []
-    });
-    const [sortOption, setSortOption] = useState<string>('best-match');
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentView, setCurrentView] = useState<'grid' | 'list'>('list');
+  const [activeFilters, setActiveFilters] = useState<{
+    categories: string[];
+    tasks: string[];
+    languages: string[];
+  }>({
+    categories: [],
+    tasks: [],
+    languages: []
+  });
+  const [sortOption, setSortOption] = useState<string>('best-match');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(20);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const { t } = useTranslation('datasets');
 
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(20);
-    const [totalItems, setTotalItems] = useState<number>(0);
-    const [totalPages, setTotalPages] = useState<number>(0);
+  const fetchDatasets = async (page: number = 1, size: number = pageSize) => {
+    try {
+      setLoading(true);
+      let queryParams = `page=${page}&pageSize=${size}`;
+      if (activeFilters.categories.length > 0) {
+        queryParams += `&category=${encodeURIComponent(activeFilters.categories[0])}`;
+      }
+      if (activeFilters.languages.length > 0) {
+        queryParams += `&language=${encodeURIComponent(activeFilters.languages[0])}`;
+      }
+      if (activeFilters.tasks.length > 0) {
+        queryParams += `&task=${encodeURIComponent(activeFilters.tasks[0])}`;
+      }
+      if (searchQuery) {
+        queryParams += `&search=${encodeURIComponent(searchQuery)}`;
+      }
+      const params: FetchDatasetsParams = {
+        page,
+        pageSize: size,
+      };
+      if (activeFilters.categories.length > 0) {
+        params.field = activeFilters.categories[0];
+      }
+      if (activeFilters.languages.length > 0) {
+        params.field = params.field ? `${params.field},${activeFilters.languages[0]}` : activeFilters.languages[0];
+      }
+      if (activeFilters.tasks.length > 0) {
+        params.task = activeFilters.tasks[0];
+      }
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+      const data = await fetchDatasetsAPI(params);
+      if (data.results && data.results.length > 0) {
+        console.log('Sample dataset structure:', data.results[0]);
+        data.results = data.results.map((dataset: Dataset) => {
 
-    // State for conferences and journals data
-    const [venues, setVenues] = useState<{
-        conferences: Array<{ id: string, name: string, abbreviation: string }>;
-        journals: Array<{ id: string, name: string, abbreviation: string }>;
-    }>({
-        conferences: [],
-        journals: [],
-    });
-
-    const { t } = useTranslation('datasets');
-
-    const fetchDatasets = async (page: number = 1, size: number = pageSize) => {
-        try {
-            setLoading(true);
-
-            // Build query parameters including filters and pagination
-            let queryParams = `page=${page}&pageSize=${size}`;
-
-            // Add filter parameters if active
-            if (activeFilters.categories.length > 0) {
-                queryParams += `&category=${encodeURIComponent(activeFilters.categories[0])}`;
-            }
-
-            if (activeFilters.languages.length > 0) {
-                queryParams += `&language=${encodeURIComponent(activeFilters.languages[0])}`;
-            }
-
-            // Add task filter if active
-            if (activeFilters.tasks.length > 0) {
-                queryParams += `&task=${encodeURIComponent(activeFilters.tasks[0])}`;
-            }
-
-            // Add search parameter if present
-            if (searchQuery) {
-                queryParams += `&search=${encodeURIComponent(searchQuery)}`;
-            }
-
-            const response = await fetchApi(`datasets/?${queryParams}`);
-            if (response.ok) {
-                const data = await response.json();
-
-                // Add debugging to examine dataset structure
-                if (data.results && data.results.length > 0) {
-                    console.log('Sample dataset structure:', data.results[0]);
-
-                    // Ensure benchmarks are properly handled
-                    data.results = data.results.map((dataset: Dataset) => {
-                        // Add a check for benchmarks
-                        if (typeof dataset.benchmarks === 'number' ||
-                            dataset.benchmarks === null ||
-                            dataset.benchmarks === undefined) {
-                            dataset.benchmarks = [];
-                        }
-                        return dataset;
-                    });
-                }
-
-                // Check if the user is logged in
-                const hasAuthToken = typeof window !== 'undefined' && (
-                    localStorage.getItem('authToken') ||
-                    sessionStorage.getItem('authToken') ||
-                    localStorage.getItem('token') ||
-                    sessionStorage.getItem('token')
-                );
-
-                // If logged in, fetch interesting datasets to mark the starred ones
-                if (hasAuthToken) {
-                    try {
-                        const interestingResponse = await fetch('/api/datasets/interesting/', {
-                            headers: getAuthHeaders(),
-                            credentials: 'include'
-                        });
-
-                        if (interestingResponse.ok) {
-                            const interestingData = await interestingResponse.json();
-                            const interestingIds = Array.isArray(interestingData)
-                                ? interestingData.map((dataset: any) => dataset.id)
-                                : [];
-
-                            // Mark datasets as starred if they are in the interesting list
-                            data.results = data.results.map((dataset: Dataset) => ({
-                                ...dataset,
-                                starred: interestingIds.includes(dataset.id),
-                                isInteresting: interestingIds.includes(dataset.id)
-                            }));
-                        }
-                    } catch (error) {
-                        console.error('Error fetching interesting datasets:', error);
-                    }
-                }
-
-                setDatasets(data.results);
-                setTotalItems(data.pagination.totalItems);
-                setTotalPages(data.pagination.totalPages);
-                setCurrentPage(data.pagination.page);
-            }
-        } catch (error) {
-            console.error('Error fetching datasets:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchDatasets(1);
-    }, []);
-
-    // Handle page change
-    const handlePageChange = (newPage: number) => {
-        if (newPage < 1 || newPage > totalPages) return;
-        setCurrentPage(newPage);
-        fetchDatasets(newPage);
-
-        // Scroll to top of page
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // Handle items per page change
-    const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newSize = parseInt(e.target.value, 10);
-        setPageSize(newSize);
-        setCurrentPage(1); // Reset to first page when changing items per page
-        fetchDatasets(1, newSize);
-    };
-
-    // Monitor network requests to '/images/datasets/' path
-    useEffect(() => {
-        // Create a Performance Observer to monitor network requests
-        if (typeof window !== 'undefined' && window.PerformanceObserver) {
-            const observer = new PerformanceObserver((list) => {
-                list.getEntries().forEach((entry) => {
-                    if (entry.name.includes('/images/datasets/')) {
-                        console.log('Image request:', entry.name, 'Duration:', entry.duration);
-                    }
-                });
-            });
-
-            // Observe resource timing entries
-            observer.observe({ entryTypes: ['resource'] });
-
-            return () => {
-                observer.disconnect();
-            };
-        }
-    }, []);
-
-    const toggleStar = async (id: string, e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Check if user is logged in by checking for auth token
-        const hasAuthToken = typeof window !== 'undefined' && (
-            localStorage.getItem('authToken') ||
-            sessionStorage.getItem('authToken') ||
-            localStorage.getItem('token') ||
-            sessionStorage.getItem('token')
-        );
-
-        if (!hasAuthToken) {
-            toast.error('You must be logged in to mark datasets as interesting');
-            return;
-        }
-
-        // First update UI optimistically
-        setDatasets(prevDatasets => prevDatasets.map(dataset =>
-            dataset.id === id ? { ...dataset, starred: !dataset.starred } : dataset
-        ));
-
-        // Get the current state of the dataset
-        const dataset = datasets.find(d => d.id === id);
-        const isCurrentlyStarred = dataset?.starred || false;
-
-        try {
-            const headers = getAuthHeaders(true);
-
-            if (isCurrentlyStarred) {
-                // If currently starred, unmark it
-                const response = await fetch(`/api/datasets/${id}/unmark-interesting/`, {
-                    method: 'DELETE',
-                    headers,
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to unmark dataset as interesting');
-                }
-
-                toast.success('Dataset removed from Interesting Datasets');
-            } else {
-                // If not starred, mark it as interesting
-                const response = await fetch(`/api/datasets/mark-interesting/${id}/`, {
-                    method: 'POST',
-                    headers,
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to mark dataset as interesting');
-                }
-
-                toast.success('Dataset added to Interesting Datasets');
-            }
-        } catch (error) {
-            console.error('Error toggling dataset interesting status:', error);
-            toast.error('Error updating dataset status. Please try again.');
-
-            // Revert the optimistic update if the API call failed
-            setDatasets(prevDatasets => prevDatasets.map(dataset =>
-                dataset.id === id ? { ...dataset, starred: !dataset.starred } : dataset
-            ));
-        }
-    };
-
-    // Filter datasets based on search query and category filter
-    const filteredDatasets = Array.isArray(datasets) ? datasets.filter(dataset => {
-        const matchesSearch = searchQuery === '' ||
-            dataset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            dataset.abbreviation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            dataset.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-        const matchesFilter = activeFilters.categories.length === 0 ||
-            activeFilters.categories.includes(dataset.category);
-
-        const matchesTaskFilter = activeFilters.tasks.length === 0 ||
-            (dataset.tasks && parseTasksArray(dataset.tasks).some(task =>
-                activeFilters.tasks.includes(task))
-            );
-
-        const matchesLanguageFilter = activeFilters.languages.length === 0 ||
-            activeFilters.languages.includes(dataset.language);
-
-        return matchesSearch && matchesFilter && matchesTaskFilter && matchesLanguageFilter;
-    }) : [];
-
-    // Get unique categories for filter
-    const categories = ['Image', '3D', 'Audio', 'Medical', 'Time series', 'Text'];
-
-    // Get unique tasks for task filter
-    const allTasks = new Set<string>();
-    if (Array.isArray(datasets)) {
-        datasets.forEach(dataset => {
-            if (dataset.tasks) {
-                const tasksArray = parseTasksArray(dataset.tasks);
-                tasksArray.forEach(task => allTasks.add(task));
-            }
+          if (typeof dataset.benchmarks === 'number' ||
+            dataset.benchmarks === null ||
+            dataset.benchmarks === undefined) {
+            dataset.benchmarks = [];
+          }
+          return dataset;
         });
+      }
+      const hasAuthToken = typeof window !== 'undefined' && (
+        localStorage.getItem('authToken') ||
+        sessionStorage.getItem('authToken') ||
+        localStorage.getItem('token') ||
+        sessionStorage.getItem('token')
+      );
+      if (hasAuthToken) {
+        try {
+          const interestingData = await fetchInterestingDatasetsAPI();
+          const interestingIds = Array.isArray(interestingData)
+            ? interestingData.map((dataset: any) => dataset.id)
+            : [];
+          data.results = data.results.map((dataset: Dataset) => ({
+            ...dataset,
+            starred: interestingIds.includes(dataset.id),
+            isInteresting: interestingIds.includes(dataset.id)
+          }));
+        } catch (error) {
+          console.error('Error fetching interesting datasets:', error);
+        }
+      }
+      setDatasets(data.results);
+      setTotalPages(data.pagination.totalPages);
+      setCurrentPage(data.pagination.page);
+    } catch (error) {
+      console.error('Error fetching datasets:', error);
+    } finally {
+      setLoading(false);
     }
-    const tasks = Array.from(allTasks).sort();
+  };
 
-    // Get unique languages for language filter
-    const languages = Array.isArray(datasets)
-        ? [...new Set(datasets.map(dataset => dataset.language).filter(Boolean))].sort()
-        : [];
+  useEffect(() => {
+    fetchDatasets(1);
+  }, []);
 
-    // Sort datasets based on selected option
-    const sortedDatasets = [...filteredDatasets].sort((a, b) => {
-        if (sortOption === 'best-match') {
-            return b.paperCount - a.paperCount;
-        } else if (sortOption === 'name-asc') {
-            return a.name.localeCompare(b.name);
-        } else if (sortOption === 'name-desc') {
-            return b.name.localeCompare(a.name);
-        } else if (sortOption === 'papers-desc') {
-            return b.paperCount - a.paperCount;
-        } else if (sortOption === 'papers-asc') {
-            return a.paperCount - b.paperCount;
-        }
-        return 0;
+  const handlePageChange = (page: number, size: number) => {
+    setCurrentPage(page);
+    if (size !== pageSize) {
+      setPageSize(size);
+    }
+    fetchDatasets(page, size);
+
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+
+    if (typeof window !== 'undefined' && window.PerformanceObserver) {
+      const observer = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+          if (entry.name.includes('/images/datasets/')) {
+            console.log('Image request:', entry.name, 'Duration:', entry.duration);
+          }
+        });
+      });
+
+
+      observer.observe({ entryTypes: ['resource'] });
+
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, []);
+
+  const filteredDatasets = Array.isArray(datasets) ? datasets.filter(dataset => {
+    const matchesSearch = searchQuery === '' ||
+      dataset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      dataset.abbreviation.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      dataset.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesFilter = activeFilters.categories.length === 0 ||
+      activeFilters.categories.includes(dataset.category);
+
+    const matchesTaskFilter = activeFilters.tasks.length === 0 ||
+      (dataset.tasks && parseTasksArray(dataset.tasks).some(task =>
+        activeFilters.tasks.includes(task))
+      );
+
+    const matchesLanguageFilter = activeFilters.languages.length === 0 ||
+      activeFilters.languages.includes(dataset.language);
+
+    return matchesSearch && matchesFilter && matchesTaskFilter && matchesLanguageFilter;
+  }) : [];
+
+  const categories = ['Image', '3D', 'Audio', 'Medical', 'Time series', 'Text'];
+
+  const allTasks = new Set<string>();
+  if (Array.isArray(datasets)) {
+    datasets.forEach(dataset => {
+      if (dataset.tasks) {
+        const tasksArray = parseTasksArray(dataset.tasks);
+        tasksArray.forEach(task => allTasks.add(task));
+      }
+    });
+  }
+  const tasks = Array.from(allTasks).sort();
+
+
+  const languages = Array.isArray(datasets)
+    ? [...new Set(datasets.map(dataset => dataset.language).filter(Boolean))].sort()
+    : [];
+
+  const sortedDatasets = [...filteredDatasets].sort((a, b) => {
+    if (sortOption === 'best-match') {
+      return b.paperCount - a.paperCount;
+    } else if (sortOption === 'name-asc') {
+      return a.name.localeCompare(b.name);
+    } else if (sortOption === 'name-desc') {
+      return b.name.localeCompare(a.name);
+    } else if (sortOption === 'papers-desc') {
+      return b.paperCount - a.paperCount;
+    } else if (sortOption === 'papers-asc') {
+      return a.paperCount - b.paperCount;
+    }
+    return 0;
+  });
+
+  const toggleCategoryFilter = (category: string) => {
+    setActiveFilters(prev => {
+      const newCategories = prev.categories.includes(category)
+        ? prev.categories.filter(c => c !== category)
+        : [...prev.categories, category];
+      return { ...prev, categories: newCategories };
     });
 
-    // Toggle filter functions
-    const toggleCategoryFilter = (category: string) => {
-        setActiveFilters(prev => {
-            const newCategories = prev.categories.includes(category)
-                ? prev.categories.filter(c => c !== category)
-                : [...prev.categories, category];
-            return { ...prev, categories: newCategories };
-        });
-        // Reset to page 1 and refetch with current page size
-        setCurrentPage(1);
-        fetchDatasets(1, pageSize);
-    };
+    setCurrentPage(1);
+    fetchDatasets(1, pageSize);
+  };
 
-    const toggleTaskFilter = (task: string) => {
-        setActiveFilters(prev => {
-            const newTasks = prev.tasks.includes(task)
-                ? prev.tasks.filter(t => t !== task)
-                : [...prev.tasks, task];
-            return { ...prev, tasks: newTasks };
-        });
-        // Reset to page 1 and refetch with current page size
-        setCurrentPage(1);
-        fetchDatasets(1, pageSize);
-    };
+  const toggleTaskFilter = (task: string) => {
+    setActiveFilters(prev => {
+      const newTasks = prev.tasks.includes(task)
+        ? prev.tasks.filter(t => t !== task)
+        : [...prev.tasks, task];
+      return { ...prev, tasks: newTasks };
+    });
 
-    const toggleLanguageFilter = (language: string) => {
-        setActiveFilters(prev => {
-            const newLanguages = prev.languages.includes(language)
-                ? prev.languages.filter(l => l !== language)
-                : [...prev.languages, language];
-            return { ...prev, languages: newLanguages };
-        });
-        // Reset to page 1 and refetch with current page size
-        setCurrentPage(1);
-        fetchDatasets(1, pageSize);
-    };
+    setCurrentPage(1);
+    fetchDatasets(1, pageSize);
+  };
 
-    // Clear all filters
-    const clearFilters = () => {
-        setActiveFilters({
-            categories: [],
-            tasks: [],
-            languages: []
-        });
-        // Reset to page 1 and refetch with current page size
-        setCurrentPage(1);
-        fetchDatasets(1, pageSize);
-    };
+  const toggleLanguageFilter = (language: string) => {
+    setActiveFilters(prev => {
+      const newLanguages = prev.languages.includes(language)
+        ? prev.languages.filter(l => l !== language)
+        : [...prev.languages, language];
+      return { ...prev, languages: newLanguages };
+    });
 
-    // Function to get conference or journal ID from venue name
-    const getVenueId = (venueName: string, type: 'conference' | 'journal' = 'conference') => {
-        if (!venueName) return undefined;
+    setCurrentPage(1);
+    fetchDatasets(1, pageSize);
+  };
 
-        const venueList = type === 'conference' ? venues.conferences : venues.journals;
-        const venue = venueList.find(v =>
-            v.name.toLowerCase() === venueName.toLowerCase() ||
-            v.abbreviation?.toLowerCase() === venueName.toLowerCase()
-        );
-        return venue?.id;
-    };
+  const clearFilters = () => {
+    setActiveFilters({
+      categories: [],
+      tasks: [],
+      languages: []
+    });
+    setCurrentPage(1);
+    fetchDatasets(1, pageSize);
+  };
 
-    // Function to navigate to conference detail
-    const navigateToConference = (id: string | undefined, e: React.MouseEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
+  const fetchVenues = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-        console.log('Navigating to conference with ID:', id);
 
-        if (id) {
-            const url = `/conferences/${id}`;
-            console.log('Conference navigation URL:', url);
-            router.push(url);
-        } else {
-            console.log('Cannot navigate - conference ID is undefined');
-        }
-    };
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      };
 
-    // Function to navigate to journal detail
-    const navigateToJournal = (id: string | undefined, e: React.MouseEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
 
-        console.log('Navigating to journal with ID:', id);
+      const conferencesData = await fetchConferencesFilterAPI();
 
-        if (id) {
-            router.push(`/journals/${id}`);
-        } else {
-            console.log('Cannot navigate - journal ID is undefined');
-        }
-    };
 
-    // Fetch conferences and journals
-    const fetchVenues = async () => {
-        try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const journalsData = await fetchJournalsFilterAPI();
 
-            // Prepare headers
-            const headers: HeadersInit = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            };
+      setVenues({
+        conferences: conferencesData,
+        journals: journalsData
+      });
+    } catch (error) {
+      console.error('Error fetching venues:', error);
+    }
+  };
 
-            // Fetch conferences
-            const conferencesResponse = await fetch(`${apiUrl}/api/conferences/filter/`, {
-                method: 'GET',
-                headers,
-                credentials: 'include'
-            });
+  useEffect(() => {
+    fetchVenues();
+  }, []);
 
-            // Fetch journals
-            const journalsResponse = await fetch(`${apiUrl}/api/journals/filter/`, {
-                method: 'GET',
-                headers,
-                credentials: 'include'
-            });
+  return (
+    <Content style={{ padding: '24px', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <Title level={2} style={{ marginBottom: 24 }}>
+          {t('datasets')}
+        </Title>
 
-            if (conferencesResponse.ok) {
-                const conferencesData = await conferencesResponse.json();
-                setVenues(prev => ({ ...prev, conferences: conferencesData }));
-            }
+        <Card style={{ marginBottom: 24 }}>
+          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+            <Col xs={24} md={12}>
+              <Search
+                placeholder={t('searchForDatasets')}
+                allowClear
+                size="large"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  const timer = setTimeout(() => {
+                    setCurrentPage(1);
+                    fetchDatasets(1, pageSize);
+                  }, 300);
+                  return () => clearTimeout(timer);
+                }}
+                onSearch={() => {
+                  setCurrentPage(1);
+                  fetchDatasets(1, pageSize);
+                }}
+              />
+            </Col>
+            <Col xs={24} md={12}>
+              <Space size="middle" style={{ width: '100%', justifyContent: 'flex-end' }}>
+                <Segmented
+                  value={currentView}
+                  onChange={(value) => setCurrentView(value as 'grid' | 'list')}
+                  options={[
+                    { label: <BarsOutlined />, value: 'list' },
+                    { label: <AppstoreOutlined />, value: 'grid' }
+                  ]}
+                />
+                <Select
+                  value={sortOption}
+                  onChange={setSortOption}
+                  style={{ width: 160 }}
+                  options={[
+                    { value: 'best-match', label: t('bestMatch') },
+                    { value: 'name-asc', label: t('nameAsc') },
+                    { value: 'name-desc', label: t('nameDesc') },
+                    { value: 'papers-desc', label: t('papersDesc') },
+                    { value: 'papers-asc', label: t('papersAsc') }
+                  ]}
+                />
+              </Space>
+            </Col>
+          </Row>
 
-            if (journalsResponse.ok) {
-                const journalsData = await journalsResponse.json();
-                setVenues(prev => ({ ...prev, journals: journalsData }));
-            }
-        } catch (error) {
-            console.error('Error fetching venues:', error);
-        }
-    };
+          <Row gutter={24}>
+            <Col xs={24} md={6}>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Title level={4} style={{ margin: 0 }}>{t('filters')}</Title>
+                  {(activeFilters.categories.length > 0 || activeFilters.tasks.length > 0 || activeFilters.languages.length > 0) && (
+                    <Button
+                      type="link"
+                      size="small"
+                      icon={<ClearOutlined />}
+                      onClick={clearFilters}
+                    >
+                      {t('clearAll')}
+                    </Button>
+                  )}
+                </div>
 
-    // Effect to fetch venues on component mount
-    useEffect(() => {
-        fetchVenues();
-    }, []);
+                <div style={{ marginBottom: 24 }}>
+                  <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByModality')}</Text>
+                  <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                    {categories.map((category) => (
+                      <Checkbox
+                        key={category}
+                        checked={activeFilters.categories.includes(category)}
+                        onChange={() => toggleCategoryFilter(category)}
+                      >
+                        {category}
+                        <Badge
+                          count={Array.isArray(datasets) ? datasets.filter(d => d.category === category).length : 0}
+                          style={{ marginLeft: 8 }}
+                          showZero
+                        />
+                      </Checkbox>
+                    ))}
+                  </Space>
+                </div>
 
-    return (
-        <div className="container mx-auto px-4 py-8" suppressHydrationWarning={true}>
-            <h1 className="text-3xl font-bold text-hust-red mb-6">{t('datasets')}</h1>
+                <div style={{ marginBottom: 24 }}>
+                  <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByTask')}</Text>
+                  <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+                    <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                      {tasks.map((task) => (
+                        <Checkbox
+                          key={task}
+                          checked={activeFilters.tasks.includes(task)}
+                          onChange={() => toggleTaskFilter(task)}
+                        >
+                          {task}
+                          <Badge
+                            count={Array.isArray(datasets) ? datasets.filter(d => {
+                              if (!d.tasks) return false;
+                              return parseTasksArray(d.tasks).includes(task);
+                            }).length : 0}
+                            style={{ marginLeft: 8 }}
+                            showZero
+                          />
+                        </Checkbox>
+                      ))}
+                    </Space>
+                  </div>
+                </div>
 
-            {/* Search and filter section */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8" suppressHydrationWarning={true}>
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6" suppressHydrationWarning={true}>
-                    <div className="w-full md:w-1/2" suppressHydrationWarning={true}>
-                        <div className="relative" suppressHydrationWarning={true}>
-                            <input
-                                type="text"
-                                placeholder={t('searchForDatasets')}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    setSearchQuery(e.target.value);
-                                    // Debounce the search to prevent too many requests
-                                    const timer = setTimeout(() => {
-                                        setCurrentPage(1);
-                                        fetchDatasets(1, pageSize);
-                                    }, 300);
-                                    return () => clearTimeout(timer);
+                <div>
+                  <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByLanguage')}</Text>
+                  <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                    {languages.map((language) => (
+                      <Checkbox
+                        key={language}
+                        checked={activeFilters.languages.includes(language)}
+                        onChange={() => toggleLanguageFilter(language)}
+                      >
+                        {language}
+                        <Badge
+                          count={Array.isArray(datasets) ? datasets.filter(d => d.language === language).length : 0}
+                          style={{ marginLeft: 8 }}
+                          showZero
+                        />
+                      </Checkbox>
+                    ))}
+                  </Space>
+                </div>
+              </div>
+            </Col>
+            <Col xs={24} md={18}>
+              <Spin spinning={loading}>
+                {sortedDatasets.length === 0 && !loading ? (
+                  <div style={{ textAlign: 'center', padding: '48px 0', marginBottom: 24, marginTop: 24 }}>
+                    <Text type="secondary" style={{ fontSize: 16 }}>
+                      {t('noDatasetsFoundMatchingCriteria')}
+                    </Text>
+                  </div>
+                ) : currentView === 'list' ? (
+                  <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                    {sortedDatasets.map((dataset) => (
+                      <Card key={dataset.id} hoverable>
+                        <Row gutter={16}>
+                          <Col xs={24} sm={6}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 96, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
+                              <Link href={`/datasets/${dataset.id}`}>
+                                {dataset.abbreviation ? (
+                                  <Image
+                                    src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
+                                    alt={dataset.abbreviation}
+                                    style={{ maxWidth: '100%', maxHeight: '100%' }}
+                                    fallback={`data:image/svg+xml;base64,${btoa(`<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" fill="#f0f0f0"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="24" fill="#999">${dataset.abbreviation}</text></svg>`)}`}
+                                    preview={false}
+                                  />
+                                ) : (
+                                  <div style={{ fontSize: 24, color: '#999' }}>No Image</div>
+                                )}
+                              </Link>
+                            </div>
+                          </Col>
+                          <Col xs={24} sm={18}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <div>
+                                <Link href={`/datasets/${dataset.id}`}>
+                                  <Title level={4} style={{ margin: 0, color: '#d32f2f' }}>
+                                    {dataset.name}
+                                  </Title>
+                                  <Text type="secondary">{dataset.abbreviation}</Text>
+                                </Link>
+                              </div>
+                              <InterestingDatasetButton
+                                datasetId={dataset.id}
+                                initialState={dataset.starred || false}
+                                onToggle={(isInteresting) => {
+                                  setDatasets(prevDatasets => prevDatasets.map(d =>
+                                    d.id === dataset.id ? { ...d, starred: isInteresting } : d
+                                  ));
                                 }}
+                              />
+                            </div>
+                            <div style={{ margin: '8px 0' }}>
+                              <Text type="secondary">
+                                {dataset.paperCount} papers • {getBenchmarkCount(dataset.benchmarks)} benchmarks • {dataset.language}
+                              </Text>
+                            </div>
+                            <Paragraph ellipsis={{ rows: 2 }}>{dataset.description}</Paragraph>
+                            <div style={{ marginBottom: 12 }}>
+                              <Text strong>{t('tasks')}: </Text>
+                              <Space wrap>
+                                {parseTasksArray(dataset.tasks).map((task, index) => (
+                                  <Tag key={index} color="red">{task}</Tag>
+                                ))}
+                              </Space>
+                            </div>
+                            <Button
+                              type="link"
+                              icon={<DownloadOutlined />}
+                              href={dataset.downloadUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ padding: 0, color: '#d32f2f' }}
+                            >
+                              {t('download')}
+                            </Button>
+                          </Col>
+                        </Row>
+                      </Card>
+                    ))}
+                  </Space>
+                ) : (
+                  <Row gutter={[16, 16]}>
+                    {sortedDatasets.map((dataset) => (
+                      <Col xs={24} sm={12} lg={8} key={dataset.id}>
+                        <Card
+                          hoverable
+                          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                          bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+                          cover={
+                            <div style={{ height: 128, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
+                              {dataset.abbreviation ? (
+                                <Image
+                                  src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
+                                  alt={dataset.abbreviation}
+                                  style={{ maxWidth: '100%', maxHeight: '100%' }}
+                                  fallback={`data:image/svg+xml;base64,${btoa(`<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" fill="#f0f0f0"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="24" fill="#999">${dataset.abbreviation}</text></svg>`)}`}
+                                  preview={false}
+                                />
+                              ) : (
+                                <div style={{ fontSize: 24, color: '#999' }}>No Image</div>
+                              )}
+                            </div>
+                          }
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              <Link href={`/datasets/${dataset.id}`}>
+                                <Title level={5} style={{ margin: 0, color: '#d32f2f' }}>
+                                  {dataset.name}
+                                </Title>
+                                <Text type="secondary" style={{ fontSize: 12 }}>{dataset.abbreviation}</Text>
+                              </Link>
+                            </div>
+                            <InterestingDatasetButton
+                              datasetId={dataset.id}
+                              initialState={dataset.starred || false}
+                              onToggle={(isInteresting) => {
+                                setDatasets(prevDatasets => prevDatasets.map(d =>
+                                  d.id === dataset.id ? { ...d, starred: isInteresting } : d
+                                ));
+                              }}
                             />
-                            <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex items-center space-x-4" suppressHydrationWarning={true}>
-                        <div className="flex border border-gray-300 rounded-md" suppressHydrationWarning={true}>
-                            <button
-                                className={`px-3 py-1 ${currentView === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-100'} rounded-l-md`}
-                                onClick={() => setCurrentView('list')}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-                            <button
-                                className={`px-3 py-1 ${currentView === 'grid' ? 'bg-blue-600 text-white' : 'bg-gray-100'} rounded-r-md`}
-                                onClick={() => setCurrentView('grid')}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            </button>
-                        </div>
-                        <select
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-                            value={sortOption}
-                            onChange={(e) => setSortOption(e.target.value)}
-                        >
-                            <option value="best-match">{t('bestMatch')}</option>
-                            <option value="name-asc">{t('nameAsc')}</option>
-                            <option value="name-desc">{t('nameDesc')}</option>
-                            <option value="papers-desc">{t('papersDesc')}</option>
-                            <option value="papers-asc">{t('papersAsc')}</option>
-                        </select>
-                    </div>
+                          </div>
+                          <Paragraph ellipsis={{ rows: 2 }} style={{ fontSize: 12, flex: 1 }}>
+                            {dataset.description}
+                          </Paragraph>
+                          <div style={{ fontSize: 11, color: '#666', marginBottom: 8 }}>
+                            <Text type="secondary">
+                              {t('papers')}: {dataset.paperCount} • {t('benchmarks')}: {getBenchmarkCount(dataset.benchmarks)} • {t('language')}: {dataset.language}
+                            </Text>
+                          </div>
+                          <div style={{ marginBottom: 8 }}>
+                            <Space wrap size="small">
+                              {parseTasksArray(dataset.tasks).slice(0, 3).map((task, index) => (
+                                <Tag key={index} color="red" style={{ fontSize: 10 }}>{task}</Tag>
+                              ))}
+                              {parseTasksArray(dataset.tasks).length > 3 && (
+                                <Tag style={{ fontSize: 10 }}>+{parseTasksArray(dataset.tasks).length - 3}</Tag>
+                              )}
+                            </Space>
+                          </div>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                )
+                }
+                <div style={{ marginTop: 24, marginBottom: 24 }}>
+                  <DataPagination
+                    current={currentPage}
+                    total={totalPages * pageSize}
+                    pageSize={pageSize}
+                    onChange={handlePageChange}
+                    itemName="datasets"
+                    loading={loading}
+                  />
                 </div>
-
-                {/* Filter options */}
-                <div className="flex flex-col md:flex-row" suppressHydrationWarning={true}>
-                    <div className="w-full md:w-1/4 pr-6" suppressHydrationWarning={true}>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold text-hust-red hover:text-red-700">{t('filters')}</h2>
-                            {(activeFilters.categories.length > 0 || activeFilters.tasks.length > 0 || activeFilters.languages.length > 0) && (
-                                <button
-                                    onClick={clearFilters}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
-                                >
-                                    {t('clearAll')}
-                                </button>
-                            )}
-                        </div>
-
-                        <h3 className="text-lg font-medium text-gray-700 mb-2">{t('filterByModality')}</h3>
-                        <div className="space-y-2">
-                            {categories.map((category) => (
-                                <div key={category} className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        id={`category-${category}`}
-                                        checked={activeFilters.categories.includes(category)}
-                                        onChange={() => toggleCategoryFilter(category)}
-                                        className="h-4 w-4 text-hust-red focus:ring-red-500 border-gray-300 rounded"
-                                    />
-                                    <label htmlFor={`category-${category}`} className="ml-2 text-sm text-gray-700">
-                                        {category}
-                                        <span className="ml-2 text-gray-500 text-sm">
-                                            {Array.isArray(datasets) ? datasets.filter(d => d.category === category).length : 0}
-                                        </span>
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-
-                        <h3 className="text-lg font-medium text-gray-700 mb-2 mt-8">{t('filterByTask')}</h3>
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {tasks.map((task) => (
-                                <div key={task} className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        id={`task-${task}`}
-                                        checked={activeFilters.tasks.includes(task)}
-                                        onChange={() => toggleTaskFilter(task)}
-                                        className="h-4 w-4 text-hust-red focus:ring-red-500 border-gray-300 rounded"
-                                    />
-                                    <label htmlFor={`task-${task}`} className="ml-2 text-sm text-gray-700">
-                                        {task}
-                                        <span className="ml-2 text-gray-500 text-sm">
-                                            {Array.isArray(datasets) ? datasets.filter(d => {
-                                                if (!d.tasks) return false;
-                                                return parseTasksArray(d.tasks).includes(task);
-                                            }).length : 0}
-                                        </span>
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-
-                        <h3 className="text-lg font-medium text-gray-700 mb-2 mt-8">{t('filterByLanguage')}</h3>
-                        <div className="space-y-2">
-                            {languages.map((language) => (
-                                <div key={language} className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        id={`language-${language}`}
-                                        checked={activeFilters.languages.includes(language)}
-                                        onChange={() => toggleLanguageFilter(language)}
-                                        className="h-4 w-4 text-hust-red focus:ring-red-500 border-gray-300 rounded"
-                                    />
-                                    <label htmlFor={`language-${language}`} className="ml-2 text-sm text-gray-700">
-                                        {language}
-                                        <span className="ml-2 text-gray-500 text-sm">
-                                            {Array.isArray(datasets) ? datasets.filter(d => d.language === language).length : 0}
-                                        </span>
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Datasets list */}
-                    <div className="w-full md:w-3/4" suppressHydrationWarning={true}>
-                        {loading ? (
-                            <div className="flex justify-center items-center h-64" suppressHydrationWarning={true}>
-                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600" suppressHydrationWarning={true}></div>
-                            </div>
-                        ) : sortedDatasets.length === 0 ? (
-                            <div className="bg-gray-100 rounded-lg p-6 text-center">
-                                <p className="text-gray-600">{t('noDatasetsFoundMatchingCriteria')}</p>
-                            </div>
-                        ) : currentView === 'list' ? (
-                            <div className="space-y-6">
-                                {sortedDatasets.map((dataset) => (
-                                    <div key={dataset.id} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                                        <div className="flex flex-col md:flex-row">
-                                            <div className="md:w-1/4 flex-shrink-0 bg-gray-100 flex items-center justify-center p-4">
-                                                <Link href={`/datasets/${dataset.id}`} className="w-full h-24 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                    {dataset.abbreviation && (
-                                                        <img
-                                                            src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
-                                                            alt={dataset.abbreviation}
-                                                            className="max-w-full max-h-full object-contain"
-                                                            onError={(e) => {
-                                                                const target = e.target as HTMLImageElement;
-                                                                // Set onerror to null to prevent infinite loop
-                                                                target.onerror = null;
-                                                                // Display fallback text instead of trying other formats
-                                                                target.style.display = 'none';
-                                                                const parent = target.parentElement;
-                                                                if (parent) {
-                                                                    parent.innerHTML = `<div class="text-2xl font-bold text-gray-400">${dataset.abbreviation}</div>`;
-                                                                }
-                                                            }}
-                                                        />
-                                                    )}
-                                                </Link>
-                                            </div>
-                                            <div className="md:w-3/4 p-4">
-                                                <div className="flex justify-between">
-                                                    <Link href={`/datasets/${dataset.id}`} className="block">
-                                                        <h2 className="text-xl font-semibold text-hust-red hover:text-red-700">{dataset.name}</h2>
-                                                        <p className="text-gray-500">{dataset.abbreviation}</p>
-                                                    </Link>
-                                                    <InterestingDatasetButton
-                                                        datasetId={dataset.id}
-                                                        initialState={dataset.starred || false}
-                                                        className="p-2 rounded-full focus:outline-none transition-colors"
-                                                        onToggle={(isInteresting) => {
-                                                            setDatasets(prevDatasets => prevDatasets.map(d =>
-                                                                d.id === dataset.id ? { ...d, starred: isInteresting } : d
-                                                            ));
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div className="flex flex-col md:flex-row justify-between mb-2">
-                                                    <div>
-                                                        <h3 className="text-sm text-gray-500 mt-2 md:mt-0">
-                                                            {dataset.paperCount} papers • {getBenchmarkCount(dataset.benchmarks)} benchmarks
-                                                        </h3>
-                                                    </div>
-                                                    <div className="text-sm text-gray-500 mt-2 md:mt-0">
-                                                        {dataset.language}
-                                                    </div>
-                                                </div>
-                                                <p className="text-gray-700 mb-4">{dataset.description}</p>
-                                                <div className="mb-3">
-                                                    <span className="text-sm font-medium text-gray-600">{t('tasks')}: </span>
-                                                    <div className="flex flex-wrap gap-1 mt-1">
-                                                        {parseTasksArray(dataset.tasks).map((task, index) => (
-                                                            <span key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                                                                {task}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <a
-                                                    href={dataset.downloadUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-hust-red hover:text-red-800 font-medium inline-flex items-center"
-                                                >
-                                                    {t('download')}
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                    </svg>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {sortedDatasets.map((dataset) => (
-                                    <div key={dataset.id} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col h-full">
-                                        <div className="h-32 bg-gray-100 flex items-center justify-center">
-                                            {dataset.abbreviation && (
-                                                <img
-                                                    src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
-                                                    alt={dataset.abbreviation}
-                                                    className="max-w-full max-h-full object-contain"
-                                                    onError={(e) => {
-                                                        const target = e.target as HTMLImageElement;
-                                                        // Set onerror to null to prevent infinite loop
-                                                        target.onerror = null;
-                                                        // Display fallback text
-                                                        target.style.display = 'none';
-                                                        const parent = target.parentElement;
-                                                        if (parent) {
-                                                            parent.innerHTML = `<div class="text-2xl font-bold text-gray-400">${dataset.abbreviation}</div>`;
-                                                        }
-                                                    }}
-                                                />
-                                            )}
-                                        </div>
-                                        <div className="p-4 flex-grow">
-                                            <div className="flex justify-between items-start">
-                                                <Link href={`/datasets/${dataset.id}`} className="block">
-                                                    <h2 className="text-lg font-semibold text-hust-red hover:text-red-700">{dataset.name}</h2>
-                                                    <p className="text-sm text-gray-500">{dataset.abbreviation}</p>
-                                                </Link>
-                                                <InterestingDatasetButton
-                                                    datasetId={dataset.id}
-                                                    initialState={dataset.starred || false}
-                                                    className="p-1 rounded-full focus:outline-none transition-colors"
-                                                    onToggle={(isInteresting) => {
-                                                        setDatasets(prevDatasets => prevDatasets.map(d =>
-                                                            d.id === dataset.id ? { ...d, starred: isInteresting } : d
-                                                        ));
-                                                    }}
-                                                />
-                                            </div>
-                                            <p className="text-gray-700 text-sm mt-3 line-clamp-2">{dataset.description}</p>
-                                            <div className="mt-3 flex items-center text-xs text-gray-500">
-                                                <span>{t('papers')}: {dataset.paperCount}</span>
-                                                <span className="mx-2">•</span>
-                                                <span>{t('benchmarks')}: {getBenchmarkCount(dataset.benchmarks)}</span>
-                                                <span className="mx-2">•</span>
-                                                <span>{t('language')}: {dataset.language}</span>
-                                            </div>
-                                            <div className="mt-3">
-                                                {(() => {
-                                                    const tasksArray = parseTasksArray(dataset.tasks);
-                                                    return (
-                                                        <div className="flex flex-wrap gap-1 mt-1">
-                                                            {tasksArray.slice(0, 3).map((task, index) => (
-                                                                <span key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                                                                    {task}
-                                                                </span>
-                                                            ))}
-                                                            {tasksArray.length > 3 && (
-                                                                <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                                                                    +{tasksArray.length - 3}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Add pagination at the bottom */}
-            {!loading && (
-                <div className="flex justify-center items-center mt-8 space-x-4">
-                    <div className="flex items-center space-x-1">
-                        <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className={`px-4 py-2 rounded-md ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-hust-red hover:bg-red-100'}`}
-                        >
-                            {t('previous')}
-                        </button>
-
-                        {Array.from({ length: Math.max(1, Math.min(5, totalPages)) }, (_, i) => {
-                            // Show pages around current page
-                            let pageNum;
-                            if (totalPages <= 5) {
-                                pageNum = i + 1;
-                            } else if (currentPage <= 3) {
-                                pageNum = i + 1;
-                            } else if (currentPage >= totalPages - 2) {
-                                pageNum = totalPages - 4 + i;
-                            } else {
-                                pageNum = currentPage - 2 + i;
-                            }
-
-                            // Ensure we don't show page numbers beyond totalPages
-                            if (pageNum <= totalPages || totalPages === 0) {
-                                return (
-                                    <button
-                                        key={pageNum}
-                                        onClick={() => handlePageChange(pageNum)}
-                                        className={`px-4 py-2 rounded-md ${currentPage === pageNum ? 'bg-hust-red text-white' : 'text-hust-red hover:bg-red-100'}`}
-                                    >
-                                        {pageNum}
-                                    </button>
-                                );
-                            }
-                            return null;
-                        })}
-
-                        <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages || totalPages === 0}
-                            className={`px-4 py-2 rounded-md ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-hust-red hover:bg-red-100'}`}
-                        >
-                            {t('next')}
-                        </button>
-                    </div>
-
-                    {/* Items per page selector - now inline with pagination */}
-                    {!loading && sortedDatasets.length > 0 && (
-                        <div className="flex items-center text-sm text-gray-600">
-                            <span className="mr-2">{t('itemsPerPage')}:</span>
-                            <select
-                                value={pageSize}
-                                onChange={handleItemsPerPageChange}
-                                className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
-                            </select>
-                        </div>
-                    )}
-                </div>
-            )}
-        </div>
-    );
+              </Spin>
+            </Col>
+          </Row>
+        </Card>
+      </div>
+    </Content>
+  );
 } 

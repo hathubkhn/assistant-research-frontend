@@ -2,314 +2,329 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import axios from 'axios';
+import {
+  Card,
+  Table,
+  Button,
+  Typography,
+  Space,
+  Input,
+  Spin,
+  Alert,
+  Tag,
+  Row,
+  Col,
+  Select
+} from 'antd';
+import {
+  SearchOutlined,
+  ClearOutlined,
+  ExportOutlined
+} from '@ant-design/icons';
+import DataPagination from '@/app/components/DataPagination';
+
+const { Title, Text } = Typography;
+const { Search } = Input;
 
 interface Conference {
-    id: string;
-    name: string;
-    abbreviation: string;
-    rank: string;
-    location: string;
-    url: string;
-    papersCount: number;
+  id: string;
+  name: string;
+  abbreviation: string;
+  rank: string;
+  location: string;
+  url: string;
+  papersCount: number;
 }
 
+interface ConferencesResponse {
+  results: Conference[];
+  pagination: {
+    totalItems: number;
+    totalPages: number;
+    page: number;
+  };
+}
+
+interface FetchConferencesParams {
+  page?: number;
+  pageSize?: number;
+  rankFilter?: string;
+  searchQuery?: string;
+}
+
+// API Functions
+const fetchConferences = async (params: FetchConferencesParams): Promise<ConferencesResponse> => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  
+  try {
+    const queryParams = new URLSearchParams();
+    
+    // Add pagination parameters
+    queryParams.append('page', (params.page || 1).toString());
+    queryParams.append('pageSize', (params.pageSize || 20).toString());
+    
+    // Add filter parameters if active
+    if (params.rankFilter) {
+      if (params.rankFilter === 'Not ranked') {
+        queryParams.append('rank', 'null');
+      } else {
+        queryParams.append('rank', params.rankFilter);
+      }
+    }
+    
+    // Add search parameter if present
+    if (params.searchQuery) {
+      queryParams.append('search', params.searchQuery);
+    }
+    
+    const response = await axios.get(`${apiUrl}/api/conferences/?${queryParams.toString()}`);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(`Error fetching conferences: ${error.response?.status} ${error.response?.statusText || error.message}`);
+  }
+};
+
 export default function ConferencesPage() {
-    const [conferences, setConferences] = useState<Conference[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
+  const [conferences, setConferences] = useState<Conference[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(20);
-    const [totalItems, setTotalItems] = useState<number>(0);
-    const [totalPages, setTotalPages] = useState<number>(0);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(20);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
-    // Filter state
-    const [rankFilter, setRankFilter] = useState<string>('');
+  // Filter state
+  const [rankFilter, setRankFilter] = useState<string>('');
 
-    const fetchConferences = async (page: number = 1, size: number = pageSize) => {
-        try {
-            setLoading(true);
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const loadConferences = async (page: number = 1, size: number = pageSize) => {
+    try {
+      setLoading(true);
+      
+      const data = await fetchConferences({
+        page,
+        pageSize: size,
+        rankFilter,
+        searchQuery
+      });
+      
+      setConferences(data.results);
+      setTotalItems(data.pagination.totalItems);
+      setTotalPages(data.pagination.totalPages);
+      setCurrentPage(data.pagination.page);
+    } catch (error: any) {
+      console.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            // Build query parameters including filters and pagination
-            let queryParams = `page=${page}&pageSize=${size}`;
+  useEffect(() => {
+    loadConferences(1);
+  }, [rankFilter, searchQuery]);
 
-            // Add filter parameters if active
-            if (rankFilter) {
-                // Send the actual rank value as stored in the database
-                // For "Not ranked", we send null or empty as the rank value
-                if (rankFilter === 'Not ranked') {
-                    queryParams += '&rank=null';
-                } else {
-                    queryParams += `&rank=${encodeURIComponent(rankFilter)}`;
-                }
-            }
+  // Handle page change
+  const handlePageChange = (page: number, size?: number) => {
+    setCurrentPage(page);
+    if (size && size !== pageSize) {
+      setPageSize(size);
+    }
+    loadConferences(page, size || pageSize);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-            // Add search parameter if present
-            if (searchQuery) {
-                queryParams += `&search=${encodeURIComponent(searchQuery)}`;
-            }
+  // Handle search
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+    loadConferences(1);
+  };
 
-            const response = await fetch(`${apiUrl}/api/conferences/?${queryParams}`);
-            if (response.ok) {
-                const data = await response.json();
-                setConferences(data.results);
-                setTotalItems(data.pagination.totalItems);
-                setTotalPages(data.pagination.totalPages);
-                setCurrentPage(data.pagination.page);
-            }
-        } catch (error) {
-            console.error('Error fetching conferences:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  // Handle rank filter change
+  const handleRankFilterChange = (rank: string) => {
+    setRankFilter(prev => prev === rank ? '' : rank);
+    setCurrentPage(1);
+    loadConferences(1, pageSize);
+  };
 
-    useEffect(() => {
-        fetchConferences(1);
-    }, [rankFilter, searchQuery]);
+  // Clear all filters
+  const clearFilters = () => {
+    setRankFilter('');
+    setSearchQuery('');
+    setCurrentPage(1);
+    loadConferences(1, pageSize);
+  };
 
-    // Handle page change
-    const handlePageChange = (newPage: number) => {
-        if (newPage < 1 || newPage > totalPages) return;
-        setCurrentPage(newPage);
-        fetchConferences(newPage);
+  const getRankColor = (rank: string) => {
+    switch (rank) {
+      case 'A*': return 'purple';
+      case 'A': return 'green';
+      case 'B': return 'blue';
+      case 'C': return 'orange';
+      default: return 'default';
+    }
+  };
 
-        // Scroll to top of page
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+  const columns = [
+    {
+      title: 'Conference',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string, record: Conference) => (
+        <Link href={`/conferences/${record.id}`}>
+          <Text style={{ color: '#1890ff', cursor: 'pointer' }}>
+            {text}
+          </Text>
+        </Link>
+      ),
+    },
+    {
+      title: 'Abbreviation',
+      dataIndex: 'abbreviation',
+      key: 'abbreviation',
+    },
+    {
+      title: 'Rank',
+      dataIndex: 'rank',
+      key: 'rank',
+      render: (rank: string) => (
+        <Tag color={getRankColor(rank)}>
+          {rank || 'N/A'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Location',
+      dataIndex: 'location',
+      key: 'location',
+      render: (location: string) => location || 'N/A',
+    },
+    {
+      title: 'Papers',
+      dataIndex: 'papersCount',
+      key: 'papersCount',
+      align: 'right' as const,
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (text: any, record: Conference) => (
+        record.url && (
+          <Button
+            type="link"
+            icon={<ExportOutlined />}
+            href={record.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="small"
+          >
+            Visit
+          </Button>
+        )
+      ),
+    },
+  ];
 
-    // Handle items per page change
-    const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newSize = parseInt(e.target.value, 10);
-        setPageSize(newSize);
-        setCurrentPage(1); // Reset to first page when changing items per page
-        fetchConferences(1, newSize);
-    };
+  return (
+    <div style={{ padding: '32px', maxWidth: '1400px', margin: '0 auto' }}>
+      <Title level={2} style={{ color: '#d9363e', marginBottom: '24px' }}>
+        Academic Conferences
+      </Title>
 
-    // Handle search input
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-    };
+      {/* Search and filter card */}
+      <Card style={{ marginBottom: '24px' }}>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={16}>
+              <Search
+                placeholder="Search conferences..."
+                allowClear
+                enterButton={<SearchOutlined />}
+                size="large"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSearch={handleSearch}
+              />
+            </Col>
+          </Row>
 
-    // Handle search submission
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        setCurrentPage(1);
-        fetchConferences(1);
-    };
+          <div>
+            <Text strong style={{ marginBottom: '8px', display: 'block' }}>
+              Filter by Rank:
+            </Text>
+            <Space size="small" wrap>
+              {['A*', 'A', 'B', 'C', 'Not ranked'].map(rank => (
+                <Button
+                  key={rank}
+                  type={rankFilter === rank ? 'primary' : 'default'}
+                  onClick={() => handleRankFilterChange(rank)}
+                  size="small"
+                >
+                  {rank}
+                </Button>
+              ))}
+              {rankFilter && (
+                <Button
+                  icon={<ClearOutlined />}
+                  onClick={clearFilters}
+                  size="small"
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </Space>
+          </div>
+        </Space>
+      </Card>
 
-    // Handle rank filter change
-    const handleRankFilterChange = (rank: string) => {
-        setRankFilter(prev => prev === rank ? '' : rank);
-        setCurrentPage(1);
-        fetchConferences(1, pageSize);
-    };
-
-    // Clear all filters
-    const clearFilters = () => {
-        setRankFilter('');
-        setSearchQuery('');
-        setCurrentPage(1);
-        fetchConferences(1, pageSize);
-    };
-
-    return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold text-hust-red mb-6">Academic Conferences</h1>
-
-            {/* Search and filter bar */}
-            <div className="bg-white shadow-md rounded-lg p-4 mb-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-grow">
-                        <form onSubmit={handleSearch} className="flex">
-                            <input
-                                type="text"
-                                placeholder="Search conferences..."
-                                className="w-full px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                            />
-                            <button
-                                type="submit"
-                                className="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                Search
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div className="mt-4">
-                    <h3 className="font-medium text-gray-700 mb-2">Filter by Rank:</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {['A*', 'A', 'B', 'C', 'Not ranked'].map(rank => (
-                            <button
-                                key={rank}
-                                onClick={() => handleRankFilterChange(rank)}
-                                className={`px-3 py-1 rounded-full border ${rankFilter === rank
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-                                    }`}
-                            >
-                                {rank}
-                            </button>
-                        ))}
-                        {rankFilter && (
-                            <button
-                                onClick={clearFilters}
-                                className="px-3 py-1 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100"
-                            >
-                                Clear Filters
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Conferences list */}
-            {loading ? (
-                <div className="flex justify-center items-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-                </div>
-            ) : conferences.length === 0 ? (
-                <div className="bg-white shadow-md rounded-lg p-6 text-center">
-                    <p className="text-lg text-gray-600">No conferences found matching your criteria.</p>
-                    <button
-                        onClick={clearFilters}
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        Clear Filters
-                    </button>
-                </div>
-            ) : (
-                <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Conference
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Abbreviation
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Rank
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Location
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Papers
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {conferences.map((conference) => (
-                                    <tr key={conference.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <Link href={`/conferences/${conference.id}`} className="text-hust-red hover:text-red-800 hover:underline">
-                                                {conference.name}
-                                            </Link>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {conference.abbreviation}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${conference.rank === 'A*' ? 'bg-purple-100 text-purple-800' :
-                                                conference.rank === 'A' ? 'bg-green-100 text-green-800' :
-                                                    conference.rank === 'B' ? 'bg-red-100 text-red-800' :
-                                                        conference.rank === 'C' ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-gray-100 text-gray-800'
-                                                }`}>
-                                                {conference.rank || 'N/A'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {conference.location || 'N/A'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {conference.papersCount}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex flex-col md:flex-row justify-between items-center mt-6">
-                    <nav className="flex items-center space-x-2">
-                        <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className={`px-3 py-1 rounded-md ${currentPage === 1
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-white text-blue-600 hover:bg-blue-50 border border-gray-300'
-                                }`}
-                        >
-                            Previous
-                        </button>
-
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                            let pageNum;
-                            if (totalPages <= 5) {
-                                pageNum = i + 1;
-                            } else if (currentPage <= 3) {
-                                pageNum = i + 1;
-                            } else if (currentPage >= totalPages - 2) {
-                                pageNum = totalPages - 4 + i;
-                            } else {
-                                pageNum = currentPage - 2 + i;
-                            }
-
-                            return (
-                                <button
-                                    key={pageNum}
-                                    onClick={() => handlePageChange(pageNum)}
-                                    className={`px-3 py-1 rounded-md ${currentPage === pageNum
-                                        ? 'bg-hust-red text-white'
-                                        : 'bg-white text-hust-red hover:bg-red-50 border border-gray-300'
-                                        }`}
-                                >
-                                    {pageNum}
-                                </button>
-                            );
-                        })}
-
-                        <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                            className={`px-3 py-1 rounded-md ${currentPage === totalPages
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-white text-hust-red hover:bg-red-50 border border-gray-300'
-                                }`}
-                        >
-                            Next
-                        </button>
-                    </nav>
-
-                    {/* Items per page selector - moved to bottom of page */}
-                    <div className="flex items-center mt-4 md:mt-0">
-                        <label className="mr-2 text-gray-700">Items per page:</label>
-                        <select
-                            value={pageSize}
-                            onChange={handleItemsPerPageChange}
-                            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="10">10</option>
-                            <option value="20">20</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+      {/* Conferences table */}
+      <Card>
+        {loading ? (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '300px' 
+          }}>
+            <Spin size="large" />
+          </div>
+        ) : conferences.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <Alert
+              message="No conferences found"
+              description="No conferences found matching your criteria."
+              type="info"
+              showIcon
+              action={
+                <Button onClick={clearFilters} type="primary">
+                  Clear Filters
+                </Button>
+              }
+            />
+          </div>
+        ) : (
+          <>
+            <Table
+              columns={columns}
+              dataSource={conferences}
+              rowKey="id"
+              pagination={false}
+              scroll={{ x: 800 }}
+            />
+            
+            <DataPagination
+              current={currentPage}
+              total={totalItems}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              itemName="conferences"
+              loading={loading}
+            />
+          </>
+        )}
+      </Card>
+    </div>
+  );
 } 
