@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import InterestingDatasetButton from '../../../components/InterestingDatasetButton';
+import { getAuthHeaders } from '@/utils/auth';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Dataset {
     id: string;
@@ -53,36 +56,14 @@ export default function DatasetDetailPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [papersPerPage] = useState(5);
 
-    // Get auth token from local storage
-    const getAuthHeaders = () => {
-        if (typeof window === 'undefined') return {
-            'Content-Type': 'application/json'
-        };
-
-        // Try to get token from various storage locations
-        let authToken = localStorage.getItem('authToken') ||
-            sessionStorage.getItem('authToken') ||
-            localStorage.getItem('token') ||
-            sessionStorage.getItem('token');
-
-        // If token already has 'Token ' prefix, remove it to avoid duplication
-        if (authToken && authToken.startsWith('Token ')) {
-            authToken = authToken.substring(6);
-        }
-
-        // Return headers with or without Authorization
-        return {
-            'Authorization': authToken ? `Token ${authToken}` : '',
-            'Content-Type': 'application/json'
-        };
-    };
-
     // Fetch dataset details and check if it's already starred
     useEffect(() => {
         const fetchDatasetDetails = async () => {
             try {
                 console.log(`Attempting to fetch dataset with ID: ${id}`);
-                const response = await fetch(`http://localhost:8000/api/datasets/${id}/`);
+                const response = await fetch(`${API_URL}/api/datasets/${id}/`, {
+                    headers: getAuthHeaders()
+                });
 
                 if (response.status === 404) {
                     console.error(`Dataset not found with ID: ${id}`);

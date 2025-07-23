@@ -466,35 +466,6 @@ export default function DatasetsPage() {
     fetchDatasets(1, pageSize);
   };
 
-  const fetchVenues = async () => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-
-
-      const conferencesData = await fetchConferencesFilterAPI();
-
-
-      const journalsData = await fetchJournalsFilterAPI();
-
-      setVenues({
-        conferences: conferencesData,
-        journals: journalsData
-      });
-    } catch (error) {
-      console.error('Error fetching venues:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchVenues();
-  }, []);
-
   return (
     <Content style={{ padding: '24px', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>

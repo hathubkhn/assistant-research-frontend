@@ -28,11 +28,10 @@
 
 import React from 'react';
 import { Pagination, Typography } from 'antd';
-import type { PaginationProps } from 'antd';
 
 const { Text } = Typography;
 
-interface DataPaginationProps extends Omit<PaginationProps, 'onChange' | 'onShowSizeChange'> {
+interface DataPaginationProps {
   current: number;
   total: number;
   pageSize: number;
@@ -44,6 +43,12 @@ interface DataPaginationProps extends Omit<PaginationProps, 'onChange' | 'onShow
   pageSizeOptions?: string[];
   itemName?: string; // e.g., "conferences", "papers", "journals"
   loading?: boolean;
+  // Additional common pagination props
+  size?: 'default' | 'small';
+  simple?: boolean;
+  hideOnSinglePage?: boolean;
+  disabled?: boolean;
+  responsive?: boolean;
 }
 
 const DataPagination: React.FC<DataPaginationProps> = ({
@@ -58,6 +63,11 @@ const DataPagination: React.FC<DataPaginationProps> = ({
   pageSizeOptions = ['10', '20', '50', '100'],
   itemName = 'items',
   loading = false,
+  size = 'default',
+  simple = false,
+  hideOnSinglePage = false,
+  disabled = false,
+  responsive = true,
   ...rest
 }) => {
   const handleChange = (page: number, size: number) => {
@@ -84,7 +94,7 @@ const DataPagination: React.FC<DataPaginationProps> = ({
   };
 
   // Don't render if there are no items or only one page
-  if (total === 0 || total <= pageSize) {
+  if (total === 0 || (hideOnSinglePage && total <= pageSize)) {
     return null;
   }
 
@@ -113,8 +123,11 @@ const DataPagination: React.FC<DataPaginationProps> = ({
         pageSizeOptions={pageSizeOptions}
         onChange={handleChange}
         onShowSizeChange={handleShowSizeChange}
-        disabled={loading}
-        showLessItems={typeof window !== 'undefined' && window.innerWidth < 768} // Show fewer page numbers on mobile
+        disabled={loading || disabled}
+        size={size}
+        simple={simple}
+        responsive={responsive}
+        showLessItems={responsive && typeof window !== 'undefined' && window.innerWidth < 768} // Show fewer page numbers on mobile
         {...rest}
       />
     </div>

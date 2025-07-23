@@ -6,24 +6,18 @@
  */
 export const getAuthHeaders = (includeContentType: boolean = false): HeadersInit => {
     // Get token from localStorage if available
-    let headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
 
     if (typeof window !== 'undefined') {
         const token = localStorage.getItem('authToken');
         if (token) {
-            headers = {
-                ...headers,
-                'Authorization': `Token ${token}`
-            };
+            headers['Authorization'] = `Token ${token}`;
         }
     }
 
     // Add Content-Type header if requested
     if (includeContentType) {
-        headers = {
-            ...headers,
-            'Content-Type': 'application/json'
-        };
+        headers['Content-Type'] = 'application/json';
     }
 
     return headers;

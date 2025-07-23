@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { getAuthHeaders } from '@/utils/auth';
 
 interface InterestingButtonProps {
     paperId: string;
@@ -40,30 +41,6 @@ const InterestingButton = ({
         }
     }, [paperId, initialState, onToggle]);
 
-    // Get auth token from local storage with improved token handling
-    const getAuthHeaders = () => {
-        if (typeof window === 'undefined') return {
-            'Content-Type': 'application/json'
-        };
-
-        // Try to get token from various storage locations
-        let authToken = localStorage.getItem('authToken') ||
-            sessionStorage.getItem('authToken') ||
-            localStorage.getItem('token') ||
-            sessionStorage.getItem('token');
-
-        // If token already has 'Token ' prefix, remove it to avoid duplication
-        if (authToken && authToken.startsWith('Token ')) {
-            authToken = authToken.substring(6);
-        }
-
-        // Return headers with or without Authorization
-        return {
-            'Authorization': authToken ? `Token ${authToken}` : '',
-            'Content-Type': 'application/json'
-        };
-    };
-
     const toggleInteresting = async () => {
         try {
             setIsLoading(true);
@@ -83,7 +60,7 @@ const InterestingButton = ({
                 onToggle(newState);
             }
 
-            const headers = getAuthHeaders();
+            const headers = getAuthHeaders(true);
             // Check if auth token exists
             if (typeof window !== 'undefined' &&
                 !(localStorage.getItem('authToken') ||

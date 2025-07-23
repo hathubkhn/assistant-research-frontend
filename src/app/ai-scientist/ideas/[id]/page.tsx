@@ -6,11 +6,11 @@ interface Params {
 }
 
 interface Props {
-    params: Params;
+    params: Promise<Params>;
 }
 
-export default function IdeaDetails({ params }: Props) {
-    const ideaId = params.id;
+export default async function IdeaDetails({ params }: Props) {
+    const { id: ideaId } = await params;
 
     // Mock data for a single idea
     const idea = {
