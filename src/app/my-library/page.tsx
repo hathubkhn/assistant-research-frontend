@@ -70,16 +70,6 @@ interface Dataset {
     language?: string;
 }
 
-// Helper function to create URL-friendly slugs from titles
-function createSlug(title: string): string {
-    return title
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '') // Remove special characters
-        .replace(/\s+/g, '-')     // Replace spaces with hyphens
-        .replace(/--+/g, '-')     // Replace multiple hyphens with single hyphen
-        .trim();                  // Trim whitespace
-}
-
 export default function MyLibraryPage() {
     const { t } = useTranslation('my-library');
 

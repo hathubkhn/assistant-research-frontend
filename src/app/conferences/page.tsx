@@ -53,18 +53,15 @@ interface FetchConferencesParams {
   searchQuery?: string;
 }
 
-// API Functions
 const fetchConferences = async (params: FetchConferencesParams): Promise<ConferencesResponse> => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   
   try {
     const queryParams = new URLSearchParams();
     
-    // Add pagination parameters
     queryParams.append('page', (params.page || 1).toString());
     queryParams.append('pageSize', (params.pageSize || 20).toString());
     
-    // Add filter parameters if active
     if (params.rankFilter) {
       if (params.rankFilter === 'Not ranked') {
         queryParams.append('rank', 'null');
@@ -73,7 +70,6 @@ const fetchConferences = async (params: FetchConferencesParams): Promise<Confere
       }
     }
     
-    // Add search parameter if present
     if (params.searchQuery) {
       queryParams.append('search', params.searchQuery);
     }
@@ -90,13 +86,10 @@ export default function ConferencesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalItems, setTotalItems] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(0);
 
-  // Filter state
   const [rankFilter, setRankFilter] = useState<string>('');
 
   const loadConferences = async (page: number = 1, size: number = pageSize) => {
@@ -112,7 +105,6 @@ export default function ConferencesPage() {
       
       setConferences(data.results);
       setTotalItems(data.pagination.totalItems);
-      setTotalPages(data.pagination.totalPages);
       setCurrentPage(data.pagination.page);
     } catch (error: any) {
       console.error(error.message);
@@ -125,7 +117,6 @@ export default function ConferencesPage() {
     loadConferences(1);
   }, [rankFilter, searchQuery]);
 
-  // Handle page change
   const handlePageChange = (page: number, size?: number) => {
     setCurrentPage(page);
     if (size && size !== pageSize) {
@@ -135,21 +126,18 @@ export default function ConferencesPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handle search
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
     loadConferences(1);
   };
 
-  // Handle rank filter change
   const handleRankFilterChange = (rank: string) => {
     setRankFilter(prev => prev === rank ? '' : rank);
     setCurrentPage(1);
     loadConferences(1, pageSize);
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setRankFilter('');
     setSearchQuery('');
@@ -233,7 +221,6 @@ export default function ConferencesPage() {
         Academic Conferences
       </Title>
 
-      {/* Search and filter card */}
       <Card style={{ marginBottom: '24px' }}>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           <Row gutter={[16, 16]}>
@@ -279,7 +266,6 @@ export default function ConferencesPage() {
         </Space>
       </Card>
 
-      {/* Conferences table */}
       <Card>
         {loading ? (
           <div style={{ 

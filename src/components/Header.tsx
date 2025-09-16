@@ -7,221 +7,251 @@ import { useRouter } from 'next/navigation';
 import NotificationBell from './NotificationBell';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTranslation } from '@/utils/useTranslation';
+import { Layout, Menu, Input, Button, Dropdown, Avatar, Space, Spin } from 'antd';
+import { SearchOutlined, UserOutlined, LogoutOutlined, ProfileOutlined } from '@ant-design/icons';
+
+const { Header: AntHeader } = Layout;
+const { Search } = Input;
 
 export default function Header() {
-    const { user, loading, logout, checkAuth } = useAuth();
-    const { t } = useTranslation('common');
-    const router = useRouter();
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    const loginDropdownRef = useRef<HTMLDivElement>(null);
-    const searchInputRef = useRef<HTMLInputElement>(null);
+  const { user, loading, logout, checkAuth } = useAuth();
+  const { t } = useTranslation('common');
+  const router = useRouter();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const loginDropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef(null);
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setDropdownOpen(false);
-            }
-            if (loginDropdownRef.current && !loginDropdownRef.current.contains(event.target as Node)) {
-                setLoginDropdownOpen(false);
-            }
-        }
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+      if (loginDropdownRef.current && !loginDropdownRef.current.contains(event.target as Node)) {
+        setLoginDropdownOpen(false);
+      }
+    }
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [dropdownRef, loginDropdownRef]);
-
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
-            setSearchQuery('');
-            setIsSearchFocused(false);
-        }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, [dropdownRef, loginDropdownRef]);
 
-    const handleLogout = async () => {
-        await logout();
-        router.push('/login');
-    };
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
+      setIsSearchFocused(false);
+    }
+  };
 
-    // Handler for My Library navigation with authentication check
-    const handleMyLibraryClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        console.log("My Library clicked, auth status:", {
-            userExists: !!user,
-            userData: user,
-            authToken: localStorage.getItem('authToken'),
-            loading
-        });
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
 
-        if (user) {
+  const handleMyLibraryClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("My Library clicked, auth status:", {
+      userExists: !!user,
+      userData: user,
+      authToken: localStorage.getItem('authToken'),
+      loading
+    });
+
+    if (user) {
+      router.push('/my-library');
+    } else {
+      if (loading) {
+        console.log("Auth still loading, please wait...");
+        return;
+      }
+
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        console.log("Token exists but user data is missing, forcing recheck");
+        checkAuth().then(() => {
+          if (user) {
             router.push('/my-library');
-        } else {
-            // Check if we're currently loading auth state
-            if (loading) {
-                console.log("Auth still loading, please wait...");
-                // Optional: Show a loading indicator instead of redirecting
-                return;
-            }
+          } else {
+            router.push('/login');
+          }
+        });
+      } else {
+        console.log("No token found, redirecting to login");
+        router.push('/login');
+      }
+    }
+  };
 
-            // Check if token exists but user object doesn't
-            const token = localStorage.getItem('authToken');
-            if (token) {
-                console.log("Token exists but user data is missing, forcing recheck");
-                // Try to force a recheck of authentication
-                checkAuth().then(() => {
-                    // If user is authenticated after recheck, go to library
-                    if (user) {
-                        router.push('/my-library');
-                    } else {
-                        router.push('/login');
-                    }
-                });
-            } else {
-                console.log("No token found, redirecting to login");
-                router.push('/login');
-            }
-        }
-    };
+  const menuItems = [
+    { key: '/dashboard', label: <Link href="/dashboard">{t('header.dashboard')}</Link> },
+    { key: '/papers', label: <Link href="/papers">{t('header.papers')}</Link> },
+    { key: '/journals', label: <Link href="/journals">{t('header.journals')}</Link> },
+    { key: '/conferences', label: <Link href="/conferences">{t('header.conferences')}</Link> },
+    { key: '/datasets', label: <Link href="/datasets">{t('header.datasets')}</Link> },
+    { key: '/research-assistant', label: <Link href="/research-assistant">{t('header.researchAssistant')}</Link> },
+    { key: '/ai-scientist', label: <Link href="/ai-scientist">{t('header.aiScientist')}</Link> },
+    {
+      key: 'my-library',
+      label: <a href="#" onClick={handleMyLibraryClick}>{t('header.myLibrary')}</a>
+    },
+  ];
 
-    return (
-        <header className="bg-[#d9363e] shadow-sm">
-            <div className="container mx-auto px-4 py-3 flex justify-between items-center" suppressHydrationWarning={true}>
-                <a href="/" className="text-xl font-bold text-white">Research Assistant</a>
-                <nav className="flex-grow flex justify-center">
-                    <ul className="flex space-x-6">
-                        <li><a href="/" className="text-white hover:text-red-200">{t('header.home')}</a></li>
-                        <li><a href="/dashboard" className="text-white hover:text-red-200">{t('header.dashboard')}</a></li>
-                        <li><a href="/papers" className="text-white hover:text-red-200">{t('header.papers')}</a></li>
-                        <li><a href="/journals" className="text-white hover:text-red-200">{t('header.journals')}</a></li>
-                        <li><a href="/conferences" className="text-white hover:text-red-200">{t('header.conferences')}</a></li>
-                        <li><a href="/datasets" className="text-white hover:text-red-200">{t('header.datasets')}</a></li>
-                        <li><a href="/research-assistant" className="text-white hover:text-red-200">{t('header.researchAssistant')}</a></li>
-                        <li><a href="/ai-scientist" className="text-white hover:text-red-200">{t('header.aiScientist')}</a></li>
-                        <li><a href="#" onClick={handleMyLibraryClick} className="text-white hover:text-red-200">{t('header.myLibrary')}</a></li>
-                    </ul>
-                </nav>
+  return (
+    <AntHeader style={{
+      backgroundColor: '#d9363e',
+      padding: '0 24px',
+      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+    }}>
+      <div style={{
+        maxWidth: '1280px',
+        margin: '0 auto',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        height: '100%'
+      }} suppressHydrationWarning={true}>
+        <Link href="/" style={{
+          fontSize: '20px',
+          fontWeight: 'bold',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          textDecoration: 'none'
+        }}>
+          Research Assistant
+        </Link>
 
-                <div className="flex items-center space-x-4" suppressHydrationWarning={true}>
-                    {/* Search component */}
-                    <div className="relative" suppressHydrationWarning={true}>
-                        <form onSubmit={handleSearch} className="flex items-center">
-                            <input
-                                ref={searchInputRef}
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onFocus={() => setIsSearchFocused(true)}
-                                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                                placeholder={t('header.search')}
-                                className={`bg-red-700 text-white placeholder-red-300 border border-red-600 rounded-full py-1 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-white ${isSearchFocused || searchQuery ? 'w-48' : 'w-32'} transition-all duration-300`}
-                            />
-                            <button
-                                type="submit"
-                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-red-300 hover:text-white focus:outline-none"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
+        <Menu
+          mode="horizontal"
+          items={menuItems}
+          style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            flex: 1,
+            justifyContent: 'center',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+          theme="dark"
+          overflowedIndicator={null}
+        />
 
-                    {/* Auth-related UI */}
-                    {loading ? (
-                        // Loading state
-                        <div className="w-8 h-8 rounded-full bg-blue-300 animate-pulse" suppressHydrationWarning={true}></div>
-                    ) : user ? (
-                        // Logged in state with notification bell and avatar
-                        <>
-                            {/* Notification Bell */}
-                            <NotificationBell />
+        <Space size="middle" align="center">
+          <Search
+            ref={searchInputRef}
+            placeholder={t('header.search')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onSearch={() => {
+              if (searchQuery.trim()) {
+                router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
+                setSearchQuery('');
+                setIsSearchFocused(false);
+              }
+            }}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+            style={{
+              width: isSearchFocused || searchQuery ? 192 : 128,
+              transition: 'width 0.3s ease',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+            size="small"
+          />
 
-                            {/* User Avatar */}
-                            <div className="relative" ref={dropdownRef} suppressHydrationWarning={true}>
-                                <button
-                                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                                    className="flex items-center focus:outline-none"
-                                >
-                                    {user.profile?.avatar_url ? (
-                                        <img
-                                            src={user.profile.avatar_url}
-                                            alt="Profile"
-                                            className="w-8 h-8 rounded-full object-cover border-2 border-white"
-                                        />
-                                    ) : (
-                                        <div className="w-8 h-8 rounded-full bg-blue-300 flex items-center justify-center text-white font-bold" suppressHydrationWarning={true}>
-                                            {user.username.charAt(0).toUpperCase()}
-                                        </div>
-                                    )}
-                                </button>
-
-                                {/* Dropdown menu */}
-                                {dropdownOpen && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10" suppressHydrationWarning={true}>
-                                        <div className="px-4 py-2 text-sm text-gray-700 border-b" suppressHydrationWarning={true}>
-                                            <div className="font-medium" suppressHydrationWarning={true}>{user.profile?.full_name || user.username}</div>
-                                            <div className="text-gray-400 text-xs truncate" suppressHydrationWarning={true}>{user.email}</div>
-                                        </div>
-                                        <Link
-                                            href="/profile"
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                        >
-                                            {t('header.viewProfile')}
-                                        </Link>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                        >
-                                            {t('header.signOut')}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    ) : (
-                        // Logged out state - Icon only
-                        <div className="relative" ref={loginDropdownRef} suppressHydrationWarning={true}>
-                            <button
-                                onClick={() => setLoginDropdownOpen(!loginDropdownOpen)}
-                                className="flex items-center text-white hover:text-blue-200 focus:outline-none"
-                            >
-                                <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </button>
-
-                            {/* Login Dropdown menu */}
-                            {loginDropdownOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10" suppressHydrationWarning={true}>
-                                    <Link
-                                        href="/profile"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                        {t('header.viewProfile')}
-                                    </Link>
-                                    <Link
-                                        href="/login"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                        {t('header.signOut')}
-                                    </Link>
-                                </div>
-                            )}
+          {loading ? (
+            <Spin size="small" />
+          ) : user ? (
+            <>
+              <NotificationBell />
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'user-info',
+                      label: (
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid #f0f0f0' }}>
+                          <div style={{ fontWeight: 500 }}>{user.profile?.full_name || user.username}</div>
+                          <div style={{ color: '#999', fontSize: '12px' }}>{user.email}</div>
                         </div>
-                    )}
-
-                    {/* Language Switcher - moved to the end */}
-                    <LanguageSwitcher />
+                      ),
+                      disabled: true
+                    },
+                    {
+                      key: 'profile',
+                      label: <Link href="/profile">{t('header.viewProfile')}</Link>,
+                      icon: <ProfileOutlined />
+                    },
+                    {
+                      key: 'logout',
+                      label: t('header.signOut'),
+                      icon: <LogoutOutlined />,
+                      onClick: handleLogout
+                    }
+                  ]
+                }}
+                trigger={['click']}
+                open={dropdownOpen}
+                onOpenChange={setDropdownOpen}
+              >
+                <div ref={dropdownRef} suppressHydrationWarning={true}>
+                  <Avatar
+                    size="default"
+                    src={user.profile?.avatar_url}
+                    style={{
+                      cursor: 'pointer',
+                      border: '2px solid white'
+                    }}
+                  >
+                    {!user.profile?.avatar_url && user.username.charAt(0).toUpperCase()}
+                  </Avatar>
                 </div>
-            </div>
-        </header>
-    );
+              </Dropdown>
+            </>
+          ) : (
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: 'profile',
+                    label: <Link href="/profile">{t('header.viewProfile')}</Link>,
+                    icon: <ProfileOutlined />
+                  },
+                  {
+                    key: 'login',
+                    label: <Link href="/login">{t('header.signOut')}</Link>,
+                    icon: <LogoutOutlined />
+                  }
+                ]
+              }}
+              trigger={['click']}
+              open={loginDropdownOpen}
+              onOpenChange={setLoginDropdownOpen}
+            >
+              <div ref={loginDropdownRef} suppressHydrationWarning={true}>
+                <Button
+                  type="text"
+                  icon={<UserOutlined />}
+                  style={{
+                    color: 'white',
+                    border: 'none'
+                  }}
+                />
+              </div>
+            </Dropdown>
+          )}
+          <LanguageSwitcher />
+        </Space>
+      </div>
+    </AntHeader>
+  );
 } 

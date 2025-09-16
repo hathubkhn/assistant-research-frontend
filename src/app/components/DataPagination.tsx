@@ -1,31 +1,3 @@
-/**
- * DataPagination - Reusable pagination component for data lists
- * 
- * Usage example:
- * ```tsx
- * <DataPagination
- *   current={currentPage}
- *   total={totalItems}
- *   pageSize={pageSize}
- *   onChange={(page, size) => {
- *     setCurrentPage(page);
- *     setPageSize(size);
- *     loadData(page, size);
- *   }}
- *   itemName="conferences" // or "papers", "journals", etc.
- *   loading={loading}
- * />
- * ```
- * 
- * Features:
- * - Automatic hiding when total items <= pageSize
- * - Consistent styling across all pages
- * - Mobile responsive
- * - Loading state support
- * - Customizable item names
- * - All Ant Design Pagination props supported
- */
-
 import React from 'react';
 import { Pagination, Typography } from 'antd';
 
@@ -41,9 +13,8 @@ interface DataPaginationProps {
   showQuickJumper?: boolean;
   showTotal?: boolean | ((total: number, range: [number, number]) => string);
   pageSizeOptions?: string[];
-  itemName?: string; // e.g., "conferences", "papers", "journals"
+  itemName?: string;
   loading?: boolean;
-  // Additional common pagination props
   size?: 'default' | 'small';
   simple?: boolean;
   hideOnSinglePage?: boolean;
@@ -78,7 +49,6 @@ const DataPagination: React.FC<DataPaginationProps> = ({
     if (onShowSizeChange) {
       onShowSizeChange(current, size);
     } else {
-      // Default behavior: reset to page 1 when changing page size
       onChange(1, size);
     }
   };
@@ -93,7 +63,6 @@ const DataPagination: React.FC<DataPaginationProps> = ({
     return defaultShowTotal;
   };
 
-  // Don't render if there are no items or only one page
   if (total === 0 || (hideOnSinglePage && total <= pageSize)) {
     return null;
   }
@@ -127,7 +96,7 @@ const DataPagination: React.FC<DataPaginationProps> = ({
         size={size}
         simple={simple}
         responsive={responsive}
-        showLessItems={responsive && typeof window !== 'undefined' && window.innerWidth < 768} // Show fewer page numbers on mobile
+        showLessItems={responsive && typeof window !== 'undefined' && window.innerWidth < 768}
         {...rest}
       />
     </div>

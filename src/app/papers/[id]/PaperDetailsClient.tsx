@@ -4,6 +4,31 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import InterestingButton from "@/components/InterestingButton";
+import { 
+  Card, 
+  Button, 
+  Typography, 
+  Space, 
+  Row, 
+  Col, 
+  Tag, 
+  Modal, 
+  Spin, 
+  Alert, 
+  Descriptions, 
+  List, 
+  Divider 
+} from 'antd';
+import { 
+  ArrowLeftOutlined, 
+  DownloadOutlined, 
+  CopyOutlined, 
+  CloseOutlined, 
+  GithubOutlined,
+  LinkOutlined
+} from '@ant-design/icons';
+
+const { Title, Paragraph, Text } = Typography;
 
 interface CitationData {
     year: number;
@@ -54,18 +79,8 @@ interface Paper {
         tasks?: string[];
         language?: string;
         downloadUrl?: string;
-    }[];  // Datasets used in the paper
+    }[];
     isInteresting?: boolean;
-}
-
-// Helper function to create URL-friendly slugs from titles
-function createSlug(title: string): string {
-    return title
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '') // Remove special characters
-        .replace(/\s+/g, '-')     // Replace spaces with hyphens
-        .replace(/--+/g, '-')     // Replace multiple hyphens with single hyphen
-        .trim();                  // Trim whitespace
 }
 
 export default function PaperDetailsClient({ slug }: { slug: string }) {
@@ -85,8 +100,6 @@ export default function PaperDetailsClient({ slug }: { slug: string }) {
 
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                 let response;
-
-                // API đã được cải thiện để xử lý cả ID và slug từ tiêu đề
                 response = await fetch(`${apiUrl}/api/papers/by-slug/${slug}/`);
 
                 if (!response.ok) {
@@ -120,334 +133,308 @@ export default function PaperDetailsClient({ slug }: { slug: string }) {
 
     if (loading) {
         return (
-            <div className="container mx-auto p-6 flex justify-center items-center min-h-screen">
-                <div className="animate-pulse flex flex-col w-full max-w-3xl">
-                    <div className="h-10 bg-gray-200 rounded w-3/4 mb-4"></div>
-                    <div className="h-6 bg-gray-200 rounded w-1/2 mb-8"></div>
-                    <div className="h-40 bg-gray-200 rounded mb-6"></div>
-                    <div className="grid grid-cols-1 gap-4">
-                        <div className="h-24 bg-gray-200 rounded"></div>
-                        <div className="h-72 bg-gray-200 rounded"></div>
-                        <div className="h-36 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                minHeight: '100vh',
+                padding: '24px'
+            }}>
+                <Spin size="large" tip="Loading paper details..." />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="container mx-auto p-6">
-                <div className="flex justify-between items-center mb-6">
-                    <button
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+                <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                    <Button
                         onClick={() => router.push('/papers')}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center"
+                        icon={<ArrowLeftOutlined />}
+                        type="primary"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                        </svg>
                         Back to Papers
-                    </button>
-                </div>
-                <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
-                    <h2 className="text-xl font-semibold">Error</h2>
-                    <p>{error}</p>
-                </div>
+                    </Button>
+                    <Alert
+                        message="Error"
+                        description={error}
+                        type="error"
+                        showIcon
+                    />
+                </Space>
             </div>
         );
     }
 
     if (!paper) {
         return (
-            <div className="container mx-auto p-6">
-                <div className="flex justify-between items-center mb-6">
-                    <button
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+                <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                    <Button
                         onClick={() => router.push('/papers')}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center"
+                        icon={<ArrowLeftOutlined />}
+                        type="primary"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                        </svg>
                         Back to Papers
-                    </button>
-                </div>
-                <div className="text-center py-12">
-                    <h2 className="text-2xl font-semibold text-gray-700">Paper not found</h2>
-                </div>
+                    </Button>
+                    <div style={{ textAlign: 'center', padding: '48px 0' }}>
+                        <Title level={2} style={{ color: '#6b7280' }}>
+                            Paper not found
+                        </Title>
+                    </div>
+                </Space>
             </div>
         );
     }
 
     return (
-        <div className="container mx-auto p-6">
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
             {/* BibTeX Modal */}
-            {showBibtexModal && paper?.bibtex && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full m-4">
-                        <div className="flex justify-between items-center p-4 border-b">
-                            <h3 className="text-lg font-semibold">BibTeX Citation</h3>
-                            <button
-                                onClick={() => setShowBibtexModal(false)}
-                                className="text-gray-500 hover:text-gray-700"
+            <Modal
+                title="BibTeX Citation"
+                open={showBibtexModal}
+                onCancel={() => setShowBibtexModal(false)}
+                footer={[
+                    <Button key="copy" type="primary" icon={<CopyOutlined />} onClick={copyBibtex}>
+                        Copy to Clipboard
+                    </Button>
+                ]}
+                width={800}
+            >
+                <pre style={{ 
+                    background: '#f9fafb', 
+                    padding: '16px', 
+                    borderRadius: '8px', 
+                    overflow: 'auto',
+                    fontSize: '14px',
+                    fontFamily: 'monospace',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                }}>
+                    {paper?.bibtex}
+                </pre>
+            </Modal>
+
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                <Row justify="space-between" align="middle">
+                    <Col>
+                        <Button
+                            onClick={() => router.push('/papers')}
+                            icon={<ArrowLeftOutlined />}
+                            type="primary"
+                            size="large"
+                        >
+                            Back to Papers
+                        </Button>
+                    </Col>
+                    <Col>
+                        <Space>
+                            {/* Interesting button */}
+                            {paper && (
+                                <InterestingButton
+                                    paperId={paper.id}
+                                    className="px-4 py-2 text-yellow-500 bg-white border border-yellow-500 rounded hover:bg-yellow-50 inline-flex items-center"
+                                    initialState={paper.isInteresting || false}
+                                />
+                            )}
+
+                            {/* Download Paper button */}
+                            <Button
+                                href={paper?.downloadUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                icon={<DownloadOutlined />}
+                                type="primary"
+                                style={{ backgroundColor: '#16a34a' }}
+                                size="large"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div className="p-4">
-                            <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm font-mono whitespace-pre-wrap break-words">
-                                {paper.bibtex}
-                            </pre>
-                            <div className="mt-4 flex justify-end">
-                                <button
-                                    onClick={copyBibtex}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                                    </svg>
-                                    Copy to Clipboard
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+                                Download Paper
+                            </Button>
+                        </Space>
+                    </Col>
+                </Row>
 
-            <div className="flex justify-between items-center mb-6">
-                <button
-                    onClick={() => router.push('/papers')}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                    </svg>
-                    Back to Papers
-                </button>
+                <Card>
+                    {/* Paper Title and Authors */}
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                        <Title level={1} style={{ margin: 0 }}>
+                            {paper.title}
+                        </Title>
+                        <Paragraph style={{ fontSize: '20px', color: '#6b7280', margin: 0 }}>
+                            {paper.authors.join(", ")}
+                        </Paragraph>
+                        <Space wrap>
+                            {paper.keywords.map((keyword, index) => (
+                                <Tag key={index} color="blue">
+                                    {keyword}
+                                </Tag>
+                            ))}
+                        </Space>
+                    </Space>
 
-                <div className="flex space-x-2">
-                    {/* Interesting button */}
-                    {paper && (
-                        <InterestingButton
-                            paperId={paper.id}
-                            className="px-4 py-2 text-yellow-500 bg-white border border-yellow-500 rounded hover:bg-yellow-50 inline-flex items-center"
-                            initialState={paper.isInteresting || false}
-                        />
-                    )}
+                    <Divider />
 
-                    {/* Download Paper button */}
-                    <a
-                        href={paper?.downloadUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 inline-flex items-center"
+                    {/* Publication Details */}
+                    <Descriptions 
+                        title="Publication Details" 
+                        bordered 
+                        column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}
+                        size="small"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                        Download Paper
-                    </a>
-                </div>
-            </div>
-
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                {/* Paper Title and Authors */}
-                <div className="p-6 border-b">
-                    <div className="flex-grow">
-                        <h1 className="text-3xl font-bold text-gray-900">{paper.title}</h1>
-                        <div className="mt-4 space-y-2">
-                            <p className="text-xl text-gray-600">
-                                {paper.authors.join(", ")}
-                            </p>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {paper.keywords.map((keyword, index) => (
-                                    <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                                        {keyword}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Publication Details */}
-                <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 border-b bg-gray-50">
-                    <div className="col-span-1">
-                        <h3 className="text-sm font-medium text-gray-500">{paper.venueType === 'journal' ? 'Journal' : 'Conference'}</h3>
-                        <p className="mt-1 text-sm text-gray-900">{paper.venue || paper.conference}</p>
-                    </div>
-                    <div className="col-span-1">
-                        <h3 className="text-sm font-medium text-gray-500">Year</h3>
-                        <p className="mt-1 text-sm text-gray-900">{paper.year}</p>
-                    </div>
-                    <div className="col-span-1">
-                        <h3 className="text-sm font-medium text-gray-500">Field</h3>
-                        <p className="mt-1 text-sm text-gray-900">{paper.field}</p>
-                    </div>
-                    {paper.doi && (
-                        <div className="col-span-1">
-                            <h3 className="text-sm font-medium text-gray-500">DOI</h3>
-                            <p className="mt-1 text-sm text-gray-900">
-                                <a
+                        <Descriptions.Item label={paper.venueType === 'journal' ? 'Journal' : 'Conference'}>
+                            {paper.venue || paper.conference}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Year">
+                            {paper.year}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Field">
+                            {paper.field}
+                        </Descriptions.Item>
+                        {paper.doi && (
+                            <Descriptions.Item label="DOI">
+                                <Button
+                                    type="link"
                                     href={`https://doi.org/${paper.doi}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
+                                    icon={<LinkOutlined />}
+                                    style={{ padding: 0 }}
                                 >
                                     {paper.doi}
-                                </a>
-                            </p>
-                        </div>
-                    )}
-                    {paper.bibtex && (
-                        <div className="col-span-1">
-                            <h3 className="text-sm font-medium text-gray-500">BibTeX</h3>
-                            <p className="mt-1 text-sm text-gray-900">
-                                <button
+                                </Button>
+                            </Descriptions.Item>
+                        )}
+                        {paper.bibtex && (
+                            <Descriptions.Item label="BibTeX">
+                                <Button
+                                    type="link"
                                     onClick={() => setShowBibtexModal(true)}
-                                    className="text-blue-600 hover:underline inline-flex items-center"
+                                    icon={<CopyOutlined />}
+                                    style={{ padding: 0 }}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                                    </svg>
                                     View & Copy Citation
-                                </button>
-                            </p>
-                        </div>
-                    )}
-                    {paper.sourceCode && (
-                        <div className="col-span-1">
-                            <h3 className="text-sm font-medium text-gray-500">Source Code</h3>
-                            <p className="mt-1 text-sm text-gray-900">
-                                <a
+                                </Button>
+                            </Descriptions.Item>
+                        )}
+                        {paper.sourceCode && (
+                            <Descriptions.Item label="Source Code">
+                                <Button
+                                    type="link"
                                     href={paper.sourceCode}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline inline-flex items-center"
+                                    icon={<GithubOutlined />}
+                                    style={{ padding: 0 }}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                                    </svg>
                                     GitHub Repository
-                                </a>
-                            </p>
-                        </div>
-                    )}
-                    {paper.impactFactor && (
-                        <div className="col-span-1">
-                            <h3 className="text-sm font-medium text-gray-500">Impact Factor</h3>
-                            <p className="mt-1 text-sm text-gray-900">{paper.impactFactor.toFixed(2)}</p>
-                        </div>
-                    )}
-                    {paper.quartile && (
-                        <div className="col-span-1">
-                            <h3 className="text-sm font-medium text-gray-500">Quartile</h3>
-                            <p className="mt-1 text-sm text-gray-900">{paper.quartile}</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Abstract */}
-                <div className="p-6 border-b">
-                    <h2 className="text-2xl font-semibold mb-4">Abstract</h2>
-                    <p className="text-gray-700 leading-relaxed">{paper.abstract}</p>
-                </div>
-
-                {/* Datasets */}
-                <div className="p-6 border-b">
-                    <h2 className="text-2xl font-semibold mb-4">Datasets</h2>
-                    <div className="space-y-4">
-                        {paper.datasets && paper.datasets.length > 0 ? (
-                            paper.datasets.map((dataset, idx) => (
-                                <div key={idx} className="border border-gray-200 rounded-md p-4">
-                                    <h3 className="font-medium text-lg">
-                                        <span
-                                            className="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline"
-                                            onClick={() => router.push(`/datasets/${dataset.id}`)}
-                                        >
-                                            {dataset.name} {dataset.abbreviation && `(${dataset.abbreviation})`}
-                                        </span>
-                                    </h3>
-
-                                    {dataset.description && (
-                                        <p className="mt-2 text-gray-600">{dataset.description}</p>
-                                    )}
-
-                                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        {dataset.size && (
-                                            <div>
-                                                <h4 className="text-sm font-medium text-gray-500">Size</h4>
-                                                <p className="text-sm">{dataset.size}</p>
-                                            </div>
-                                        )}
-                                        {dataset.license && (
-                                            <div>
-                                                <h4 className="text-sm font-medium text-gray-500">License</h4>
-                                                <p className="text-sm">{dataset.license}</p>
-                                            </div>
-                                        )}
-                                        {dataset.category && (
-                                            <div>
-                                                <h4 className="text-sm font-medium text-gray-500">Category</h4>
-                                                <p className="text-sm">{dataset.category}</p>
-                                            </div>
-                                        )}
-                                        {dataset.language && (
-                                            <div>
-                                                <h4 className="text-sm font-medium text-gray-500">Language</h4>
-                                                <p className="text-sm">{dataset.language}</p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {dataset.tasks && Array.isArray(dataset.tasks) && dataset.tasks.length > 0 && (
-                                        <div className="mt-4">
-                                            <h4 className="text-sm font-medium text-gray-500">Tasks</h4>
-                                            <div className="flex flex-wrap gap-2 mt-1">
-                                                {dataset.tasks.map((task, taskIdx) => (
-                                                    <span
-                                                        key={taskIdx}
-                                                        className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full"
-                                                    >
-                                                        {task}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {dataset.downloadUrl && (
-                                        <div className="mt-4">
-                                            <a
-                                                href={dataset.downloadUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                                            >
-                                                Download Dataset
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-gray-500">No datasets associated with this paper.</p>
+                                </Button>
+                            </Descriptions.Item>
                         )}
-                    </div>
-                </div>
+                        {paper.impactFactor && (
+                            <Descriptions.Item label="Impact Factor">
+                                {paper.impactFactor.toFixed(2)}
+                            </Descriptions.Item>
+                        )}
+                        {paper.quartile && (
+                            <Descriptions.Item label="Quartile">
+                                <Tag color="blue">{paper.quartile}</Tag>
+                            </Descriptions.Item>
+                        )}
+                    </Descriptions>
 
-                {/* Citation Metrics Section */}
-                <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-                    <h2 className="text-xl font-semibold mb-4">Citation Metrics</h2>
+                    <Divider />
 
+                    {/* Abstract */}
+                    <Title level={2}>Abstract</Title>
+                    <Paragraph style={{ fontSize: '16px', lineHeight: '1.6' }}>
+                        {paper.abstract}
+                    </Paragraph>
+
+                    <Divider />
+
+                    {/* Datasets */}
+                    <Title level={2}>Datasets</Title>
+                    {paper.datasets && paper.datasets.length > 0 ? (
+                        <List
+                            dataSource={paper.datasets}
+                            renderItem={(dataset, idx) => (
+                                <List.Item key={idx}>
+                                    <Card
+                                        size="small"
+                                        title={
+                                            <Button
+                                                type="link"
+                                                onClick={() => router.push(`/datasets/${dataset.id}`)}
+                                                style={{ padding: 0, fontSize: '18px', fontWeight: 500 }}
+                                            >
+                                                {dataset.name} {dataset.abbreviation && `(${dataset.abbreviation})`}
+                                            </Button>
+                                        }
+                                        style={{ width: '100%' }}
+                                    >
+                                        {dataset.description && (
+                                            <Paragraph style={{ color: '#6b7280', marginBottom: '16px' }}>
+                                                {dataset.description}
+                                            </Paragraph>
+                                        )}
+                                        
+                                        <Descriptions size="small" column={3}>
+                                            {dataset.size && (
+                                                <Descriptions.Item label="Size">{dataset.size}</Descriptions.Item>
+                                            )}
+                                            {dataset.license && (
+                                                <Descriptions.Item label="License">{dataset.license}</Descriptions.Item>
+                                            )}
+                                            {dataset.category && (
+                                                <Descriptions.Item label="Category">{dataset.category}</Descriptions.Item>
+                                            )}
+                                            {dataset.language && (
+                                                <Descriptions.Item label="Language">{dataset.language}</Descriptions.Item>
+                                            )}
+                                        </Descriptions>
+
+                                        {dataset.tasks && Array.isArray(dataset.tasks) && dataset.tasks.length > 0 && (
+                                            <div style={{ marginTop: '16px' }}>
+                                                <Text strong style={{ color: '#6b7280', fontSize: '14px' }}>Tasks:</Text>
+                                                <div style={{ marginTop: '8px' }}>
+                                                    {dataset.tasks.map((task, taskIdx) => (
+                                                        <Tag key={taskIdx} color="blue">
+                                                            {task}
+                                                        </Tag>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {dataset.downloadUrl && (
+                                            <div style={{ marginTop: '16px' }}>
+                                                <Button
+                                                    type="link"
+                                                    href={dataset.downloadUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    icon={<DownloadOutlined />}
+                                                    style={{ padding: 0 }}
+                                                >
+                                                    Download Dataset
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </Card>
+                                </List.Item>
+                            )}
+                        />
+                    ) : (
+                        <Paragraph style={{ color: '#6b7280' }}>No datasets associated with this paper.</Paragraph>
+                    )}
+
+                    <Divider />
+
+                    {/* Citation Metrics Section */}
+                    <Title level={2}>Citation Metrics</Title>
                     {paper.citationsByYear && paper.citationsByYear.length > 0 ? (
-                        <div className="h-80">
+                        <div style={{ height: '320px' }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart
                                     data={paper.citationsByYear.map(item => ({
@@ -461,81 +448,99 @@ export default function PaperDetailsClient({ slug }: { slug: string }) {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="citations" fill="#8884d8" />
+                                    <Bar dataKey="citations" fill="#1890ff" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
                     ) : (
-                        <p className="text-gray-500">No citation data available for this paper.</p>
+                        <Paragraph style={{ color: '#6b7280' }}>No citation data available for this paper.</Paragraph>
                     )}
-                </div>
 
-                {/* Method */}
-                <div className="p-6 border-b">
-                    <h2 className="text-2xl font-semibold mb-4">Method</h2>
-                    <div className="prose max-w-none text-gray-700 leading-relaxed">
+                    <Divider />
+
+                    {/* Method */}
+                    <Title level={2}>Method</Title>
+                    <div style={{ fontSize: '16px', lineHeight: '1.6', color: '#374151' }}>
                         {paper.method?.split('\n\n').map((paragraph, idx) => (
-                            <p key={idx} className="mb-4">{paragraph}</p>
-                        )) || <p>No method information available.</p>}
+                            <Paragraph key={idx} style={{ marginBottom: '16px' }}>{paragraph}</Paragraph>
+                        )) || <Paragraph style={{ color: '#6b7280' }}>No method information available.</Paragraph>}
                     </div>
-                </div>
 
-                {/* Results */}
-                <div className="p-6 border-b">
-                    <h2 className="text-2xl font-semibold mb-4">Results</h2>
-                    <div className="prose max-w-none text-gray-700 leading-relaxed">
+                    <Divider />
+
+                    {/* Results */}
+                    <Title level={2}>Results</Title>
+                    <div style={{ fontSize: '16px', lineHeight: '1.6', color: '#374151' }}>
                         {paper.results?.split('\n\n').map((paragraph, idx) => (
-                            <p key={idx} className="mb-4">{paragraph}</p>
-                        )) || <p>No results information available.</p>}
+                            <Paragraph key={idx} style={{ marginBottom: '16px' }}>{paragraph}</Paragraph>
+                        )) || <Paragraph style={{ color: '#6b7280' }}>No results information available.</Paragraph>}
                     </div>
-                </div>
 
-                {/* Conclusions */}
-                <div className="p-6 border-b">
-                    <h2 className="text-2xl font-semibold mb-4">Conclusions</h2>
-                    <div className="prose max-w-none text-gray-700 leading-relaxed">
+                    <Divider />
+
+                    {/* Conclusions */}
+                    <Title level={2}>Conclusions</Title>
+                    <div style={{ fontSize: '16px', lineHeight: '1.6', color: '#374151' }}>
                         {paper.conclusions?.split('\n\n').map((paragraph, idx) => (
-                            <p key={idx} className="mb-4">{paragraph}</p>
-                        )) || <p>No conclusions information available.</p>}
+                            <Paragraph key={idx} style={{ marginBottom: '16px' }}>{paragraph}</Paragraph>
+                        )) || <Paragraph style={{ color: '#6b7280' }}>No conclusions information available.</Paragraph>}
                     </div>
-                </div>
 
-                {/* Citing Papers */}
-                <div className="p-6 border-b">
-                    <h2 className="text-2xl font-semibold mb-4">Citing Papers</h2>
-                    <div className="space-y-4">
-                        {paper.citingPapers && paper.citingPapers.length > 0 ? (
-                            paper.citingPapers.map((citingPaper, idx) => (
-                                <div key={idx} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                                    <h3 className="text-lg font-medium text-blue-600 hover:underline cursor-pointer"
-                                        onClick={() => router.push(`/papers/${citingPaper.id}`)}>
-                                        {citingPaper.title}
-                                    </h3>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                        {citingPaper.authors.join(", ")} ({citingPaper.year})
-                                    </p>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-gray-600">No citing papers found.</p>
-                        )}
-                    </div>
-                </div>
+                    <Divider />
 
-                {/* References */}
-                <div className="p-6 border-b">
-                    <h2 className="text-2xl font-semibold mb-4">References</h2>
-                    {paper.references && paper.references.length > 0 ? (
-                        <ul className="list-decimal pl-5 space-y-2">
-                            {paper.references.map((reference, idx) => (
-                                <li key={idx} className="text-gray-700">{reference}</li>
-                            ))}
-                        </ul>
+                    {/* Citing Papers */}
+                    <Title level={2}>Citing Papers</Title>
+                    {paper.citingPapers && paper.citingPapers.length > 0 ? (
+                        <List
+                            dataSource={paper.citingPapers}
+                            renderItem={(citingPaper, idx) => (
+                                <List.Item key={idx}>
+                                    <Card
+                                        hoverable
+                                        size="small"
+                                        onClick={() => router.push(`/papers/${citingPaper.id}`)}
+                                        style={{ width: '100%', cursor: 'pointer' }}
+                                    >
+                                        <Card.Meta
+                                            title={
+                                                <Text style={{ color: '#1890ff', fontSize: '18px' }}>
+                                                    {citingPaper.title}
+                                                </Text>
+                                            }
+                                            description={
+                                                <Text style={{ color: '#6b7280' }}>
+                                                    {citingPaper.authors.join(", ")} ({citingPaper.year})
+                                                </Text>
+                                            }
+                                        />
+                                    </Card>
+                                </List.Item>
+                            )}
+                        />
                     ) : (
-                        <p className="text-gray-600">No references found.</p>
+                        <Paragraph style={{ color: '#6b7280' }}>No citing papers found.</Paragraph>
                     )}
-                </div>
-            </div>
+
+                    <Divider />
+
+                    {/* References */}
+                    <Title level={2}>References</Title>
+                    {paper.references && paper.references.length > 0 ? (
+                        <List
+                            dataSource={paper.references}
+                            renderItem={(reference, idx) => (
+                                <List.Item key={idx}>
+                                    <Text style={{ color: '#374151' }}>
+                                        {idx + 1}. {reference}
+                                    </Text>
+                                </List.Item>
+                            )}
+                        />
+                    ) : (
+                        <Paragraph style={{ color: '#6b7280' }}>No references found.</Paragraph>
+                    )}
+                </Card>
+            </Space>
         </div>
     );
 } 

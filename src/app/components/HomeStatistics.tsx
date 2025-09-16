@@ -27,16 +27,12 @@ export function HomeStatistics() {
             setError(null);
 
             try {
-                // Use relative URL to leverage Next.js API routing with rewrites
                 const response = await fetch('/api/stats/home', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                     },
-                    // No need for these with relative URLs that use Next.js rewrites
-                    // credentials: 'same-origin',
-                    // mode: 'cors',
                 });
 
                 if (!response.ok) {
@@ -48,7 +44,6 @@ export function HomeStatistics() {
             } catch (err) {
                 console.error('Failed to fetch home statistics:', err);
                 setError('Failed to load statistics. Please try again later.');
-                // Use fallback data in case of error
                 setStats({
                     totalPapers: 15200,
                     totalUsers: 3400,
@@ -63,7 +58,6 @@ export function HomeStatistics() {
         fetchStats();
     }, []);
 
-    // Format numbers with commas and add "+" if greater than 1000
     const formatNumber = (num: number): string => {
         if (num === 0 && isLoading) return '...';
 
@@ -75,7 +69,6 @@ export function HomeStatistics() {
 
     return (
         <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Papers */}
             <div className="flex flex-col bg-white shadow-sm rounded-xl">
                 <div className="p-4 md:p-5 flex justify-center items-center">
                     <div className="flex flex-col items-center">
@@ -87,7 +80,6 @@ export function HomeStatistics() {
                 </div>
             </div>
 
-            {/* Users/Researchers */}
             <div className="flex flex-col bg-white shadow-sm rounded-xl">
                 <div className="p-4 md:p-5 flex justify-center items-center">
                     <div className="flex flex-col items-center">
@@ -99,7 +91,6 @@ export function HomeStatistics() {
                 </div>
             </div>
 
-            {/* Datasets */}
             <div className="flex flex-col bg-white shadow-sm rounded-xl">
                 <div className="p-4 md:p-5 flex justify-center items-center">
                     <div className="flex flex-col items-center">
@@ -111,7 +102,6 @@ export function HomeStatistics() {
                 </div>
             </div>
 
-            {/* Conferences/Journals */}
             <div className="flex flex-col bg-white shadow-sm rounded-xl">
                 <div className="p-4 md:p-5 flex justify-center items-center">
                     <div className="flex flex-col items-center">
@@ -123,7 +113,6 @@ export function HomeStatistics() {
                 </div>
             </div>
 
-            {/* Show error message if any */}
             {error && (
                 <div className="col-span-4 text-center text-red-500 mt-4">
                     {error}

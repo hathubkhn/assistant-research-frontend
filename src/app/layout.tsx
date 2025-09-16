@@ -6,7 +6,33 @@ import PrelineScript from "../components/PrelineScript";
 import { AuthProvider } from "../contexts/AuthContext";
 import { LanguageProvider } from "../contexts/LanguageContext";
 import Header from "../components/Header";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { ConfigProvider } from 'antd';
+
+export function removeBisSkinCheckedAttributes() {
+  try {
+    const elements = document.querySelectorAll('[bis_skin_checked]');
+    elements.forEach(el => el.removeAttribute('bis_skin_checked'));
+    
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'bis_skin_checked') {
+          (mutation.target as Element).removeAttribute('bis_skin_checked');
+        }
+      }
+    });
+    
+    observer.observe(document.body, { 
+      attributes: true,
+      attributeFilter: ['bis_skin_checked'],
+      subtree: true 
+    });
+    
+    return () => observer.disconnect();
+  } catch (e) {
+    console.error('Error removing bis_skin_checked attributes:', e);
+  }
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,20 +44,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const [mounted, setMounted] = useState(false);
-
-  // Set default language from localStorage on mount
+export default function RootLayout({children}: Readonly<{children: React.ReactNode;}>) {
   useEffect(() => {
-    setMounted(true);
     const savedLanguage = localStorage.getItem('language');
     if (savedLanguage) {
       document.documentElement.lang = savedLanguage;
     }
+    removeBisSkinCheckedAttributes();
   }, []);
 
   return (
@@ -44,47 +63,24 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        {/* Script to remove bis_skin_checked attributes */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                // Execute immediately to remove attributes before hydration
-                try {
-                  const elements = document.querySelectorAll('[bis_skin_checked]');
-                  elements.forEach(el => el.removeAttribute('bis_skin_checked'));
-                  
-                  // Also use a MutationObserver to catch any that might be added later
-                  const observer = new MutationObserver((mutations) => {
-                    for (const mutation of mutations) {
-                      if (mutation.type === 'attributes' && mutation.attributeName === 'bis_skin_checked') {
-                        mutation.target.removeAttribute('bis_skin_checked');
-                      }
-                    }
-                  });
-                  
-                  // Start observing the document
-                  observer.observe(document.body, { 
-                    attributes: true,
-                    attributeFilter: ['bis_skin_checked'],
-                    subtree: true 
-                  });
-                } catch (e) {
-                  console.error('Error removing bis_skin_checked attributes:', e);
-                }
-              })();
-            `,
+        <ConfigProvider
+          theme={{
+            token: {
+              colorPrimary: '#d9363e',
+              borderRadius: 8,
+            },
           }}
-        />
-        <AuthProvider>
-          <LanguageProvider>
-            <Header />
-            <main>
-              {children}
-            </main>
-            <PrelineScript />
-          </LanguageProvider>
-        </AuthProvider>
+        >
+          <AuthProvider>
+            <LanguageProvider>
+              <Header />
+              <main>
+                {children}
+              </main>
+              <PrelineScript />
+            </LanguageProvider>
+          </AuthProvider>
+        </ConfigProvider>
       </body>
     </html>
   );
