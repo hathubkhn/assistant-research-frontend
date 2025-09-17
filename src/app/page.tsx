@@ -65,7 +65,7 @@ export default function Home() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          width: '100%'
+          width: '75%'
         }}
       >
         <Row gutter={[24, 24]} style={{ width: '100%' }}>
@@ -219,14 +219,14 @@ export default function Home() {
         border: 'none',
         borderRadius: 0
       }}>
-        <Space 
+        <Space
           direction="vertical"
           align="center"
           style={{
             width: '100%',
             margin: '0 auto',
             textAlign: 'center'
-        }}>
+          }}>
           <Space direction="vertical" size="small">
             <Title level={3} style={{
               color: 'white',
