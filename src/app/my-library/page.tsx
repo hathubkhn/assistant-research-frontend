@@ -6,7 +6,7 @@ import { StarIcon } from '@heroicons/react/24/solid';
 import { useTranslation } from '@/utils/useTranslation';
 
 // API URL configuration
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Paper data structure
 interface Paper {
@@ -1246,8 +1246,6 @@ export default function MyLibraryPage() {
     // Fetch conferences and journals
     const fetchVenues = async () => {
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
             // Prepare headers
             const headers: HeadersInit = {
                 'Content-Type': 'application/json',
@@ -1255,14 +1253,14 @@ export default function MyLibraryPage() {
             };
 
             // Fetch conferences
-            const conferencesResponse = await fetch(`${apiUrl}/api/conferences/filter/`, {
+            const conferencesResponse = await fetch(`${API_URL}/api/conferences/filter/`, {
                 method: 'GET',
                 headers,
                 credentials: 'include'
             });
 
             // Fetch journals
-            const journalsResponse = await fetch(`${apiUrl}/api/journals/filter/`, {
+            const journalsResponse = await fetch(`${API_URL}/api/journals/filter/`, {
                 method: 'GET',
                 headers,
                 credentials: 'include'

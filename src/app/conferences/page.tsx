@@ -26,6 +26,7 @@ import DataPagination from '@/app/components/DataPagination';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Conference {
   id: string;
@@ -54,8 +55,6 @@ interface FetchConferencesParams {
 }
 
 const fetchConferences = async (params: FetchConferencesParams): Promise<ConferencesResponse> => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  
   try {
     const queryParams = new URLSearchParams();
     
@@ -74,7 +73,7 @@ const fetchConferences = async (params: FetchConferencesParams): Promise<Confere
       queryParams.append('search', params.searchQuery);
     }
     
-    const response = await axios.get(`${apiUrl}/api/conferences/?${queryParams.toString()}`);
+    const response = await axios.get(`${API_URL}/api/conferences/?${queryParams.toString()}`);
     return response.data;
   } catch (error: any) {
     throw new Error(`Error fetching conferences: ${error.response?.status} ${error.response?.statusText || error.message}`);

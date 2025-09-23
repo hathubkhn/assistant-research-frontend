@@ -29,6 +29,7 @@ import {
 } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CitationData {
     year: number;
@@ -97,10 +98,8 @@ export default function PaperDetailsClient({ slug }: { slug: string }) {
                 if (!slug) {
                     throw new Error('Invalid paper identifier');
                 }
-
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                 let response;
-                response = await fetch(`${apiUrl}/api/papers/by-slug/${slug}/`);
+                response = await fetch(`${API_URL}/api/papers/by-slug/${slug}/`);
 
                 if (!response.ok) {
                     if (response.status === 404) {

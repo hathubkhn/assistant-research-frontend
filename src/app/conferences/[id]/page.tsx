@@ -24,7 +24,7 @@ import {
 } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 interface Conference {
   id: string;
   name: string;
@@ -44,10 +44,8 @@ interface Paper {
 }
 
 const fetchConferenceById = async (id: string): Promise<Conference & { papers: Paper[] }> => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
   try {
-    const response = await axios.get(`${apiUrl}/api/conferences/${id}/`);
+    const response = await axios.get(`${API_URL}/api/conferences/${id}/`);
     return response.data;
   } catch (error: any) {
     if (error.response?.status === 404) {

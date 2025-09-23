@@ -5,7 +5,7 @@ import { useTranslation } from '@/utils/useTranslation';
 import { Row, Col, Card, Statistic, Alert } from 'antd';
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface StatsData {
   totalPapers: number;
@@ -16,7 +16,7 @@ interface StatsData {
 
 async function fetchHomeStatistics(): Promise<StatsData> {
   try {
-    const response = await axios.get(`${apiUrl}/api/stats/home/`, {
+    const response = await axios.get(`${API_URL}/api/stats/home/`, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

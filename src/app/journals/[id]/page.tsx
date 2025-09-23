@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 interface Journal {
     id: string;
     name: string;
@@ -36,8 +38,7 @@ export default function JournalDetailPage() {
         const fetchJournalDetails = async () => {
             try {
                 setLoading(true);
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                const response = await fetch(`${apiUrl}/api/journals/${id}/`);
+                const response = await fetch(`${API_URL}/api/journals/${id}/`);
 
                 if (response.status === 404) {
                     console.error(`Journal not found with ID: ${id}`);

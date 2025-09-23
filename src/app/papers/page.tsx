@@ -1,31 +1,29 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import DataPagination from '@/app/components/DataPagination';
 import { useTranslation } from '@/utils/useTranslation';
-import axios from 'axios';
+import { ClearOutlined, FilterOutlined, LinkOutlined, SearchOutlined } from '@ant-design/icons';
 import {
-  Layout,
+  Alert,
+  Button,
   Card,
   Checkbox,
-  Input,
-  Button,
-  Typography,
-  Space,
-  Row,
   Col,
-  Spin,
-  Alert,
-  Tag,
   Drawer,
-  Grid
+  Input,
+  Layout,
+  Row,
+  Space,
+  Spin,
+  Tag,
+  Typography
 } from 'antd';
-import { SearchOutlined, ClearOutlined, LinkOutlined, FilterOutlined } from '@ant-design/icons';
-import DataPagination from '@/app/components/DataPagination';
+import axios from 'axios';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const { Title, Text, Paragraph } = Typography;
 const { Search } = Input;
-const { useBreakpoint } = Grid;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -56,8 +54,7 @@ interface Filters {
 export default function PapersPage() {
   const router = useRouter();
   const { t } = useTranslation('papers');
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
+
   const [activeFilters, setActiveFilters] = useState<Filters>({
     years: [],
     venues: [],
@@ -75,7 +72,6 @@ export default function PapersPage() {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [mobileFiltersVisible, setMobileFiltersVisible] = useState<boolean>(false);
 
   const [expandedFilters, setExpandedFilters] = useState<{
     conferences: boolean;
@@ -183,8 +179,7 @@ export default function PapersPage() {
 
       const axiosConfig = {
         headers,
-        withCredentials: true,
-        timeout: 10000
+        withCredentials: true
       };
 
       try {
@@ -198,16 +193,8 @@ export default function PapersPage() {
       }
 
       try {
-        console.log("Fetching conferences from API:", `${API_URL}/api/conferences/filter/`);
-        const conferencesResponse = await axios.get(`${API_URL}/api/conferences/filter/`, axiosConfig);
-
-        const conferencesData = conferencesResponse.data;
-        console.log("Conferences fetched successfully:", conferencesData.length);
-
-        if (conferencesData.length > 0) {
-          console.log("First conference sample:", conferencesData[0]);
-        }
-
+        const conferencesResponse = await axios.get(`${API_URL}/api/conferences/`, axiosConfig);
+        const conferencesData = conferencesResponse.data.results;
         setConferences(conferencesData);
 
         if (conferencesCount === 0) {
@@ -223,19 +210,8 @@ export default function PapersPage() {
       }
 
       try {
-        const journalsResponse = await axios.get(`${API_URL}/api/journals/filter/`, axiosConfig);
-        const journalsData = journalsResponse.data;
-
-        const sortedByIF = [...journalsData].sort((a, b) =>
-          (b.impactFactor || 0) - (a.impactFactor || 0)
-        );
-
-        if (sortedByIF.length > 0) {
-          console.log("Highest impact factor journal:", sortedByIF[0]);
-          console.log("Top 5 impact factor journals:", sortedByIF.slice(0, 5).map(j =>
-            `${j.name}: IF=${j.impactFactor}`
-          ));
-        }
+        const journalsResponse = await axios.get(`${API_URL}/api/journals/`, axiosConfig);
+        const journalsData = journalsResponse.data.results;
 
         setJournals(journalsData);
 
@@ -455,7 +431,6 @@ export default function PapersPage() {
     const value = e.target.value;
     setSearchQuery(value);
 
-    // Only clear search results if the input is completely cleared
     if (value === '') {
       setCurrentPage(1);
       fetchPapers(1, pageSize);
@@ -598,7 +573,7 @@ export default function PapersPage() {
 
   const filtersContent = (
     <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-      <div>
+      <>
         <Title level={5} style={{ marginBottom: 8 }}>Publication Type</Title>
         <Space direction="vertical" size="small">
           <Checkbox
@@ -614,9 +589,9 @@ export default function PapersPage() {
             Journals
           </Checkbox>
         </Space>
-      </div>
+      </>
 
-      <div>
+      <>
         <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 8 }}>
           <Title level={5} style={{ margin: 0 }}>Conferences</Title>
           <Text type="secondary" style={{ fontSize: '12px' }}>
@@ -696,9 +671,9 @@ export default function PapersPage() {
             </Button>
           )}
         </Space>
-      </div>
+      </>
 
-      <div>
+      <>
         <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 8 }}>
           <Title level={5} style={{ margin: 0 }}>Journals</Title>
           <Text type="secondary" style={{ fontSize: '12px' }}>
@@ -759,9 +734,9 @@ export default function PapersPage() {
               </Button>
             )}
         </Space>
-      </div>
+      </>
 
-      <div>
+      <>
         <Title level={5} style={{ marginBottom: 8 }}>Publication Year</Title>
         <Space direction="vertical" size="small">
           {years.map((year) => (
@@ -774,53 +749,41 @@ export default function PapersPage() {
             </Checkbox>
           ))}
         </Space>
-      </div>
+      </>
     </Space>
   );
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <div style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '20px 16px' }}>
+      <Space direction="vertical" style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '20px 16px' }}>
         <Row gutter={[16, 24]}>
-          {!isMobile && (
-            <Col xs={0} sm={0} md={8} lg={6} xl={6}>
-              <Card
-                title={
-                  <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                    <Title level={4} style={{ margin: 0 }}>Filters</Title>
-                    {(activeFilters.years.length > 0 || activeFilters.venues.length > 0 || activeFilters.fields.length > 0 || activeFilters.venueTypes.length > 0) && (
-                      <Button
-                        type="link"
-                        size="small"
-                        icon={<ClearOutlined />}
-                        onClick={clearFilters}
-                      >
-                        Clear all
-                      </Button>
-                    )}
-                  </Space>
-                }
-                size="small"
-              >
-                {filtersContent}
-              </Card>
-            </Col>
-          )}
+          <Col xs={0} sm={0} md={8} lg={6} xl={6}>
+            <Card
+              title={
+                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                  <Title level={4} style={{ margin: 0 }}>Filters</Title>
+                  {(activeFilters.years.length > 0 || activeFilters.venues.length > 0 || activeFilters.fields.length > 0 || activeFilters.venueTypes.length > 0) && (
+                    <Button
+                      type="link"
+                      size="small"
+                      icon={<ClearOutlined />}
+                      onClick={clearFilters}
+                    >
+                      Clear all
+                    </Button>
+                  )}
+                </Space>
+              }
+              size="small"
+            >
+              {filtersContent}
+            </Card>
+          </Col>
 
-          <Col xs={24} sm={24} md={isMobile ? 24 : 16} lg={isMobile ? 24 : 18} xl={isMobile ? 24 : 18}>
-
+          <Col xs={24} sm={24} md={16} lg={18} xl={18}>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <Space style={{ width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Title level={2} style={{ margin: 0 }}>{t('title')}</Title>
-                {isMobile && (
-                  <Button
-                    type="primary"
-                    icon={<FilterOutlined />}
-                    onClick={() => setMobileFiltersVisible(true)}
-                  >
-                    Filters
-                  </Button>
-                )}
               </Space>
 
               <Search
@@ -876,7 +839,7 @@ export default function PapersPage() {
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
                   {getPapersByType('conference').length > 0 && (
                     <div>
-                      <Title level={isMobile ? 4 : 3} style={{ marginBottom: 16 }}>Conference Publications</Title>
+                      <Title level={3} style={{ marginBottom: 16 }}>Conference Publications</Title>
                       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                         {getPapersByType('conference').map((paper) => (
                           <Link
@@ -887,7 +850,7 @@ export default function PapersPage() {
                             <Card
                               hoverable
                               style={{ width: '100%' }}
-                              bodyStyle={{ padding: isMobile ? '16px' : '24px' }}
+                              styles={{ body: { padding: '24px' } }}
                             >
                               <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                                 <Space style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -942,7 +905,7 @@ export default function PapersPage() {
 
                   {getPapersByType('journal').length > 0 && (
                     <div>
-                      <Title level={isMobile ? 4 : 3} style={{ marginBottom: 16 }}>Journal Publications (Q1-Q2)</Title>
+                      <Title level={3} style={{ marginBottom: 16 }}>Journal Publications (Q1-Q2)</Title>
                       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                         {getPapersByType('journal').map((paper) => (
                           <Link
@@ -953,7 +916,7 @@ export default function PapersPage() {
                             <Card
                               hoverable
                               style={{ width: '100%' }}
-                              bodyStyle={{ padding: isMobile ? '16px' : '24px' }}
+                              styles={{ body: { padding: '24px' } }}
                             >
                               <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                                 <Space style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -1042,7 +1005,7 @@ export default function PapersPage() {
             </Space>
           </Col>
         </Row>
-      </div>
+      </Space>
 
       <Drawer
         title={
@@ -1055,7 +1018,6 @@ export default function PapersPage() {
                 icon={<ClearOutlined />}
                 onClick={() => {
                   clearFilters();
-                  setMobileFiltersVisible(false);
                 }}
               >
                 Clear all
@@ -1064,10 +1026,10 @@ export default function PapersPage() {
           </Space>
         }
         placement="left"
-        onClose={() => setMobileFiltersVisible(false)}
-        open={mobileFiltersVisible}
+        onClose={() => {}}
+        open={false}
         width={320}
-        bodyStyle={{ padding: '16px' }}
+        styles={{ body: { padding: '16px' } }}
       >
         {filtersContent}
       </Drawer>

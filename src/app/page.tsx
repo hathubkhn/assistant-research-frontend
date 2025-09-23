@@ -70,7 +70,7 @@ export default function Home() {
       >
         <Row gutter={[24, 24]} style={{ width: '100%' }}>
           <Col xs={24} sm={12} lg={6}>
-            <Card hoverable style={{ height: '100%', width: '100%' }} bodyStyle={{ padding: 0 }}>
+            <Card hoverable style={{ height: '100%', width: '100%' }} styles={{ body: { padding: 0 } }}>
               <div style={{
                 height: '208px',
                 display: 'flex',
@@ -90,7 +90,7 @@ export default function Home() {
           </Col>
 
           <Col xs={24} sm={12} lg={6}>
-            <Card hoverable style={{ height: '100%', width: '100%' }} bodyStyle={{ padding: 0 }}>
+            <Card hoverable style={{ height: '100%', width: '100%' }} styles={{ body: { padding: 0 } }}>
               <div style={{
                 height: '208px',
                 display: 'flex',
@@ -110,7 +110,7 @@ export default function Home() {
           </Col>
 
           <Col xs={24} sm={12} lg={6}>
-            <Card hoverable style={{ height: '100%', width: '100%' }} bodyStyle={{ padding: 0 }}>
+            <Card hoverable style={{ height: '100%', width: '100%' }} styles={{ body: { padding: 0 } }}>
               <div style={{
                 height: '208px',
                 display: 'flex',
@@ -130,7 +130,7 @@ export default function Home() {
           </Col>
 
           <Col xs={24} sm={12} lg={6}>
-            <Card hoverable style={{ height: '100%', width: '100%' }} bodyStyle={{ padding: 0 }}>
+            <Card hoverable style={{ height: '100%', width: '100%' }} styles={{ body: { padding: 0 } }}>
               <div style={{
                 height: '208px',
                 display: 'flex',
