@@ -1,0 +1,36 @@
+{
+    "hero": {
+        "title": "Trợ lý nghiên cứu được hỗ trợ bởi AI",
+        "subtitle": "Hướng dẫn cá nhân hóa giúp bạn khám phá, kết nối và sử dụng nghiên cứu học thuật thông qua mạng lưới thông minh của các bài báo, bộ dữ liệu và ấn phẩm."
+    },
+    "features": {
+        "papers": {
+            "title": "Tìm kiếm bài báo nghiên cứu",
+            "description": "Tìm kiếm hiệu quả qua hàng nghìn bài báo học thuật với công nghệ tìm kiếm nâng cao để tìm chính xác những gì bạn cần."
+        },
+        "ai": {
+            "title": "Hỗ trợ AI cá nhân hóa",
+            "description": "Nhận các giải thích, tóm tắt và thông tin chi tiết được điều chỉnh phù hợp với sở thích và hồ sơ nghiên cứu của bạn."
+        },
+        "network": {
+            "title": "Mạng lưới nghiên cứu kết nối",
+            "description": "Khám phá mối liên hệ giữa các bài báo, bộ dữ liệu, hội nghị và tạp chí trong mạng lưới nghiên cứu toàn diện của chúng tôi."
+        },
+        "scientist": {
+            "title": "Nhà khoa học AI",
+            "description": "Tạo và chạy các thí nghiệm khoa học sử dụng AI để kiểm tra giả thuyết và thúc đẩy nghiên cứu của bạn với thiết kế thí nghiệm tự động.",
+            "tryNow": "Thử ngay"
+        }
+    },
+    "statistics": {
+        "title": "Thống kê tác động nghiên cứu",
+        "subtitle": "Khám phá hệ sinh thái nghiên cứu đang phát triển của chúng tôi",
+        "papers": "Bài báo",
+        "researchers": "Nhà nghiên cứu",
+        "datasets": "Bộ dữ liệu",
+        "venues": "Hội nghị & Tạp chí"
+    },
+    "footer": {
+        "copyright": "© Trợ lý nghiên cứu. 2025. Được phát triển bởi Trung tâm Chuyển đổi số, ĐHBKHN."
+    }
+}

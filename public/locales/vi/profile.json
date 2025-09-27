@@ -1,0 +1,155 @@
+{
+    "title": "Hồ sơ",
+    "subtitle": "Quản lý thông tin tài khoản và tùy chọn của bạn",
+    "tabs": {
+        "personal": "Thông tin Cá nhân",
+        "preferences": "Tùy chọn",
+        "security": "Bảo mật",
+        "notifications": "Thông báo",
+        "integration": "Tích hợp"
+    },
+    "personal": {
+        "title": "Thông tin Cá nhân",
+        "profilePicture": {
+            "title": "Ảnh Hồ sơ",
+            "upload": "Tải lên Ảnh Mới",
+            "remove": "Xóa Ảnh"
+        },
+        "form": {
+            "firstName": "Tên",
+            "lastName": "Họ",
+            "email": "Địa chỉ Email",
+            "institution": "Tổ chức",
+            "department": "Khoa/Phòng",
+            "position": "Vị trí",
+            "bio": "Tiểu sử",
+            "website": "Website",
+            "orcid": "ID ORCID",
+            "researchInterests": "Sở thích Nghiên cứu",
+            "save": "Lưu Thay đổi",
+            "cancel": "Hủy"
+        }
+    },
+    "preferences": {
+        "title": "Tùy chọn",
+        "language": {
+            "title": "Ngôn ngữ",
+            "description": "Chọn ngôn ngữ ưa thích cho giao diện"
+        },
+        "theme": {
+            "title": "Giao diện",
+            "description": "Chọn giữa giao diện sáng và tối",
+            "light": "Sáng",
+            "dark": "Tối",
+            "system": "Mặc định Hệ thống"
+        },
+        "accessibility": {
+            "title": "Trợ năng",
+            "description": "Điều chỉnh cài đặt để truy cập tốt hơn",
+            "fontSize": "Cỡ chữ",
+            "contrastMode": "Chế độ Tương phản Cao",
+            "reduceMotion": "Giảm Chuyển động"
+        },
+        "save": "Lưu Tùy chọn"
+    },
+    "security": {
+        "title": "Bảo mật",
+        "passwordChange": {
+            "title": "Đổi Mật khẩu",
+            "currentPassword": "Mật khẩu Hiện tại",
+            "newPassword": "Mật khẩu Mới",
+            "confirmPassword": "Xác nhận Mật khẩu Mới",
+            "update": "Cập nhật Mật khẩu"
+        },
+        "twoFactor": {
+            "title": "Xác thực Hai yếu tố",
+            "description": "Tăng cường bảo mật tài khoản với xác thực hai yếu tố",
+            "enable": "Bật 2FA",
+            "disable": "Tắt 2FA",
+            "status": {
+                "enabled": "Đã bật",
+                "disabled": "Đã tắt"
+            }
+        },
+        "sessions": {
+            "title": "Phiên Đang hoạt động",
+            "description": "Quản lý các phiên đăng nhập đang hoạt động của bạn",
+            "current": "Phiên Hiện tại",
+            "logoutAll": "Đăng xuất Tất cả Phiên Khác"
+        },
+        "deleteAccount": {
+            "title": "Xóa Tài khoản",
+            "description": "Xóa vĩnh viễn tài khoản của bạn và tất cả dữ liệu liên quan",
+            "button": "Xóa Tài khoản",
+            "confirm": "Hành động này không thể hoàn tác. Vui lòng nhập email của bạn để xác nhận:"
+        }
+    },
+    "notifications": {
+        "title": "Cài đặt Thông báo",
+        "email": {
+            "title": "Thông báo Email",
+            "research": "Cập nhật Nghiên cứu",
+            "papers": "Bài báo Mới Phù hợp với Sở thích của Bạn",
+            "system": "Cập nhật Hệ thống",
+            "newsletter": "Bản tin"
+        },
+        "web": {
+            "title": "Thông báo Web",
+            "enable": "Bật Thông báo Web",
+            "papers": "Đề xuất Bài báo",
+            "messages": "Tin nhắn và Yêu cầu Hợp tác"
+        },
+        "frequency": {
+            "title": "Tần suất Thông báo",
+            "realTime": "Thời gian Thực",
+            "daily": "Tóm tắt Hàng ngày",
+            "weekly": "Tóm tắt Hàng tuần",
+            "none": "Không"
+        },
+        "save": "Lưu Cài đặt Thông báo"
+    },
+    "integration": {
+        "title": "Tài khoản Đã kết nối",
+        "description": "Quản lý các tài khoản và dịch vụ đã kết nối của bạn",
+        "google": {
+            "title": "Google",
+            "connect": "Kết nối Tài khoản Google",
+            "disconnect": "Ngắt kết nối",
+            "status": {
+                "connected": "Đã kết nối",
+                "notConnected": "Chưa kết nối"
+            }
+        },
+        "microsoft": {
+            "title": "Microsoft",
+            "connect": "Kết nối Tài khoản Microsoft",
+            "disconnect": "Ngắt kết nối",
+            "status": {
+                "connected": "Đã kết nối",
+                "notConnected": "Chưa kết nối"
+            }
+        },
+        "orcid": {
+            "title": "ORCID",
+            "connect": "Kết nối ORCID",
+            "disconnect": "Ngắt kết nối",
+            "status": {
+                "connected": "Đã kết nối",
+                "notConnected": "Chưa kết nối"
+            }
+        }
+    },
+    "success": {
+        "profileUpdated": "Thông tin hồ sơ đã được cập nhật thành công",
+        "preferencesUpdated": "Tùy chọn đã được cập nhật thành công",
+        "passwordChanged": "Mật khẩu đã được thay đổi thành công",
+        "notificationsUpdated": "Cài đặt thông báo đã được cập nhật thành công"
+    },
+    "errors": {
+        "updateFailed": "Không thể cập nhật thông tin hồ sơ",
+        "wrongPassword": "Mật khẩu hiện tại không chính xác",
+        "passwordMismatch": "Mật khẩu mới không khớp",
+        "emailInUse": "Email này đã được sử dụng",
+        "accountDeletionFailed": "Không thể xóa tài khoản"
+    }
+}

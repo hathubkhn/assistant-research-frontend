@@ -1,0 +1,48 @@
+{
+    "title": "Create an Account",
+    "subtitle": "Join the research community",
+    "form": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "institution": "Institution",
+        "position": "Position",
+        "termsLabel": "I agree to the Terms of Service and Privacy Policy",
+        "newsletterLabel": "Subscribe to newsletter",
+        "signupButton": "Create Account",
+        "loading": "Creating your account..."
+    },
+    "validation": {
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Please enter a valid email address",
+        "passwordRequired": "Password is required",
+        "passwordLength": "Password must be at least 8 characters",
+        "passwordStrength": "Password must include uppercase, lowercase, number and special character",
+        "passwordsMatch": "Passwords must match",
+        "termsRequired": "You must agree to the terms to create an account"
+    },
+    "social": {
+        "title": "Or sign up with",
+        "google": "Sign up with Google",
+        "microsoft": "Sign up with Microsoft",
+        "orcid": "Sign up with ORCID"
+    },
+    "login": {
+        "prompt": "Already have an account?",
+        "link": "Log in here"
+    },
+    "success": {
+        "title": "Account Created Successfully!",
+        "message": "Please check your email to verify your account.",
+        "loginLink": "Log in now"
+    },
+    "errors": {
+        "generic": "An error occurred during signup. Please try again.",
+        "emailExists": "An account with this email already exists.",
+        "network": "Network error. Please check your connection and try again."
+    }
+}

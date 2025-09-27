@@ -1,0 +1,51 @@
+{
+    "title": "Research Dashboard",
+    "dateFilters": {
+        "title": "Date Filters",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "viewBy": "View By",
+        "periods": {
+            "daily": "Daily",
+            "monthly": "Monthly",
+            "yearly": "Yearly"
+        },
+        "resetDates": "Reset Dates"
+    },
+    "stats": {
+        "totalPapers": "Total Papers",
+        "papersThisMonth": "Papers This Month",
+        "totalCitations": "Total Citations",
+        "totalDatasets": "Total Datasets"
+    },
+    "charts": {
+        "papersByMonth": "Papers Published by Month",
+        "papersByCategory": "Papers by Category",
+        "topTasks": "Top Tasks",
+        "topDatasets": "Top Datasets",
+        "trendingTasks": "Trending Tasks",
+        "loading": "Loading...",
+        "noData": "No task trend data available for the selected period.",
+        "count": "Count"
+    },
+    "papers": {
+        "filterByTasks": "Filter by Tasks",
+        "researchPapers": "Research Papers",
+        "noPapers": "No papers available for the selected date range.",
+        "noMatch": "No papers match the selected tasks. Try selecting different tasks or clear filters.",
+        "noTasks": "No tasks found.",
+        "citations": "Citations",
+        "download": "Download"
+    },
+    "pagination": {
+        "show": "Show",
+        "perPage": "per page",
+        "page": "Page",
+        "of": "of",
+        "results": "results",
+        "first": "First",
+        "previous": "Previous",
+        "next": "Next",
+        "last": "Last"
+    }
+}

@@ -1,0 +1,50 @@
+{
+    "title": "Bảng điều khiển nghiên cứu",
+    "dateFilters": {
+        "title": "Bộ lọc ngày",
+        "startDate": "Ngày bắt đầu",
+        "endDate": "Ngày kết thúc",
+        "viewBy": "Xem theo",
+        "periods": {
+            "daily": "Hàng ngày",
+            "monthly": "Hàng tháng",
+            "yearly": "Hàng năm"
+        },
+        "resetDates": "Đặt lại ngày"
+    },
+    "stats": {
+        "totalPapers": "Tổng số bài báo",
+        "papersThisMonth": "Bài báo tháng này",
+        "totalCitations": "Tổng số trích dẫn"
+    },
+    "charts": {
+        "papersByMonth": "Bài báo xuất bản theo tháng",
+        "papersByCategory": "Bài báo theo danh mục",
+        "topKeywords": "Từ khóa hàng đầu",
+        "topDatasets": "Bộ dữ liệu hàng đầu",
+        "keywordTrends": "Xu hướng từ khóa theo thời gian (Từ khóa hàng đầu mỗi giai đoạn)",
+        "loading": "Đang tải...",
+        "noData": "Không có dữ liệu xu hướng từ khóa cho giai đoạn đã chọn.",
+        "count": "Số lượng"
+    },
+    "papers": {
+        "filterByKeywords": "Lọc theo từ khóa",
+        "researchPapers": "Bài báo nghiên cứu",
+        "noPapers": "Không có bài báo cho phạm vi ngày đã chọn.",
+        "noMatch": "Không có bài báo phù hợp với từ khóa đã chọn. Hãy thử chọn từ khóa khác hoặc xóa bộ lọc.",
+        "noKeywords": "Không tìm thấy từ khóa trong các bài báo hiện tại.",
+        "citations": "Trích dẫn",
+        "download": "Tải xuống"
+    },
+    "pagination": {
+        "show": "Hiển thị",
+        "perPage": "mỗi trang",
+        "page": "Trang",
+        "of": "trên",
+        "results": "kết quả",
+        "first": "Đầu tiên",
+        "previous": "Trước",
+        "next": "Tiếp",
+        "last": "Cuối cùng"
+    }
+}

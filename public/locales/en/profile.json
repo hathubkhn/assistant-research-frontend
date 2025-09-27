@@ -1,0 +1,155 @@
+{
+    "title": "Profile",
+    "subtitle": "Manage your account information and preferences",
+    "tabs": {
+        "personal": "Personal Information",
+        "preferences": "Preferences",
+        "security": "Security",
+        "notifications": "Notifications",
+        "integration": "Integrations"
+    },
+    "personal": {
+        "title": "Personal Information",
+        "profilePicture": {
+            "title": "Profile Picture",
+            "upload": "Upload New Picture",
+            "remove": "Remove Picture"
+        },
+        "form": {
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "email": "Email Address",
+            "institution": "Institution",
+            "department": "Department",
+            "position": "Position",
+            "bio": "Biography",
+            "website": "Website",
+            "orcid": "ORCID ID",
+            "researchInterests": "Research Interests",
+            "save": "Save Changes",
+            "cancel": "Cancel"
+        }
+    },
+    "preferences": {
+        "title": "Preferences",
+        "language": {
+            "title": "Language",
+            "description": "Select your preferred language for the interface"
+        },
+        "theme": {
+            "title": "Theme",
+            "description": "Choose between light and dark theme",
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System Default"
+        },
+        "accessibility": {
+            "title": "Accessibility",
+            "description": "Adjust settings for better accessibility",
+            "fontSize": "Font Size",
+            "contrastMode": "High Contrast Mode",
+            "reduceMotion": "Reduce Motion"
+        },
+        "save": "Save Preferences"
+    },
+    "security": {
+        "title": "Security",
+        "passwordChange": {
+            "title": "Change Password",
+            "currentPassword": "Current Password",
+            "newPassword": "New Password",
+            "confirmPassword": "Confirm New Password",
+            "update": "Update Password"
+        },
+        "twoFactor": {
+            "title": "Two-Factor Authentication",
+            "description": "Enhance your account security with two-factor authentication",
+            "enable": "Enable 2FA",
+            "disable": "Disable 2FA",
+            "status": {
+                "enabled": "Enabled",
+                "disabled": "Disabled"
+            }
+        },
+        "sessions": {
+            "title": "Active Sessions",
+            "description": "Manage your active login sessions",
+            "current": "Current Session",
+            "logoutAll": "Log Out All Other Sessions"
+        },
+        "deleteAccount": {
+            "title": "Delete Account",
+            "description": "Permanently delete your account and all associated data",
+            "button": "Delete Account",
+            "confirm": "This action cannot be undone. Please type your email to confirm:"
+        }
+    },
+    "notifications": {
+        "title": "Notification Settings",
+        "email": {
+            "title": "Email Notifications",
+            "research": "Research Updates",
+            "papers": "New Papers Matching Your Interests",
+            "system": "System Updates",
+            "newsletter": "Newsletter"
+        },
+        "web": {
+            "title": "Web Notifications",
+            "enable": "Enable Web Notifications",
+            "papers": "Paper Recommendations",
+            "messages": "Messages and Collaboration Requests"
+        },
+        "frequency": {
+            "title": "Notification Frequency",
+            "realTime": "Real-time",
+            "daily": "Daily Digest",
+            "weekly": "Weekly Digest",
+            "none": "None"
+        },
+        "save": "Save Notification Settings"
+    },
+    "integration": {
+        "title": "Connected Accounts",
+        "description": "Manage your connected accounts and services",
+        "google": {
+            "title": "Google",
+            "connect": "Connect Google Account",
+            "disconnect": "Disconnect",
+            "status": {
+                "connected": "Connected",
+                "notConnected": "Not Connected"
+            }
+        },
+        "microsoft": {
+            "title": "Microsoft",
+            "connect": "Connect Microsoft Account",
+            "disconnect": "Disconnect",
+            "status": {
+                "connected": "Connected",
+                "notConnected": "Not Connected"
+            }
+        },
+        "orcid": {
+            "title": "ORCID",
+            "connect": "Connect ORCID",
+            "disconnect": "Disconnect",
+            "status": {
+                "connected": "Connected",
+                "notConnected": "Not Connected"
+            }
+        }
+    },
+    "success": {
+        "profileUpdated": "Profile information updated successfully",
+        "preferencesUpdated": "Preferences updated successfully",
+        "passwordChanged": "Password changed successfully",
+        "notificationsUpdated": "Notification settings updated successfully"
+    },
+    "errors": {
+        "updateFailed": "Failed to update profile information",
+        "wrongPassword": "Current password is incorrect",
+        "passwordMismatch": "New passwords do not match",
+        "emailInUse": "This email is already in use",
+        "accountDeletionFailed": "Failed to delete account"
+    }
+}

@@ -1,0 +1,95 @@
+{
+    "header": {
+        "home": "Trang chủ",
+        "dashboard": "Bảng điều khiển",
+        "papers": "Bài báo",
+        "journals": "Tạp chí",
+        "conferences": "Hội nghị",
+        "datasets": "Bộ dữ liệu",
+        "researchAssistant": "Trợ lý nghiên cứu",
+        "aiScientist": "Nhà khoa học AI",
+        "myLibrary": "Thư viện của tôi",
+        "search": "Tìm kiếm...",
+        "viewProfile": "Xem hồ sơ",
+        "signOut": "Đăng xuất"
+    },
+    "auth": {
+        "login": "Đăng nhập",
+        "signup": "Đăng ký",
+        "logout": "Đăng xuất",
+        "profile": "Hồ sơ",
+        "email": "Email",
+        "password": "Mật khẩu",
+        "confirmPassword": "Xác nhận mật khẩu",
+        "forgotPassword": "Quên mật khẩu?",
+        "rememberMe": "Ghi nhớ đăng nhập",
+        "loginButton": "Đăng nhập",
+        "signupButton": "Đăng ký",
+        "noAccount": "Chưa có tài khoản?",
+        "alreadyAccount": "Đã có tài khoản?",
+        "createAccount": "Tạo tài khoản",
+        "continueWithGoogle": "Tiếp tục với Google",
+        "continueWithMicrosoft": "Tiếp tục với Microsoft"
+    },
+    "dashboard": {
+        "title": "Bảng điều khiển",
+        "welcome": "Chào mừng trở lại",
+        "recentPapers": "Bài báo gần đây",
+        "savedItems": "Đã lưu",
+        "statistics": "Thống kê",
+        "recommendations": "Đề xuất"
+    },
+    "papers": {
+        "title": "Bài báo nghiên cứu",
+        "abstract": "Tóm tắt",
+        "authors": "Tác giả",
+        "published": "Xuất bản",
+        "journal": "Tạp chí",
+        "conference": "Hội nghị",
+        "keywords": "Từ khóa",
+        "citations": "Trích dẫn",
+        "download": "Tải xuống",
+        "save": "Lưu",
+        "share": "Chia sẻ",
+        "related": "Bài báo liên quan",
+        "viewMore": "Xem thêm"
+    },
+    "search": {
+        "title": "Kết quả tìm kiếm",
+        "noResults": "Không tìm thấy kết quả",
+        "filter": "Lọc",
+        "sortBy": "Sắp xếp theo",
+        "relevance": "Liên quan",
+        "date": "Ngày",
+        "citations": "Trích dẫn",
+        "searching": "Đang tìm kiếm..."
+    },
+    "common": {
+        "loading": "Đang tải...",
+        "error": "Đã xảy ra lỗi",
+        "retry": "Thử lại",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "delete": "Xóa",
+        "edit": "Sửa",
+        "submit": "Gửi",
+        "back": "Quay lại",
+        "next": "Tiếp theo",
+        "previous": "Trước đó",
+        "or": "HOẶC"
+    },
+    "languages": {
+        "english": "Tiếng Anh",
+        "vietnamese": "Tiếng Việt"
+    },
+    "profile": {
+        "title": "Hồ sơ người dùng",
+        "personalInfo": "Thông tin cá nhân",
+        "name": "Họ và tên",
+        "bio": "Tiểu sử",
+        "institution": "Tổ chức",
+        "interests": "Lĩnh vực nghiên cứu",
+        "updateProfile": "Cập nhật hồ sơ",
+        "changePassword": "Đổi mật khẩu"
+    }
+}

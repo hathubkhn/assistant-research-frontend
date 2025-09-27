@@ -1,0 +1,115 @@
+{
+    "title": "Thư viện Của tôi",
+    "description": "Quản lý bài báo, bộ dữ liệu và bộ sưu tập đã lưu của bạn",
+    "interestingPapers": "Bài báo Yêu thích",
+    "downloadedPapers": "Bài báo Đã tải xuống",
+    "interestingDatasets": "Bộ dữ liệu Yêu thích",
+    "uploadedPapers": "Bài báo Đã tải lên",
+    "tabs": {
+        "papers": "Bài báo",
+        "datasets": "Bộ dữ liệu",
+        "collections": "Bộ sưu tập",
+        "history": "Lịch sử Xem"
+    },
+    "search": {
+        "placeholder": "Tìm kiếm trong thư viện của bạn...",
+        "button": "Tìm kiếm"
+    },
+    "filters": {
+        "title": "Bộ lọc",
+        "recentlyAdded": "Thêm Gần đây",
+        "mostViewed": "Xem Nhiều nhất",
+        "alphabetical": "A-Z",
+        "date": "Ngày",
+        "tags": "Thẻ",
+        "clearFilters": "Xóa Bộ lọc",
+        "noTags": "Không tìm thấy thẻ",
+        "clearFilter": "Xóa Bộ lọc",
+        "withAppliedFilters": " với bộ lọc đã áp dụng"
+    },
+    "results": {
+        "showing": "Hiển thị",
+        "result": "kết quả",
+        "results": "kết quả",
+        "dataset": "bộ dữ liệu",
+        "datasets": "bộ dữ liệu"
+    },
+    "papers": {
+        "authors": "Tác giả:",
+        "downloaded": "Đã tải xuống",
+        "uploaded": "Đã tải lên",
+        "added": "Đã thêm",
+        "noPapersFound": "Không tìm thấy bài báo",
+        "noInterestingPapers": "Bạn chưa đánh dấu bài báo nào là yêu thích.",
+        "noDownloadedPapers": "Bạn chưa tải xuống bài báo nào.",
+        "noUploadedPapers": "Bạn chưa tải lên bài báo nào.",
+        "uploadPaper": "Tải lên Bài báo",
+        "noDatasetsFound": "Không tìm thấy bộ dữ liệu",
+        "noRecommendations": "Chưa có đề xuất nào",
+        "abstract": "Tóm tắt",
+        "doi": "DOI",
+        "sourceCode": "Mã nguồn",
+        "datasets": "Bộ dữ liệu",
+        "addedDate": "Ngày Thêm",
+        "viewFullDetails": "Xem Chi tiết Đầy đủ",
+        "downloadPaper": "Tải xuống Bài báo",
+        "removeFromDownloaded": "Xóa khỏi Đã tải xuống",
+        "close": "Đóng",
+        "mustBeLoggedIn": "Bạn phải đăng nhập để tải lên bài báo.",
+        "loginNow": "Đăng nhập ngay",
+        "uploadResearchPaper": "Tải lên bài báo nghiên cứu (định dạng PDF). Hệ thống sẽ tự động trích xuất dữ liệu như tiêu đề, tác giả và tóm tắt.",
+        "dragAndDrop": "Kéo và thả tệp vào đây, hoặc <span class=\"text-blue-600\">duyệt</span> để chọn tệp",
+        "supportedFormat": "Định dạng hỗ trợ: PDF (tối đa 50MB)",
+        "uploading": "Đang tải lên và trích xuất dữ liệu...",
+        "cancel": "Hủy",
+        "selectFile": "Chọn Tệp"
+    },
+    "datasets": {
+        "papers": "bài báo"
+    },
+    "noItems": {
+        "papers": "Không tìm thấy bài báo đã lưu. Duyệt bài báo và lưu chúng vào thư viện của bạn.",
+        "datasets": "Không tìm thấy bộ dữ liệu đã lưu. Duyệt bộ dữ liệu và lưu chúng vào thư viện của bạn.",
+        "collections": "Không tìm thấy bộ sưu tập. Tạo một bộ sưu tập để tổ chức tài liệu nghiên cứu của bạn.",
+        "history": "Không tìm thấy lịch sử xem."
+    },
+    "collections": {
+        "create": "Tạo Bộ sưu tập",
+        "edit": "Chỉnh sửa Bộ sưu tập",
+        "delete": "Xóa Bộ sưu tập",
+        "name": "Tên Bộ sưu tập",
+        "description": "Mô tả",
+        "createButton": "Tạo",
+        "cancelButton": "Hủy",
+        "saveButton": "Lưu Thay đổi",
+        "itemCount": "mục",
+        "addTo": "Thêm vào Bộ sưu tập",
+        "removeFrom": "Xóa khỏi Bộ sưu tập",
+        "confirmDelete": "Bạn có chắc chắn muốn xóa bộ sưu tập này? Hành động này không thể hoàn tác."
+    },
+    "items": {
+        "addTag": "Thêm thẻ",
+        "removeTag": "Xóa thẻ",
+        "addToCollection": "Thêm vào Bộ sưu tập",
+        "removeFromLibrary": "Xóa khỏi Thư viện",
+        "addNote": "Thêm Ghi chú",
+        "editNote": "Chỉnh sửa Ghi chú",
+        "viewDetails": "Xem Chi tiết",
+        "dateAdded": "Ngày Thêm",
+        "lastViewed": "Xem Lần cuối",
+        "download": "Tải xuống",
+        "cite": "Trích dẫn",
+        "share": "Chia sẻ"
+    },
+    "pagination": {
+        "show": "Hiển thị",
+        "perPage": "mỗi trang",
+        "page": "Trang",
+        "of": "trên",
+        "results": "kết quả",
+        "first": "Đầu tiên",
+        "previous": "Trước",
+        "next": "Tiếp",
+        "last": "Cuối cùng"
+    }
+}

@@ -1,0 +1,48 @@
+{
+    "title": "Tạo Tài khoản",
+    "subtitle": "Tham gia cộng đồng nghiên cứu",
+    "form": {
+        "firstName": "Tên",
+        "lastName": "Họ",
+        "email": "Địa chỉ Email",
+        "password": "Mật khẩu",
+        "confirmPassword": "Xác nhận Mật khẩu",
+        "institution": "Tổ chức",
+        "position": "Vị trí",
+        "termsLabel": "Tôi đồng ý với Điều khoản Dịch vụ và Chính sách Riêng tư",
+        "newsletterLabel": "Đăng ký nhận bản tin",
+        "signupButton": "Tạo Tài khoản",
+        "loading": "Đang tạo tài khoản của bạn..."
+    },
+    "validation": {
+        "firstNameRequired": "Tên là bắt buộc",
+        "lastNameRequired": "Họ là bắt buộc",
+        "emailRequired": "Địa chỉ email là bắt buộc",
+        "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+        "passwordRequired": "Mật khẩu là bắt buộc",
+        "passwordLength": "Mật khẩu phải có ít nhất 8 ký tự",
+        "passwordStrength": "Mật khẩu phải bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
+        "passwordsMatch": "Mật khẩu phải khớp nhau",
+        "termsRequired": "Bạn phải đồng ý với điều khoản để tạo tài khoản"
+    },
+    "social": {
+        "title": "Hoặc đăng ký với",
+        "google": "Đăng ký bằng Google",
+        "microsoft": "Đăng ký bằng Microsoft",
+        "orcid": "Đăng ký bằng ORCID"
+    },
+    "login": {
+        "prompt": "Đã có tài khoản?",
+        "link": "Đăng nhập tại đây"
+    },
+    "success": {
+        "title": "Tạo Tài khoản Thành công!",
+        "message": "Vui lòng kiểm tra email của bạn để xác minh tài khoản.",
+        "loginLink": "Đăng nhập ngay"
+    },
+    "errors": {
+        "generic": "Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.",
+        "emailExists": "Đã tồn tại tài khoản với email này.",
+        "network": "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn và thử lại."
+    }
+}

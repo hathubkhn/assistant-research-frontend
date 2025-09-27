@@ -1,0 +1,76 @@
+{
+    "title": "Research Datasets",
+    "searchPlaceholder": "Search datasets...",
+    "searchButton": "Search",
+    "noResults": "No datasets found matching your criteria.",
+    "loading": "Loading...",
+    "datasets": "Datasets",
+    "searchForDatasets": "Search for datasets...",
+    "bestMatch": "Best Match",
+    "nameAsc": "Name (A-Z)",
+    "nameDesc": "Name (Z-A)",
+    "papersDesc": "Most Papers",
+    "papersAsc": "Fewest Papers",
+    "filters": "Filters",
+    "clearAll": "Clear All",
+    "filterByModality": "Filter by Modality",
+    "filterByTask": "Filter by Task",
+    "filterByLanguage": "Filter by Language",
+    "noDatasetsFoundMatchingCriteria": "No datasets found matching your criteria.",
+    "tasks": "Tasks",
+    "download": "Download",
+    "papers": "Papers",
+    "benchmarks": "Benchmarks",
+    "language": "Language",
+    "previous": "Previous",
+    "next": "Next",
+    "itemsPerPage": "Items per page",
+    "filters": {
+        "title": "Filters",
+        "categories": {
+            "title": "Categories"
+        },
+        "sizes": {
+            "title": "Dataset Size",
+            "small": "Small (<1GB)",
+            "medium": "Medium (1-10GB)",
+            "large": "Large (10-100GB)",
+            "veryLarge": "Very Large (>100GB)"
+        },
+        "formats": {
+            "title": "Formats"
+        },
+        "years": {
+            "title": "Years"
+        },
+        "clearFilters": "Clear All Filters",
+        "activeFilters": "Active Filters"
+    },
+    "card": {
+        "size": "Size",
+        "format": "Format",
+        "records": "Records",
+        "category": "Category",
+        "published": "Published",
+        "license": "License",
+        "authors": "Authors",
+        "description": "Description",
+        "readMore": "Read more",
+        "download": "Download",
+        "cite": "Cite",
+        "save": "Save",
+        "share": "Share",
+        "viewDetails": "View Details"
+    },
+    "pagination": {
+        "show": "Show",
+        "perPage": "per page",
+        "page": "Page",
+        "of": "of",
+        "results": "results",
+        "first": "First",
+        "previous": "Previous",
+        "next": "Next",
+        "last": "Last"
+    }
+}

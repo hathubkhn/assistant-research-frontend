@@ -1,0 +1,115 @@
+{
+    "title": "My Library",
+    "description": "Manage your saved papers, datasets, and collections",
+    "interestingPapers": "Interesting Papers",
+    "downloadedPapers": "Downloaded Papers",
+    "interestingDatasets": "Interesting Datasets",
+    "uploadedPapers": "Uploaded Papers",
+    "tabs": {
+        "papers": "Papers",
+        "datasets": "Datasets",
+        "collections": "Collections",
+        "history": "View History"
+    },
+    "search": {
+        "placeholder": "Search in your library...",
+        "button": "Search"
+    },
+    "filters": {
+        "title": "Filters",
+        "recentlyAdded": "Recently Added",
+        "mostViewed": "Most Viewed",
+        "alphabetical": "A-Z",
+        "date": "Date",
+        "tags": "Tags",
+        "clearFilters": "Clear Filters",
+        "noTags": "No tags found",
+        "clearFilter": "Clear Filter",
+        "withAppliedFilters": " with applied filters"
+    },
+    "results": {
+        "showing": "Showing",
+        "result": "result",
+        "results": "results",
+        "dataset": "dataset",
+        "datasets": "datasets"
+    },
+    "papers": {
+        "authors": "Authors:",
+        "downloaded": "Downloaded",
+        "uploaded": "Uploaded",
+        "added": "Added",
+        "noPapersFound": "No papers found",
+        "noInterestingPapers": "You haven't marked any papers as interesting yet.",
+        "noDownloadedPapers": "You haven't downloaded any papers yet.",
+        "noUploadedPapers": "You haven't uploaded any papers yet.",
+        "uploadPaper": "Upload Paper",
+        "noDatasetsFound": "No datasets found",
+        "noRecommendations": "No recommendations yet",
+        "abstract": "Abstract",
+        "doi": "DOI",
+        "sourceCode": "Source Code",
+        "datasets": "Datasets",
+        "addedDate": "Added Date",
+        "viewFullDetails": "View Full Details",
+        "downloadPaper": "Download Paper",
+        "removeFromDownloaded": "Remove from Downloaded",
+        "close": "Close",
+        "mustBeLoggedIn": "You must be logged in to upload papers.",
+        "loginNow": "Login now",
+        "uploadResearchPaper": "Upload a research paper (PDF format). The system will automatically extract metadata such as title, authors, and abstract.",
+        "dragAndDrop": "Drag and drop a file here, or <span class=\"text-blue-600\">browse</span> to select a file",
+        "supportedFormat": "Supported format: PDF (max 50MB)",
+        "uploading": "Uploading and extracting metadata...",
+        "cancel": "Cancel",
+        "selectFile": "Select File"
+    },
+    "datasets": {
+        "papers": "papers"
+    },
+    "noItems": {
+        "papers": "No saved papers found. Browse papers and save them to your library.",
+        "datasets": "No saved datasets found. Browse datasets and save them to your library.",
+        "collections": "No collections found. Create a collection to organize your research materials.",
+        "history": "No view history found."
+    },
+    "collections": {
+        "create": "Create Collection",
+        "edit": "Edit Collection",
+        "delete": "Delete Collection",
+        "name": "Collection Name",
+        "description": "Description",
+        "createButton": "Create",
+        "cancelButton": "Cancel",
+        "saveButton": "Save Changes",
+        "itemCount": "items",
+        "addTo": "Add to Collection",
+        "removeFrom": "Remove from Collection",
+        "confirmDelete": "Are you sure you want to delete this collection? This action cannot be undone."
+    },
+    "items": {
+        "addTag": "Add tag",
+        "removeTag": "Remove tag",
+        "addToCollection": "Add to Collection",
+        "removeFromLibrary": "Remove from Library",
+        "addNote": "Add Note",
+        "editNote": "Edit Note",
+        "viewDetails": "View Details",
+        "dateAdded": "Date Added",
+        "lastViewed": "Last Viewed",
+        "download": "Download",
+        "cite": "Cite",
+        "share": "Share"
+    },
+    "pagination": {
+        "show": "Show",
+        "perPage": "per page",
+        "page": "Page",
+        "of": "of",
+        "results": "results",
+        "first": "First",
+        "previous": "Previous",
+        "next": "Next",
+        "last": "Last"
+    }
+}

@@ -1,0 +1,76 @@
+{
+    "title": "Bộ dữ liệu Nghiên cứu",
+    "searchPlaceholder": "Tìm kiếm bộ dữ liệu...",
+    "searchButton": "Tìm kiếm",
+    "noResults": "Không tìm thấy bộ dữ liệu phù hợp với tiêu chí của bạn.",
+    "loading": "Đang tải...",
+    "datasets": "Bộ dữ liệu",
+    "searchForDatasets": "Tìm kiếm bộ dữ liệu...",
+    "bestMatch": "Phù hợp nhất",
+    "nameAsc": "Tên (A-Z)",
+    "nameDesc": "Tên (Z-A)",
+    "papersDesc": "Nhiều bài báo nhất",
+    "papersAsc": "Ít bài báo nhất",
+    "filters": "Bộ lọc",
+    "clearAll": "Xóa tất cả",
+    "filterByModality": "Lọc theo Phương thức",
+    "filterByTask": "Lọc theo Nhiệm vụ",
+    "filterByLanguage": "Lọc theo Ngôn ngữ",
+    "noDatasetsFoundMatchingCriteria": "Không tìm thấy bộ dữ liệu phù hợp với tiêu chí của bạn.",
+    "tasks": "Nhiệm vụ",
+    "download": "Tải xuống",
+    "papers": "Bài báo",
+    "benchmarks": "Đánh giá",
+    "language": "Ngôn ngữ",
+    "previous": "Trước",
+    "next": "Tiếp",
+    "itemsPerPage": "Mục mỗi trang",
+    "filters": {
+        "title": "Bộ lọc",
+        "categories": {
+            "title": "Danh mục"
+        },
+        "sizes": {
+            "title": "Kích thước Bộ dữ liệu",
+            "small": "Nhỏ (<1GB)",
+            "medium": "Trung bình (1-10GB)",
+            "large": "Lớn (10-100GB)",
+            "veryLarge": "Rất lớn (>100GB)"
+        },
+        "formats": {
+            "title": "Định dạng"
+        },
+        "years": {
+            "title": "Năm"
+        },
+        "clearFilters": "Xóa Tất cả Bộ lọc",
+        "activeFilters": "Bộ lọc Đang hoạt động"
+    },
+    "card": {
+        "size": "Kích thước",
+        "format": "Định dạng",
+        "records": "Bản ghi",
+        "category": "Danh mục",
+        "published": "Công bố",
+        "license": "Giấy phép",
+        "authors": "Tác giả",
+        "description": "Mô tả",
+        "readMore": "Đọc thêm",
+        "download": "Tải xuống",
+        "cite": "Trích dẫn",
+        "save": "Lưu",
+        "share": "Chia sẻ",
+        "viewDetails": "Xem Chi tiết"
+    },
+    "pagination": {
+        "show": "Hiển thị",
+        "perPage": "mỗi trang",
+        "page": "Trang",
+        "of": "trên",
+        "results": "kết quả",
+        "first": "Đầu tiên",
+        "previous": "Trước",
+        "next": "Tiếp",
+        "last": "Cuối cùng"
+    }
+}

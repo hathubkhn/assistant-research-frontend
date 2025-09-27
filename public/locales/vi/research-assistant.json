@@ -1,0 +1,57 @@
+{
+    "title": "Trợ lý Nghiên cứu",
+    "description": "Nhận hỗ trợ cá nhân hóa cho các nhiệm vụ nghiên cứu của bạn",
+    "features": {
+        "title": "Tính năng",
+        "literature": {
+            "title": "Tổng quan Tài liệu",
+            "description": "Tìm bài báo liên quan và tóm tắt nghiên cứu hiện tại trong lĩnh vực của bạn"
+        },
+        "summarization": {
+            "title": "Tóm tắt Bài báo",
+            "description": "Nhận tóm tắt ngắn gọn của các bài báo nghiên cứu phức tạp"
+        },
+        "analysis": {
+            "title": "Phân tích Dữ liệu",
+            "description": "Phân tích dữ liệu nghiên cứu của bạn với các công cụ AI tiên tiến"
+        },
+        "writing": {
+            "title": "Viết Nghiên cứu",
+            "description": "Nhận hỗ trợ trong việc soạn thảo và cải thiện các bài báo nghiên cứu của bạn"
+        }
+    },
+    "chat": {
+        "placeholder": "Đặt câu hỏi nghiên cứu hoặc tải lên bài báo...",
+        "send": "Gửi",
+        "clear": "Xóa Trò chuyện",
+        "upload": "Tải lên Bài báo",
+        "thinking": "Đang suy nghĩ...",
+        "welcome": "Chào mừng đến với Trợ lý Nghiên cứu. Tôi có thể giúp gì cho nghiên cứu của bạn hôm nay?",
+        "examples": {
+            "title": "Ví dụ",
+            "literature": "Tóm tắt các bài báo gần đây về học máy lượng tử",
+            "summarize": "Tóm tắt bài báo này cho tôi",
+            "analysis": "Giúp tôi phân tích bộ dữ liệu này",
+            "writing": "Giúp tôi soạn thảo phần phương pháp luận cho bài báo của tôi"
+        }
+    },
+    "history": {
+        "title": "Lịch sử Trò chuyện",
+        "noHistory": "Chưa có lịch sử trò chuyện",
+        "deleteAll": "Xóa Tất cả Lịch sử",
+        "loadMore": "Tải thêm"
+    },
+    "settings": {
+        "title": "Cài đặt",
+        "language": "Ngôn ngữ",
+        "theme": "Giao diện",
+        "notifications": "Thông báo",
+        "save": "Lưu Cài đặt"
+    },
+    "errors": {
+        "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
+        "upload": "Lỗi khi tải lên tệp. Vui lòng thử lại.",
+        "fileSize": "Kích thước tệp vượt quá giới hạn tối đa (10MB).",
+        "fileType": "Loại tệp không được hỗ trợ. Vui lòng tải lên tệp PDF, DOC hoặc DOCX."
+    }
+}

@@ -1,0 +1,57 @@
+{
+    "title": "Bài Báo Nghiên Cứu",
+    "searchPlaceholder": "Tìm kiếm bài báo...",
+    "searchButton": "Tìm kiếm",
+    "noResults": "Không tìm thấy bài báo phù hợp với tiêu chí của bạn.",
+    "loading": "Đang tải...",
+    "filters": {
+        "title": "Bộ lọc",
+        "venues": {
+            "conferences": "Hội nghị",
+            "journals": "Tạp chí",
+            "showAll": "Hiển thị Tất cả",
+            "showLess": "Hiển thị Ít hơn",
+            "searchPlaceholder": "Tìm kiếm địa điểm..."
+        },
+        "years": {
+            "title": "Năm"
+        },
+        "fields": {
+            "title": "Lĩnh vực Nghiên cứu"
+        },
+        "venueTypes": {
+            "title": "Loại Địa điểm",
+            "conference": "Hội nghị",
+            "journal": "Tạp chí"
+        },
+        "clearFilters": "Xóa Tất cả Bộ lọc",
+        "activeFilters": "Bộ lọc Đang hoạt động",
+        "conferencesCount": "hội nghị",
+        "journalsCount": "tạp chí"
+    },
+    "card": {
+        "authors": "Tác giả",
+        "venue": "Địa điểm",
+        "year": "Năm",
+        "abstract": "Tóm tắt",
+        "keywords": "Từ khóa",
+        "field": "Lĩnh vực",
+        "readMore": "Đọc thêm",
+        "viewFull": "Xem Bài báo Đầy đủ",
+        "download": "Tải xuống",
+        "cite": "Trích dẫn",
+        "save": "Lưu",
+        "share": "Chia sẻ"
+    },
+    "pagination": {
+        "show": "Hiển thị",
+        "perPage": "mỗi trang",
+        "page": "Trang",
+        "of": "trên",
+        "results": "kết quả",
+        "first": "Đầu tiên",
+        "previous": "Trước",
+        "next": "Tiếp",
+        "last": "Cuối cùng"
+    }
+}

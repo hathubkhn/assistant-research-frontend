@@ -1,0 +1,81 @@
+{
+    "title": "AI Scientist",
+    "description": "Collaborate with advanced AI to accelerate your research",
+    "features": {
+        "title": "Features",
+        "hypothesis": {
+            "title": "Hypothesis Generation",
+            "description": "Generate novel research hypotheses based on existing literature"
+        },
+        "experiment": {
+            "title": "Experiment Design",
+            "description": "Design effective experiments to test your hypotheses"
+        },
+        "analysis": {
+            "title": "Advanced Analysis",
+            "description": "Perform complex data analysis with state-of-the-art AI models"
+        },
+        "discovery": {
+            "title": "Knowledge Discovery",
+            "description": "Uncover hidden patterns and relationships in research data"
+        }
+    },
+    "projects": {
+        "title": "Research Projects",
+        "create": "Create New Project",
+        "noProjects": "No projects found. Create your first research project to get started.",
+        "search": "Search projects...",
+        "filters": {
+            "all": "All Projects",
+            "recent": "Recent",
+            "active": "Active",
+            "completed": "Completed",
+            "shared": "Shared with me"
+        }
+    },
+    "projectCard": {
+        "created": "Created",
+        "lastUpdated": "Last updated",
+        "status": "Status",
+        "collaborators": "Collaborators",
+        "viewProject": "View Project",
+        "deleteProject": "Delete Project",
+        "shareProject": "Share Project"
+    },
+    "projectCreate": {
+        "title": "Create New Research Project",
+        "name": "Project Name",
+        "description": "Project Description",
+        "field": "Research Field",
+        "privacy": {
+            "title": "Privacy Setting",
+            "private": "Private",
+            "shared": "Shared with collaborators",
+            "public": "Public"
+        },
+        "create": "Create Project",
+        "cancel": "Cancel"
+    },
+    "chat": {
+        "placeholder": "Describe your research question or upload data...",
+        "send": "Send",
+        "clear": "Clear Chat",
+        "upload": "Upload Data",
+        "thinking": "Thinking...",
+        "welcome": "Welcome to the AI Scientist. What research question would you like to explore today?",
+        "examples": {
+            "title": "Examples",
+            "hypothesis": "Generate hypotheses about the relationship between gut microbiome and neurological disorders",
+            "experiment": "Design an experiment to test the effects of meditation on stress hormones",
+            "analysis": "Analyze this dataset for correlations between environmental factors and disease incidence",
+            "discovery": "Find unexpected patterns in my genomic sequencing data"
+        }
+    },
+    "errors": {
+        "generic": "An error occurred. Please try again.",
+        "projectCreate": "Error creating project. Please try again.",
+        "upload": "Error uploading file. Please try again.",
+        "fileSize": "File size exceeds the maximum limit (50MB).",
+        "fileType": "Unsupported file type. Please check acceptable formats."
+    }
+}

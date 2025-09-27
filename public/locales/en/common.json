@@ -1,0 +1,95 @@
+{
+    "header": {
+        "home": "Home",
+        "dashboard": "Dashboard",
+        "papers": "Papers",
+        "journals": "Journals",
+        "conferences": "Conferences",
+        "datasets": "Datasets",
+        "researchAssistant": "Research Assistant",
+        "aiScientist": "AI Scientist",
+        "myLibrary": "My Library",
+        "search": "Search...",
+        "viewProfile": "View Profile",
+        "signOut": "Sign out"
+    },
+    "auth": {
+        "login": "Login",
+        "signup": "Sign Up",
+        "logout": "Logout",
+        "profile": "Profile",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "forgotPassword": "Forgot Password?",
+        "rememberMe": "Remember Me",
+        "loginButton": "Log In",
+        "signupButton": "Sign Up",
+        "noAccount": "Don't have an account?",
+        "alreadyAccount": "Already have an account?",
+        "createAccount": "Create Account",
+        "continueWithGoogle": "Continue with Google",
+        "continueWithMicrosoft": "Continue with Microsoft"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "welcome": "Welcome back",
+        "recentPapers": "Recent Papers",
+        "savedItems": "Saved Items",
+        "statistics": "Statistics",
+        "recommendations": "Recommendations"
+    },
+    "papers": {
+        "title": "Research Papers",
+        "abstract": "Abstract",
+        "authors": "Authors",
+        "published": "Published",
+        "journal": "Journal",
+        "conference": "Conference",
+        "keywords": "Keywords",
+        "citations": "Citations",
+        "download": "Download",
+        "save": "Save",
+        "share": "Share",
+        "related": "Related Papers",
+        "viewMore": "View More"
+    },
+    "search": {
+        "title": "Search Results",
+        "noResults": "No results found",
+        "filter": "Filter",
+        "sortBy": "Sort by",
+        "relevance": "Relevance",
+        "date": "Date",
+        "citations": "Citations",
+        "searching": "Searching..."
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "retry": "Retry",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "submit": "Submit",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "or": "OR"
+    },
+    "languages": {
+        "english": "English",
+        "vietnamese": "Vietnamese"
+    },
+    "profile": {
+        "title": "User Profile",
+        "personalInfo": "Personal Information",
+        "name": "Full Name",
+        "bio": "Biography",
+        "institution": "Institution",
+        "interests": "Research Interests",
+        "updateProfile": "Update Profile",
+        "changePassword": "Change Password"
+    }
+}

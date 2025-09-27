@@ -1,0 +1,81 @@
+{
+    "title": "Nhà Khoa học AI",
+    "description": "Hợp tác với AI tiên tiến để đẩy nhanh nghiên cứu của bạn",
+    "features": {
+        "title": "Tính năng",
+        "hypothesis": {
+            "title": "Tạo Giả thuyết",
+            "description": "Tạo ra các giả thuyết nghiên cứu mới dựa trên tài liệu hiện có"
+        },
+        "experiment": {
+            "title": "Thiết kế Thí nghiệm",
+            "description": "Thiết kế các thí nghiệm hiệu quả để kiểm tra giả thuyết của bạn"
+        },
+        "analysis": {
+            "title": "Phân tích Nâng cao",
+            "description": "Thực hiện phân tích dữ liệu phức tạp với các mô hình AI hiện đại"
+        },
+        "discovery": {
+            "title": "Khám phá Kiến thức",
+            "description": "Phát hiện các mẫu và mối quan hệ ẩn trong dữ liệu nghiên cứu"
+        }
+    },
+    "projects": {
+        "title": "Dự án Nghiên cứu",
+        "create": "Tạo Dự án Mới",
+        "noProjects": "Không tìm thấy dự án nào. Tạo dự án nghiên cứu đầu tiên của bạn để bắt đầu.",
+        "search": "Tìm kiếm dự án...",
+        "filters": {
+            "all": "Tất cả Dự án",
+            "recent": "Gần đây",
+            "active": "Đang hoạt động",
+            "completed": "Đã hoàn thành",
+            "shared": "Được chia sẻ với tôi"
+        }
+    },
+    "projectCard": {
+        "created": "Đã tạo",
+        "lastUpdated": "Cập nhật lần cuối",
+        "status": "Trạng thái",
+        "collaborators": "Cộng tác viên",
+        "viewProject": "Xem Dự án",
+        "deleteProject": "Xóa Dự án",
+        "shareProject": "Chia sẻ Dự án"
+    },
+    "projectCreate": {
+        "title": "Tạo Dự án Nghiên cứu Mới",
+        "name": "Tên Dự án",
+        "description": "Mô tả Dự án",
+        "field": "Lĩnh vực Nghiên cứu",
+        "privacy": {
+            "title": "Cài đặt Riêng tư",
+            "private": "Riêng tư",
+            "shared": "Chia sẻ với cộng tác viên",
+            "public": "Công khai"
+        },
+        "create": "Tạo Dự án",
+        "cancel": "Hủy"
+    },
+    "chat": {
+        "placeholder": "Mô tả câu hỏi nghiên cứu của bạn hoặc tải lên dữ liệu...",
+        "send": "Gửi",
+        "clear": "Xóa Trò chuyện",
+        "upload": "Tải lên Dữ liệu",
+        "thinking": "Đang suy nghĩ...",
+        "welcome": "Chào mừng đến với Nhà Khoa học AI. Bạn muốn khám phá câu hỏi nghiên cứu nào hôm nay?",
+        "examples": {
+            "title": "Ví dụ",
+            "hypothesis": "Tạo giả thuyết về mối quan hệ giữa hệ vi sinh đường ruột và rối loạn thần kinh",
+            "experiment": "Thiết kế một thí nghiệm để kiểm tra tác động của thiền định đối với hormone căng thẳng",
+            "analysis": "Phân tích bộ dữ liệu này để tìm mối tương quan giữa các yếu tố môi trường và tỷ lệ mắc bệnh",
+            "discovery": "Tìm các mẫu bất ngờ trong dữ liệu giải trình tự gen của tôi"
+        }
+    },
+    "errors": {
+        "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
+        "projectCreate": "Lỗi khi tạo dự án. Vui lòng thử lại.",
+        "upload": "Lỗi khi tải lên tệp. Vui lòng thử lại.",
+        "fileSize": "Kích thước tệp vượt quá giới hạn tối đa (50MB).",
+        "fileType": "Loại tệp không được hỗ trợ. Vui lòng kiểm tra các định dạng được chấp nhận."
+    }
+}

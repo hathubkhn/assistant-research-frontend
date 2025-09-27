@@ -1,0 +1,38 @@
+{
+    "title": "Tạp chí Học thuật",
+    "search": {
+        "placeholder": "Tìm kiếm tạp chí...",
+        "button": "Tìm kiếm"
+    },
+    "filters": {
+        "quartile": {
+            "title": "Lọc theo Phân vị"
+        },
+        "impact": {
+            "title": "Lọc theo Hệ số Ảnh hưởng"
+        },
+        "clearFilters": "Xóa Bộ lọc"
+    },
+    "table": {
+        "journal": "Tạp chí",
+        "abbreviation": "Viết tắt",
+        "impactFactor": "Hệ số Ảnh hưởng",
+        "quartile": "Phân vị",
+        "publisher": "Nhà xuất bản",
+        "papers": "Bài báo"
+    },
+    "noResults": "Không tìm thấy tạp chí phù hợp với tiêu chí của bạn.",
+    "loading": "Đang tải...",
+    "pagination": {
+        "show": "Hiển thị",
+        "perPage": "mỗi trang",
+        "page": "Trang",
+        "of": "trên",
+        "results": "kết quả",
+        "first": "Đầu tiên",
+        "previous": "Trước",
+        "next": "Tiếp",
+        "last": "Cuối cùng"
+    },
+    "visitJournal": "Truy cập Tạp chí"
+}

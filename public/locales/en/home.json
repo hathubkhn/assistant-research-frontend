@@ -1,0 +1,36 @@
+{
+    "hero": {
+        "title": "AI-Powered Research Assistant",
+        "subtitle": "Your personalized guide to discovering, connecting, and utilizing academic research through an intelligent network of papers, datasets, and publications."
+    },
+    "features": {
+        "papers": {
+            "title": "Find Research Papers",
+            "description": "Efficiently search through thousands of academic papers with our advanced search technology to find exactly what you need."
+        },
+        "ai": {
+            "title": "Personalized AI Assistance",
+            "description": "Get customized explanations, summaries, and insights tailored to your research interests and profile."
+        },
+        "network": {
+            "title": "Connected Research Network",
+            "description": "Discover the interconnections between papers, datasets, conferences, and journals in our comprehensive research network."
+        },
+        "scientist": {
+            "title": "AI Scientist",
+            "description": "Generate and run scientific experiments using AI to test hypotheses and advance your research with automated experiment design.",
+            "tryNow": "Try it now"
+        }
+    },
+    "statistics": {
+        "title": "Research Impact Statistics",
+        "subtitle": "Explore our growing research ecosystem",
+        "papers": "Papers",
+        "researchers": "Researchers",
+        "datasets": "Datasets",
+        "venues": "Conferences & Journals"
+    },
+    "footer": {
+        "copyright": "© Research Assistant. 2025. Made by The Center of Digital Transformation, HUST."
+    }
+}

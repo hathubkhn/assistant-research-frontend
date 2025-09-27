@@ -1,0 +1,38 @@
+{
+    "title": "Academic Journals",
+    "search": {
+        "placeholder": "Search journals...",
+        "button": "Search"
+    },
+    "filters": {
+        "quartile": {
+            "title": "Filter by Quartile"
+        },
+        "impact": {
+            "title": "Filter by Impact"
+        },
+        "clearFilters": "Clear Filters"
+    },
+    "table": {
+        "journal": "Journal",
+        "abbreviation": "Abbreviation",
+        "impactFactor": "Impact Factor",
+        "quartile": "Quartile",
+        "publisher": "Publisher",
+        "papers": "Papers"
+    },
+    "noResults": "No journals found matching your criteria.",
+    "loading": "Loading...",
+    "pagination": {
+        "show": "Show",
+        "perPage": "per page",
+        "page": "Page",
+        "of": "of",
+        "results": "results",
+        "first": "First",
+        "previous": "Previous",
+        "next": "Next",
+        "last": "Last"
+    },
+    "visitJournal": "Visit Journal"
+}

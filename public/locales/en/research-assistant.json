@@ -1,0 +1,57 @@
+{
+    "title": "Research Assistant",
+    "description": "Get personalized assistance with your research tasks",
+    "features": {
+        "title": "Features",
+        "literature": {
+            "title": "Literature Review",
+            "description": "Find relevant papers and summarize current research in your field"
+        },
+        "summarization": {
+            "title": "Paper Summarization",
+            "description": "Get concise summaries of complex research papers"
+        },
+        "analysis": {
+            "title": "Data Analysis",
+            "description": "Analyze your research data with advanced AI tools"
+        },
+        "writing": {
+            "title": "Research Writing",
+            "description": "Get assistance with drafting and improving your research papers"
+        }
+    },
+    "chat": {
+        "placeholder": "Ask a research question or upload a paper...",
+        "send": "Send",
+        "clear": "Clear Chat",
+        "upload": "Upload Paper",
+        "thinking": "Thinking...",
+        "welcome": "Welcome to the Research Assistant. How can I help with your research today?",
+        "examples": {
+            "title": "Examples",
+            "literature": "Summarize recent papers on quantum machine learning",
+            "summarize": "Summarize this paper for me",
+            "analysis": "Help me analyze this dataset",
+            "writing": "Help me draft the methodology section for my paper"
+        }
+    },
+    "history": {
+        "title": "Conversation History",
+        "noHistory": "No conversation history yet",
+        "deleteAll": "Delete All History",
+        "loadMore": "Load More"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language",
+        "theme": "Theme",
+        "notifications": "Notifications",
+        "save": "Save Settings"
+    },
+    "errors": {
+        "generic": "An error occurred. Please try again.",
+        "upload": "Error uploading file. Please try again.",
+        "fileSize": "File size exceeds the maximum limit (10MB).",
+        "fileType": "Unsupported file type. Please upload PDF, DOC, or DOCX files."
+    }
+}

@@ -1,0 +1,57 @@
+{
+    "title": "Research Papers",
+    "searchPlaceholder": "Search papers...",
+    "searchButton": "Search",
+    "noResults": "No papers found matching your criteria.",
+    "loading": "Loading...",
+    "filters": {
+        "title": "Filters",
+        "venues": {
+            "conferences": "Conferences",
+            "journals": "Journals",
+            "showAll": "Show All",
+            "showLess": "Show Less",
+            "searchPlaceholder": "Search venues..."
+        },
+        "years": {
+            "title": "Years"
+        },
+        "fields": {
+            "title": "Research Fields"
+        },
+        "venueTypes": {
+            "title": "Venue Types",
+            "conference": "Conference",
+            "journal": "Journal"
+        },
+        "clearFilters": "Clear All Filters",
+        "activeFilters": "Active Filters",
+        "conferencesCount": "conferences",
+        "journalsCount": "journals"
+    },
+    "card": {
+        "authors": "Authors",
+        "venue": "Venue",
+        "year": "Year",
+        "abstract": "Abstract",
+        "keywords": "Keywords",
+        "field": "Field",
+        "readMore": "Read more",
+        "viewFull": "View Full Paper",
+        "download": "Download",
+        "cite": "Cite",
+        "save": "Save",
+        "share": "Share"
+    },
+    "pagination": {
+        "show": "Show",
+        "perPage": "per page",
+        "page": "Page",
+        "of": "of",
+        "results": "results",
+        "first": "First",
+        "previous": "Previous",
+        "next": "Next",
+        "last": "Last"
+    }
+}
