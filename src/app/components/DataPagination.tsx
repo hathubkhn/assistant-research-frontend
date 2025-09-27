@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pagination, Typography } from 'antd';
+import { Pagination, Space, Typography } from 'antd';
 
 const { Text } = Typography;
 
@@ -68,20 +68,15 @@ const DataPagination: React.FC<DataPaginationProps> = ({
   }
 
   return (
-    <div
-      style={{
-        marginTop: '24px',
-        display: 'flex',
+    <Space 
+      direction="vertical" 
+      size="middle" 
+      style={{ 
+        width: '100%', 
         justifyContent: 'space-between',
         alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px',
       }}
-    >
-      <Text type="secondary">
-        Total {total.toLocaleString()} {itemName}
-      </Text>
-      
+    >      
       <Pagination
         current={current}
         total={total}
@@ -99,7 +94,7 @@ const DataPagination: React.FC<DataPaginationProps> = ({
         showLessItems={responsive && typeof window !== 'undefined' && window.innerWidth < 768}
         {...rest}
       />
-    </div>
+    </Space>
   );
 };
 
