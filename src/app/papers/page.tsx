@@ -1,7 +1,7 @@
 'use client';
 import DataPagination from '@/app/components/DataPagination';
 import { useTranslation } from '@/utils/useTranslation';
-import { ClearOutlined, FilterOutlined, LinkOutlined, SearchOutlined } from '@ant-design/icons';
+import { ClearOutlined, LinkOutlined, SearchOutlined } from '@ant-design/icons';
 import {
   Alert,
   Button,
@@ -49,6 +49,128 @@ interface Filters {
   venues: string[];
   fields: string[];
   venueTypes: Array<'conference' | 'journal'>;
+}
+
+interface Venue {
+  id: string;
+  name: string;
+  abbreviation: string;
+  rank?: string;
+  impactFactor?: number;
+  quartile?: string;
+}
+
+interface Conference {
+  id: string;
+  name: string;
+  abbreviation: string;
+  rank?: string;
+}
+interface Journal {
+  id: string;
+  name: string;
+  abbreviation: string;
+  impactFactor?: number;
+  quartile?: string;
+}
+
+interface Field {
+  id: string;
+  name: string;
+}
+
+async function countVenues() {
+  try {
+    const response = await axios.get(`${API_URL}/api/venues/counts/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      withCredentials: true
+    });
+    console.log("Venues counts response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching venues counts:', error);
+    return { conferencesCount: 0, journalsCount: 0 };
+  }
+}
+
+async function callFetchPapers(page: number = 1, size: number = 20, searchQuery: string = '', activeFilters: Filters) {
+  try {
+    const params: Record<string, string> = {
+      page: page.toString(),
+      pageSize: size.toString()
+    };
+
+    if (searchQuery.trim()) {
+      params.search = searchQuery.trim();
+    }
+
+    if (activeFilters.years.length > 0) {
+      params.year = activeFilters.years[0].toString();
+    }
+
+    if (activeFilters.venues.length > 0) {
+      params.venue_id = activeFilters.venues[0];
+    }
+
+    if (activeFilters.fields.length > 0) {
+      params.field = activeFilters.fields[0];
+    }
+
+    if (activeFilters.venueTypes.length > 0) {
+      params.venueType = activeFilters.venueTypes[0];
+    }
+
+    const response = await axios.get(`${API_URL}/api/papers/`, {
+      params,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      withCredentials: true
+    });
+    console.log("Papers response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching papers:', error);
+    return { results: [], count: 0, next: null, previous: null };
+  }
+}
+
+async function fetchConferences() {
+  try {
+    const response = await axios.get(`${API_URL}/api/conferences/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      withCredentials: true
+    });
+    console.log("Conferences response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching conferences:', error);
+    return { results: [] };
+  }
+}
+
+async function fetchJournals() {
+  try {
+    const response = await axios.get(`${API_URL}/api/journals/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      withCredentials: true
+    });
+    console.log("Journals response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching journals:', error);
+    return { results: [] };
+  }
 }
 
 export default function PapersPage() {
@@ -153,152 +275,44 @@ export default function PapersPage() {
     }));
   };
 
-  const fetchVenues = async () => {
-    try {
-      setLoadingVenues(true);
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-
-      if (typeof window !== 'undefined') {
-        let authToken = localStorage.getItem('authToken') ||
-          sessionStorage.getItem('authToken') ||
-          localStorage.getItem('token') ||
-          sessionStorage.getItem('token');
-
-        if (authToken && authToken.startsWith('Token ')) {
-          authToken = authToken.substring(6);
-        }
-
-        if (authToken) {
-          headers['Authorization'] = `Token ${authToken}`;
-        }
-      }
-
-      const axiosConfig = {
-        headers,
-        withCredentials: true
-      };
-
+  useEffect(() => {
+    const fetchVenues = async () => {
       try {
-        const countsResponse = await axios.get(`${API_URL}/api/venues/counts/`, axiosConfig);
-        setConferencesCount(countsResponse.data.conferencesCount || 0);
-        setJournalsCount(countsResponse.data.journalsCount || 0);
-      } catch (error) {
-        console.error('Error fetching venue counts:', error);
-        setConferencesCount(0);
-        setJournalsCount(0);
-      }
+        setLoadingVenues(true);
+        const countsResponse = await countVenues();
+        setConferencesCount(countsResponse.conferencesCount || 0);
+        setJournalsCount(countsResponse.journalsCount || 0);
 
-      try {
-        const conferencesResponse = await axios.get(`${API_URL}/api/conferences/`, axiosConfig);
-        const conferencesData = conferencesResponse.data.results;
+        const conferencesResponse = await fetchConferences();
+        const conferencesData = conferencesResponse.results;
         setConferences(conferencesData);
 
-        if (conferencesCount === 0) {
-          setConferencesCount(conferencesData.length);
-        }
-      } catch (error) {
-        console.error('Error fetching conferences:', error);
-        if (axios.isAxiosError(error)) {
-          console.error('Error details:', error.response?.data);
-          console.error('Status:', error.response?.status);
-        }
-        setConferences([]);
-      }
-
-      try {
-        const journalsResponse = await axios.get(`${API_URL}/api/journals/`, axiosConfig);
-        const journalsData = journalsResponse.data.results;
-
+        const journalsResponse = await fetchJournals();
+        const journalsData = journalsResponse.results;
         setJournals(journalsData);
-
-        if (journalsCount === 0) {
-          setJournalsCount(journalsData.length);
-        }
       } catch (error) {
-        console.error('Error fetching journals:', error);
-        if (axios.isAxiosError(error)) {
-          console.error('Error details:', error.response?.data);
-          console.error('Status:', error.response?.status);
-        }
+        console.error('Error in fetchVenues:', error);
+        setConferences([]);
         setJournals([]);
+      } finally {
+        setLoadingVenues(false);
       }
-    } catch (error) {
-      console.error('Error in fetchVenues:', error);
-      setConferences([]);
-      setJournals([]);
-    } finally {
-      setLoadingVenues(false);
-    }
-  };
+    };
 
-  const fetchPapers = async (page: number = 1, size: number = pageSize) => {
+    fetchVenues();
+  }, []);
+
+  const fetchPapers = async (page: number = 1, size: number = pageSize, searchQuery: string = '', activeFilters: Filters) => {
     try {
       setLoading(true);
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-
-      if (typeof window !== 'undefined') {
-        let authToken = localStorage.getItem('authToken') ||
-          sessionStorage.getItem('authToken') ||
-          localStorage.getItem('token') ||
-          sessionStorage.getItem('token');
-
-        if (authToken && authToken.startsWith('Token ')) {
-          authToken = authToken.substring(6);
-        }
-
-        if (authToken) {
-          headers['Authorization'] = `Token ${authToken}`;
-        }
-      }
-
-      const params: Record<string, string> = {
-        page: page.toString(),
-        pageSize: size.toString()
-      };
-
-      if (searchQuery.trim()) {
-        params.search = searchQuery.trim();
-      }
-
-      if (activeFilters.years.length > 0) {
-        params.year = activeFilters.years[0].toString();
-      }
-
-      if (activeFilters.venues.length > 0) {
-        params.venue_id = activeFilters.venues[0];
-      }
-
-      if (activeFilters.fields.length > 0) {
-        params.field = activeFilters.fields[0];
-      }
-
-      if (activeFilters.venueTypes.length > 0) {
-        params.venueType = activeFilters.venueTypes[0];
-      }
-
       try {
-        const response = await axios.get(`${API_URL}/api/papers/`, {
-          params,
-          headers,
-          withCredentials: true
-        });
-
-        console.log("Response:", response);
-
-        const data = (await response).data;
-        setPapers(data.results);
-        setFilteredPapers(data.results);
-        setTotalItems(data.pagination.totalItems);
-        setTotalPages(data.pagination.totalPages);
-        setCurrentPage(data.pagination.page);
+        const paperData = await callFetchPapers(page, size, searchQuery, activeFilters);
+        console.log("Paper data:", paperData);
+        setPapers(paperData.results);
+        setFilteredPapers(paperData.results);
+        setTotalItems(paperData.pagination ? paperData.pagination.totalItems : 0);
+        setTotalPages(paperData.pagination ? paperData.pagination.totalPages : 0);
+        setCurrentPage(paperData.pagination ? paperData.pagination.page : 1);
         setError(null);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
@@ -308,14 +322,8 @@ export default function PapersPage() {
           if (err.code === 'ECONNABORTED') {
             setError('Request timed out. The API server may be unavailable.');
           } else if (err.response) {
-            console.error(`Server responded with ${err.response.status}: ${err.response.data}`);
             setError(`Failed to fetch papers (${err.response.status}): ${err.response.data}`);
           } else if (err.request) {
-            console.error('API URL:', API_URL);
-            console.error('Headers:', JSON.stringify(headers));
-            console.error('User-Agent:', navigator.userAgent);
-            console.error('Is Online:', navigator.onLine);
-
             setError(`Cannot connect to the API server at ${API_URL}. Make sure the backend is running and CORS is properly configured.`);
           } else {
             setError('Failed to load papers: ' + errorMessage);
@@ -331,28 +339,15 @@ export default function PapersPage() {
 
   useEffect(() => {
     let isMounted = true;
-
     const safelyFetchPapers = async () => {
       try {
-        await fetchPapers(1);
+        await fetchPapers(1, pageSize, searchQuery, activeFilters);
       } catch (error) {
         console.error('Error in initial papers fetch:', error);
         if (!isMounted) return;
       }
     };
-
-    const safelyFetchVenues = async () => {
-      try {
-        await fetchVenues();
-      } catch (error) {
-        console.error('Error in initial venues fetch:', error);
-        if (!isMounted) return;
-      }
-    };
-
     safelyFetchPapers();
-    safelyFetchVenues();
-
     return () => {
       isMounted = false;
     };
@@ -363,7 +358,7 @@ export default function PapersPage() {
     if (size !== pageSize) {
       setPageSize(size);
     }
-    fetchPapers(page, size);
+    fetchPapers(page, size, searchQuery, activeFilters);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -378,7 +373,7 @@ export default function PapersPage() {
     });
     setCurrentPage(1);
     setTimeout(() => {
-      fetchPapers(1, pageSize);
+      fetchPapers(1, pageSize, searchQuery, activeFilters);
     }, 0);
   };
 
@@ -391,7 +386,7 @@ export default function PapersPage() {
     });
     setCurrentPage(1);
     setTimeout(() => {
-      fetchPapers(1, pageSize);
+      fetchPapers(1, pageSize, searchQuery, activeFilters);
     }, 0);
   };
 
@@ -404,7 +399,7 @@ export default function PapersPage() {
     });
     setCurrentPage(1);
     setTimeout(() => {
-      fetchPapers(1, pageSize);
+      fetchPapers(1, pageSize, searchQuery, activeFilters);
     }, 0);
   };
 
@@ -417,14 +412,14 @@ export default function PapersPage() {
     });
     setSearchQuery('');
     setCurrentPage(1);
-    fetchPapers(1, pageSize);
+    fetchPapers(1, pageSize, searchQuery, activeFilters);
   };
 
   const handleSearch = (value?: string) => {
     const query = value !== undefined ? value : searchQuery;
     setSearchQuery(query);
     setCurrentPage(1);
-    fetchPapers(1, pageSize);
+    fetchPapers(1, pageSize, searchQuery, activeFilters);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -433,7 +428,7 @@ export default function PapersPage() {
 
     if (value === '') {
       setCurrentPage(1);
-      fetchPapers(1, pageSize);
+      fetchPapers(1, pageSize, searchQuery, activeFilters);
     }
   };
 
@@ -568,7 +563,7 @@ export default function PapersPage() {
   };
 
   useEffect(() => {
-    fetchPapers(1);
+    fetchPapers(1, pageSize, searchQuery, activeFilters);
   }, [activeFilters, pageSize]);
 
   const filtersContent = (
@@ -813,8 +808,8 @@ export default function PapersPage() {
                 />
               )}
 
-              {!loading && !error && (
-                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+              {!loading && !error && filteredPapers.length > 0 ? (
+                <Space direction="vertical" size="large" style={{ width: '100%' }}>
                   <Text type="secondary">
                     Showing {filteredPapers.length} {filteredPapers.length === 1 ? 'result' : 'results'}
                     {searchQuery.trim() && (
@@ -824,172 +819,74 @@ export default function PapersPage() {
                       <span> with applied filters</span>
                     )}
                   </Text>
-                  <Button
-                    onClick={clearFilters}
-                    disabled={activeFilters.years.length === 0 && activeFilters.venues.length === 0 && activeFilters.fields.length === 0 && activeFilters.venueTypes.length === 0}
-                    icon={<ClearOutlined />}
-                    size="small"
-                  >
-                    Clear Filter
-                  </Button>
-                </Space>
-              )}
-
-              {!loading && !error && filteredPapers.length > 0 ? (
-                <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  {getPapersByType('conference').length > 0 && (
-                    <div>
-                      <Title level={3} style={{ marginBottom: 16 }}>Conference Publications</Title>
-                      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                        {getPapersByType('conference').map((paper) => (
-                          <Link
-                            key={paper.id}
-                            href={`/papers/${paper.id}`}
-                            style={{ textDecoration: 'none' }}
-                          >
-                            <Card
-                              hoverable
-                              style={{ width: '100%' }}
-                              styles={{ body: { padding: '24px' } }}
-                            >
-                              <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                                <Space style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                  <Title level={4} style={{ margin: 0, color: '#1890ff', cursor: 'pointer' }}>
-                                    {paper.title}
-                                  </Title>
-                                  <Space direction="vertical" align="end">
-                                    {getConferenceId(paper.venue) ? (
-                                      <Button
-                                        type="primary"
-                                        size="small"
-                                        icon={<LinkOutlined />}
-                                        onClick={(e) => navigateToConference(getConferenceId(paper.venue), e)}
-                                      >
-                                        {getConferenceDisplay(paper.venue)}
-                                      </Button>
-                                    ) : (
-                                      <Tag color="blue">
-                                        {getConferenceDisplay(paper.venue)}
-                                      </Tag>
-                                    )}
-                                    <Text type="secondary" style={{ fontSize: '12px' }}>{paper.year}</Text>
-                                  </Space>
-                                </Space>
-
-                                <Text type="secondary">
-                                  <Text strong>Authors:</Text> {paper.authors.join(', ')}
-                                </Text>
-
-                                <Space wrap size="small">
-                                  {paper.keywords.map((keyword, idx) => (
-                                    <Tag key={idx} color="orange">
-                                      {keyword}
-                                    </Tag>
-                                  ))}
-                                </Space>
-
-                                <Paragraph ellipsis={{ rows: 2, expandable: false }}>
-                                  {paper.abstract}
-                                </Paragraph>
-
-                                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                                  <Text type="secondary" style={{ fontSize: '12px' }}>{paper.field}</Text>
-                                </Space>
+                  <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                    {filteredPapers.map((paper) => (
+                      <Link
+                        key={paper.id}
+                        href={`/papers/${paper.id}`}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <Card
+                          hoverable
+                          style={{ width: '100%' }}
+                          styles={{ body: { padding: '24px' } }}
+                        >
+                          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                            <Space style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                              <Title level={4} style={{ margin: 0, color: '#1890ff', cursor: 'pointer' }}>
+                                {paper.title}
+                              </Title>
+                              <Space direction="vertical" align="end">
+                                {getConferenceId(paper.venue) ? (
+                                  <Button
+                                    type="primary"
+                                    size="small"
+                                    icon={<LinkOutlined />}
+                                    onClick={(e) => navigateToConference(getConferenceId(paper.venue), e)}
+                                  >
+                                    {getConferenceDisplay(paper.venue)}
+                                  </Button>
+                                ) : (
+                                  <Tag color="blue">
+                                    {getConferenceDisplay(paper.venue)}
+                                  </Tag>
+                                )}
+                                <Text type="secondary" style={{ fontSize: '12px' }}>{paper.year}</Text>
                               </Space>
-                            </Card>
-                          </Link>
-                        ))}
-                      </Space>
-                    </div>
-                  )}
+                            </Space>
 
-                  {getPapersByType('journal').length > 0 && (
-                    <div>
-                      <Title level={3} style={{ marginBottom: 16 }}>Journal Publications (Q1-Q2)</Title>
-                      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                        {getPapersByType('journal').map((paper) => (
-                          <Link
-                            key={paper.id}
-                            href={`/papers/${paper.id}`}
-                            style={{ textDecoration: 'none' }}
-                          >
-                            <Card
-                              hoverable
-                              style={{ width: '100%' }}
-                              styles={{ body: { padding: '24px' } }}
-                            >
-                              <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                                <Space style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                  <Title level={4} style={{ margin: 0, color: '#1890ff', cursor: 'pointer' }}>
-                                    {paper.title}
-                                  </Title>
-                                  <Space direction="vertical" align="end">
-                                    {getJournalId(paper.venue) ? (
-                                      <Button
-                                        type="primary"
-                                        size="small"
-                                        icon={<LinkOutlined />}
-                                        onClick={(e) => navigateToJournal(getJournalId(paper.venue), e)}
-                                        style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-                                      >
-                                        {paper.venue}
-                                      </Button>
-                                    ) : (
-                                      <Tag color="green">
-                                        {paper.venue}
-                                      </Tag>
-                                    )}
-                                    <Space size="small">
-                                      <Text type="secondary" style={{ fontSize: '12px' }}>{paper.year}</Text>
-                                      {paper.quartile && (
-                                        <Tag color="purple">{paper.quartile}</Tag>
-                                      )}
-                                      {paper.impactFactor && (
-                                        <Text type="secondary" style={{ fontSize: '12px' }}>
-                                          IF: {Number(paper.impactFactor).toFixed(paper.impactFactor >= 100 ? 0 : 1)}
-                                        </Text>
-                                      )}
-                                    </Space>
-                                  </Space>
-                                </Space>
+                            <Text type="secondary">
+                              <Text strong>Authors:</Text> {paper.authors.join(', ')}
+                            </Text>
 
-                                <Text type="secondary">
-                                  <Text strong>Authors:</Text> {paper.authors.join(', ')}
-                                </Text>
+                            <Space wrap size="small">
+                              {paper.keywords.map((keyword, idx) => (
+                                <Tag key={idx} color="orange">
+                                  {keyword}
+                                </Tag>
+                              ))}
+                            </Space>
 
-                                <Space wrap size="small">
-                                  {paper.keywords.map((keyword, idx) => (
-                                    <Tag key={idx} color="orange">
-                                      {keyword}
-                                    </Tag>
-                                  ))}
-                                </Space>
+                            <Paragraph ellipsis={{ rows: 2, expandable: false }}>
+                              {paper.abstract}
+                            </Paragraph>
 
-                                <Paragraph ellipsis={{ rows: 2, expandable: false }}>
-                                  {paper.abstract}
-                                </Paragraph>
-
-                                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                                  <Text type="secondary" style={{ fontSize: '12px' }}>{paper.field}</Text>
-                                </Space>
-                              </Space>
-                            </Card>
-                          </Link>
-                        ))}
-                      </Space>
-                    </div>
-                  )}
+                            <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                              <Text type="secondary" style={{ fontSize: '12px' }}>{paper.field}</Text>
+                            </Space>
+                          </Space>
+                        </Card>
+                      </Link>
+                    ))}
+                  </Space>
                 </Space>
-              ) : (
-                !loading && !error && (
-                  <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                    <Space direction="vertical" size="middle">
-                      <div style={{ fontSize: '48px', color: '#d9d9d9' }}>📄</div>
-                      <Title level={4} type="secondary">No papers found</Title>
-                      <Text type="secondary">Try adjusting your filters to find what you're looking for.</Text>
-                    </Space>
-                  </div>
-                )
+              ) : (!loading && !error && filteredPapers.length === 0 && (
+                <Space direction="vertical" size="middle" style={{ width: '100%', alignItems: 'center' }}>
+                  <div style={{ fontSize: '48px', color: '#d9d9d9' }}>📄</div>
+                  <Title level={4} type="secondary">No papers found</Title>
+                  <Text type="secondary">Try adjusting your filters to find what you're looking for.</Text>
+                </Space>
+              )
               )}
 
               {!loading && !error && (
@@ -1026,7 +923,7 @@ export default function PapersPage() {
           </Space>
         }
         placement="left"
-        onClose={() => {}}
+        onClose={() => { }}
         open={false}
         width={320}
         styles={{ body: { padding: '16px' } }}
