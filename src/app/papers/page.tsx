@@ -8,10 +8,10 @@ import {
   Card,
   Checkbox,
   Col,
-  Drawer,
   Input,
   Layout,
   Row,
+  Select,
   Space,
   Spin,
   Tag,
@@ -27,11 +27,20 @@ const { Search } = Input;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+interface Venue {
+  id: string;
+  name: string;
+  abbreviation: string | null;
+  rank?: string;
+  impactFactor?: number;
+  quartile?: string;
+}
+
 interface Paper {
   id: string;
   title: string;
   authors: string[];
-  venue: string;
+  venue: Venue | null;
   venueType: 'conference' | 'journal';
   year: number;
   field: string;
@@ -51,15 +60,6 @@ interface Filters {
   venueTypes: Array<'conference' | 'journal'>;
 }
 
-interface Venue {
-  id: string;
-  name: string;
-  abbreviation: string;
-  rank?: string;
-  impactFactor?: number;
-  quartile?: string;
-}
-
 interface Conference {
   id: string;
   name: string;
@@ -72,11 +72,6 @@ interface Journal {
   abbreviation: string;
   impactFactor?: number;
   quartile?: string;
-}
-
-interface Field {
-  id: string;
-  name: string;
 }
 
 async function countVenues() {
@@ -96,7 +91,7 @@ async function countVenues() {
   }
 }
 
-async function callFetchPapers(page: number = 1, size: number = 20, searchQuery: string = '', activeFilters: Filters) {
+async function fetchPapers(page: number = 1, size: number = 20, searchQuery: string = '', activeFilters: Filters) {
   try {
     const params: Record<string, string> = {
       page: page.toString(),
@@ -139,7 +134,7 @@ async function callFetchPapers(page: number = 1, size: number = 20, searchQuery:
   }
 }
 
-async function fetchConferences() {
+async function fetchConferences(page: number = 1, size: number = 20, searchQuery: string = '') {
   try {
     const response = await axios.get(`${API_URL}/api/conferences/`, {
       headers: {
@@ -192,7 +187,6 @@ export default function PapersPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [totalItems, setTotalItems] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [expandedFilters, setExpandedFilters] = useState<{
@@ -207,15 +201,19 @@ export default function PapersPage() {
     sidebar: true
   });
 
-  const [conferences, setConferences] = useState<Array<{ id: string, name: string, abbreviation: string, rank?: string }>>([]);
-  const [journals, setJournals] = useState<Array<{ id: string, name: string, abbreviation: string, impactFactor?: number, quartile?: string }>>([]);
+  const [conferences, setConferences] = useState<Array<Conference>>([]);
+  const [journals, setJournals] = useState<Array<Journal>>([]);
   const [conferenceSearch, setConferenceSearch] = useState('');
   const [journalSearch, setJournalSearch] = useState('');
   const [loadingVenues, setLoadingVenues] = useState(false);
   const [conferencesCount, setConferencesCount] = useState(0);
   const [journalsCount, setJournalsCount] = useState(0);
-  const [filteredConferences, setFilteredConferences] = useState<Array<{ id: string, name: string, abbreviation: string, rank?: string }>>([]);
-  const [topRankedConferences, setTopRankedConferences] = useState<Array<{ id: string, name: string, abbreviation: string, rank?: string }>>([]);
+  const [filteredConferences, setFilteredConferences] = useState<Array<Conference>>([]);
+  const [topRankedConferences, setTopRankedConferences] = useState<Array<Conference>>([]);
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2000 + 3 }, (_, i) => 2000 + i).reverse();
+
 
   useEffect(() => {
     const filtered = conferences.filter(conf =>
@@ -302,16 +300,15 @@ export default function PapersPage() {
     fetchVenues();
   }, []);
 
-  const fetchPapers = async (page: number = 1, size: number = pageSize, searchQuery: string = '', activeFilters: Filters) => {
+  const handleFetchPapers = async (page: number = 1, size: number = pageSize, searchQuery: string = '', activeFilters: Filters) => {
     try {
       setLoading(true);
       try {
-        const paperData = await callFetchPapers(page, size, searchQuery, activeFilters);
+        const paperData = await fetchPapers(page, size, searchQuery, activeFilters);
         console.log("Paper data:", paperData);
         setPapers(paperData.results);
         setFilteredPapers(paperData.results);
         setTotalItems(paperData.pagination ? paperData.pagination.totalItems : 0);
-        setTotalPages(paperData.pagination ? paperData.pagination.totalPages : 0);
         setCurrentPage(paperData.pagination ? paperData.pagination.page : 1);
         setError(null);
       } catch (err) {
@@ -341,7 +338,7 @@ export default function PapersPage() {
     let isMounted = true;
     const safelyFetchPapers = async () => {
       try {
-        await fetchPapers(1, pageSize, searchQuery, activeFilters);
+        await handleFetchPapers(1, pageSize, searchQuery, activeFilters);
       } catch (error) {
         console.error('Error in initial papers fetch:', error);
         if (!isMounted) return;
@@ -358,23 +355,8 @@ export default function PapersPage() {
     if (size !== pageSize) {
       setPageSize(size);
     }
-    fetchPapers(page, size, searchQuery, activeFilters);
+    handleFetchPapers(page, size, searchQuery, activeFilters);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const years = [2021, 2022, 2023, 2024, 2025];
-
-  const toggleYearFilter = (year: number) => {
-    setActiveFilters(prev => {
-      const newYears = prev.years.includes(year)
-        ? prev.years.filter(y => y !== year)
-        : [...prev.years, year];
-      return { ...prev, years: newYears };
-    });
-    setCurrentPage(1);
-    setTimeout(() => {
-      fetchPapers(1, pageSize, searchQuery, activeFilters);
-    }, 0);
   };
 
   const toggleVenueFilter = (venue: { id: string, name: string }) => {
@@ -386,7 +368,7 @@ export default function PapersPage() {
     });
     setCurrentPage(1);
     setTimeout(() => {
-      fetchPapers(1, pageSize, searchQuery, activeFilters);
+      handleFetchPapers(1, pageSize, searchQuery, activeFilters);
     }, 0);
   };
 
@@ -399,7 +381,7 @@ export default function PapersPage() {
     });
     setCurrentPage(1);
     setTimeout(() => {
-      fetchPapers(1, pageSize, searchQuery, activeFilters);
+      handleFetchPapers(1, pageSize, searchQuery, activeFilters);
     }, 0);
   };
 
@@ -412,14 +394,14 @@ export default function PapersPage() {
     });
     setSearchQuery('');
     setCurrentPage(1);
-    fetchPapers(1, pageSize, searchQuery, activeFilters);
+    handleFetchPapers(1, pageSize, searchQuery, activeFilters);
   };
 
   const handleSearch = (value?: string) => {
     const query = value !== undefined ? value : searchQuery;
     setSearchQuery(query);
     setCurrentPage(1);
-    fetchPapers(1, pageSize, searchQuery, activeFilters);
+    handleFetchPapers(1, pageSize, searchQuery, activeFilters);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -428,7 +410,7 @@ export default function PapersPage() {
 
     if (value === '') {
       setCurrentPage(1);
-      fetchPapers(1, pageSize, searchQuery, activeFilters);
+      handleFetchPapers(1, pageSize, searchQuery, activeFilters);
     }
   };
 
@@ -453,86 +435,6 @@ export default function PapersPage() {
 
     setFilteredPapers(result);
   }, [activeFilters, papers]);
-
-  const getPapersByType = (type: 'conference' | 'journal') => {
-    return filteredPapers.filter(paper => paper.venueType === type);
-  };
-
-  const getConferenceDisplay = (venueName: string) => {
-    const conference = conferences.find(conf =>
-      conf.name === venueName || conf.abbreviation === venueName
-    );
-
-    return conference?.abbreviation || venueName;
-  };
-
-  const getConferenceId = (venueName: string) => {
-    if (!venueName) {
-      console.log('Conference venueName is empty or undefined');
-      return undefined;
-    }
-
-    console.log('Searching for conference ID with venue name:', venueName);
-
-    const exactMatch = conferences.find(conf =>
-      conf.name === venueName || conf.abbreviation === venueName
-    );
-
-    if (exactMatch) {
-      console.log('Found exact conference match:', exactMatch.name, 'ID:', exactMatch.id);
-      return exactMatch.id;
-    }
-
-    const abbrevMatch = conferences.find(conf =>
-      conf.abbreviation &&
-      conf.abbreviation.trim() !== '' &&
-      venueName.includes(conf.abbreviation)
-    );
-
-    if (abbrevMatch) {
-      console.log('Found abbreviation match:', abbrevMatch.name, 'ID:', abbrevMatch.id, 'Abbr:', abbrevMatch.abbreviation);
-      return abbrevMatch.id;
-    }
-
-    const partialMatch = conferences.find(conf =>
-      (conf.name && venueName.includes(conf.name)) ||
-      (conf.name && conf.name.includes(venueName))
-    );
-
-    if (partialMatch) {
-      console.log('Found partial name match:', partialMatch.name, 'ID:', partialMatch.id);
-      return partialMatch.id;
-    }
-
-    const looseMatch = conferences.find(conf =>
-      (conf.abbreviation && conf.abbreviation.includes(venueName)) ||
-      venueName.toLowerCase().includes(conf.name.toLowerCase().substring(0, Math.min(10, conf.name.length)))
-    );
-
-    console.log('Conference match result for:', venueName, looseMatch
-      ? `ID: ${looseMatch.id}, Name: ${looseMatch.name}, Abbr: ${looseMatch.abbreviation}`
-      : 'Not found after all checks');
-
-    return looseMatch?.id;
-  };
-
-  const getJournalId = (venueName: string) => {
-    const exactMatch = journals.find(j =>
-      j.name === venueName || j.abbreviation === venueName
-    );
-
-    if (exactMatch) return exactMatch.id;
-
-    const partialMatch = journals.find(j =>
-      venueName.includes(j.name) ||
-      j.name.includes(venueName) ||
-      (j.abbreviation && venueName.includes(j.abbreviation)) ||
-      (j.abbreviation && j.abbreviation.includes(venueName))
-    );
-
-    console.log('Journal match for:', venueName, partialMatch ? `ID: ${partialMatch.id}` : 'Not found');
-    return partialMatch?.id;
-  };
 
   const navigateToConference = (id: string | undefined, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -563,7 +465,7 @@ export default function PapersPage() {
   };
 
   useEffect(() => {
-    fetchPapers(1, pageSize, searchQuery, activeFilters);
+    handleFetchPapers(1, pageSize, searchQuery, activeFilters);
   }, [activeFilters, pageSize]);
 
   const filtersContent = (
@@ -597,7 +499,11 @@ export default function PapersPage() {
           <Search
             placeholder="Search conferences..."
             value={conferenceSearch}
-            onChange={(e) => setConferenceSearch(e.target.value)}
+            onChange={(e) => {
+              setConferenceSearch(e.target.value);
+              setCurrentPage(1);
+              fetchConferences(1, pageSize, conferenceSearch);
+            }}
             size="small"
             prefix={<SearchOutlined />}
             allowClear
@@ -733,17 +639,35 @@ export default function PapersPage() {
 
       <>
         <Title level={5} style={{ marginBottom: 8 }}>Publication Year</Title>
-        <Space direction="vertical" size="small">
-          {years.map((year) => (
-            <Checkbox
-              key={year}
-              checked={activeFilters.years.includes(year)}
-              onChange={() => toggleYearFilter(year)}
-            >
-              {year}
-            </Checkbox>
-          ))}
-        </Space>
+        <Select
+          mode="multiple"
+          placeholder="Select publication years"
+          value={activeFilters.years}
+          onChange={(selectedYears) => {
+            setActiveFilters(prev => ({ ...prev, years: selectedYears }));
+            setCurrentPage(1);
+            setTimeout(() => {
+              handleFetchPapers(1, pageSize, searchQuery, { ...activeFilters, years: selectedYears });
+            }, 0);
+          }}
+          style={{ width: '100%' }}
+          size="small"
+          maxTagCount="responsive"
+          allowClear
+          showSearch
+          filterOption={(input, option) =>
+            option?.label?.toString().toLowerCase().includes(input.toLowerCase()) ?? false
+          }
+          options={years.map(year => ({
+            label: year.toString(),
+            value: year
+          }))}
+          styles={{
+            popup: {
+              root: { maxHeight: 200, overflow: 'auto' }
+            }
+          }}
+        />
       </>
     </Space>
   );
@@ -837,18 +761,24 @@ export default function PapersPage() {
                                 {paper.title}
                               </Title>
                               <Space direction="vertical" align="end">
-                                {getConferenceId(paper.venue) ? (
+                                {paper.venue ? (
                                   <Button
                                     type="primary"
                                     size="small"
                                     icon={<LinkOutlined />}
-                                    onClick={(e) => navigateToConference(getConferenceId(paper.venue), e)}
+                                    onClick={(e) => {
+                                      if (paper.venueType === 'conference') {
+                                        navigateToConference(paper.venue?.id, e);
+                                      } else {
+                                        navigateToJournal(paper.venue?.id, e);
+                                      }
+                                    }}
                                   >
-                                    {getConferenceDisplay(paper.venue)}
+                                    {paper.venue.abbreviation || paper.venue.name}
                                   </Button>
                                 ) : (
                                   <Tag color="blue">
-                                    {getConferenceDisplay(paper.venue)}
+                                    Venue: Unknown
                                   </Tag>
                                 )}
                                 <Text type="secondary" style={{ fontSize: '12px' }}>{paper.year}</Text>
@@ -903,33 +833,6 @@ export default function PapersPage() {
           </Col>
         </Row>
       </Space>
-
-      <Drawer
-        title={
-          <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-            <span>Filters</span>
-            {(activeFilters.years.length > 0 || activeFilters.venues.length > 0 || activeFilters.fields.length > 0 || activeFilters.venueTypes.length > 0) && (
-              <Button
-                type="link"
-                size="small"
-                icon={<ClearOutlined />}
-                onClick={() => {
-                  clearFilters();
-                }}
-              >
-                Clear all
-              </Button>
-            )}
-          </Space>
-        }
-        placement="left"
-        onClose={() => { }}
-        open={false}
-        width={320}
-        styles={{ body: { padding: '16px' } }}
-      >
-        {filtersContent}
-      </Drawer>
     </Layout>
   );
 } 
