@@ -134,9 +134,13 @@ async function fetchPapers(page: number = 1, size: number = 20, searchQuery: str
   }
 }
 
-async function fetchConferences(page: number = 1, size: number = 20, searchQuery: string = '') {
+async function fetchConferences() {
   try {
     const response = await axios.get(`${API_URL}/api/conferences/`, {
+      params: {
+        page: 1,
+        pageSize: 100
+      },
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -154,6 +158,10 @@ async function fetchConferences(page: number = 1, size: number = 20, searchQuery
 async function fetchJournals() {
   try {
     const response = await axios.get(`${API_URL}/api/journals/`, {
+      params: {
+        page: 1,
+        pageSize: 100
+      },
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
