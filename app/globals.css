@@ -32,3 +32,8 @@ header,
 footer {
   background-color: var(--primary);
 }
+
+/* Ensure Ant Design components work well with Tailwind */
+.ant-btn {
+  font-family: inherit;
+}

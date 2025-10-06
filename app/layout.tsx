@@ -4,6 +4,7 @@ import "./globals.css";
 import PrelineScript from "../components/PrelineScript";
 import { AuthProvider } from "../contexts/AuthContext";
 import Header from "../components/Header";
+import AntdRegistry from "../components/AntdRegistry";
 import Script from "next/script";
 
 const geistSans = Geist({
@@ -64,13 +65,13 @@ export default function RootLayout({
             `,
           }}
         />
-        <AuthProvider>
-          <Header />
-          <main>
-            {children}
-          </main>
-          <PrelineScript />
-        </AuthProvider>
+        <AntdRegistry>
+          <AuthProvider>
+            <Header />
+            <main>{children}</main>
+            <PrelineScript />
+          </AuthProvider>
+        </AntdRegistry>
       </body>
     </html>
   );
