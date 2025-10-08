@@ -1,17 +1,16 @@
 'use client';
 
-import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import NotificationBell from './NotificationBell';
-import LanguageSwitcher from './LanguageSwitcher';
 import { useTranslation } from '@/utils/useTranslation';
-import { Layout, Menu, Input, Button, Dropdown, Avatar, Space, Spin } from 'antd';
-import { SearchOutlined, UserOutlined, LogoutOutlined, ProfileOutlined } from '@ant-design/icons';
+import { LogoutOutlined, ProfileOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Button, Dropdown, Layout, Menu, Space } from 'antd';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import LanguageSwitcher from './LanguageSwitcher';
+import NotificationBell from './NotificationBell';
 
 const { Header: AntHeader } = Layout;
-const { Search } = Input;
 
 export default function Header() {
   const { user, loading, logout, checkAuth } = useAuth();
@@ -19,11 +18,8 @@ export default function Header() {
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const loginDropdownRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -40,15 +36,6 @@ export default function Header() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdownRef, loginDropdownRef]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery('');
-      setIsSearchFocused(false);
-    }
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -143,34 +130,8 @@ export default function Header() {
           theme="dark"
           overflowedIndicator={null}
         />
-
         <Space size="middle" align="center">
-          <Search
-            ref={searchInputRef}
-            placeholder={t('header.search')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onSearch={() => {
-              if (searchQuery.trim()) {
-                router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
-                setSearchQuery('');
-                setIsSearchFocused(false);
-              }
-            }}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            style={{
-              width: isSearchFocused || searchQuery ? 192 : 128,
-              transition: 'width 0.3s ease',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-            size="small"
-          />
-
-          {loading ? (
-            <Spin size="small" />
-          ) : user ? (
+          {user !== null ? (
             <>
               <NotificationBell />
               <Dropdown
@@ -222,14 +183,16 @@ export default function Header() {
               menu={{
                 items: [
                   {
-                    key: 'profile',
-                    label: <Link href="/profile">{t('header.viewProfile')}</Link>,
-                    icon: <ProfileOutlined />
-                  },
-                  {
                     key: 'login',
-                    label: <Link href="/login">{t('header.signOut')}</Link>,
-                    icon: <LogoutOutlined />
+                    label: (
+                      <div onClick={() => {
+                        console.log('Login clicked');
+                        router.push('/login');
+                      }}>
+                        <UserOutlined style={{ marginRight: 8 }} />
+                        {t('auth.login')}
+                      </div>
+                    )
                   }
                 ]
               }}
@@ -237,16 +200,15 @@ export default function Header() {
               open={loginDropdownOpen}
               onOpenChange={setLoginDropdownOpen}
             >
-              <div ref={loginDropdownRef} suppressHydrationWarning={true}>
-                <Button
-                  type="text"
-                  icon={<UserOutlined />}
-                  style={{
-                    color: 'white',
-                    border: 'none'
-                  }}
-                />
-              </div>
+              <Button
+                type="text"
+                icon={<UserOutlined />}
+                style={{
+                  color: 'white',
+                  border: 'none'
+                }}
+                onClick={() => setLoginDropdownOpen(!loginDropdownOpen)}
+              />
             </Dropdown>
           )}
           <LanguageSwitcher />
