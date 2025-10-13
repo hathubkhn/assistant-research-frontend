@@ -51,7 +51,7 @@ interface FetchJournalsParams {
 const fetchJournalsAPI = async (params: FetchJournalsParams): Promise<JournalsResponse> => {
   try {
     const queryParams = new URLSearchParams();
-    
+
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
     if (params.quartile) queryParams.append('quartile', params.quartile);
@@ -68,83 +68,83 @@ const fetchJournalsAPI = async (params: FetchJournalsParams): Promise<JournalsRe
 };
 
 interface Journal {
-    id: string;
-    name: string;
-    abbreviation: string;
-    impactFactor: number;
-    quartile: string;
-    publisher: string;
-    url: string;
-    papersCount: number;
+  id: string;
+  name: string;
+  abbreviation: string;
+  impactFactor: number;
+  quartile: string;
+  publisher: string;
+  url: string;
+  papersCount: number;
 }
 
 
 interface ImpactRange {
-    min: number;
-    max: number | null;
-    label: string;
+  min: number;
+  max: number | null;
+  label: string;
 }
 
 export default function JournalsPage() {
-    const { t } = useTranslation('journals');
-    const [journals, setJournals] = useState<Journal[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
+  const { t } = useTranslation('journals');
+  const [journals, setJournals] = useState<Journal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(20);
-    const [totalItems, setTotalItems] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(20);
+  const [totalItems, setTotalItems] = useState<number>(0);
 
-    const [quartileFilter, setQuartileFilter] = useState<string>('');
-    const [impactFilter, setImpactFilter] = useState<string>('');
+  const [quartileFilter, setQuartileFilter] = useState<string>('');
+  const [impactFilter, setImpactFilter] = useState<string>('');
 
-    const impactRanges: ImpactRange[] = [
-        { min: 0, max: 3, label: '0~3' },
-        { min: 3, max: 5, label: '3~5' },
-        { min: 5, max: 7, label: '5~7' },
-        { min: 7, max: null, label: '7+' }
-    ];
+  const impactRanges: ImpactRange[] = [
+    { min: 0, max: 3, label: '0~3' },
+    { min: 3, max: 5, label: '3~5' },
+    { min: 5, max: 7, label: '5~7' },
+    { min: 7, max: null, label: '7+' }
+  ];
 
-    const fetchJournals = async (page: number = 1, size: number = pageSize, quartileValue: string = quartileFilter, impactValue: string = impactFilter, searchValue: string = searchQuery) => {
-        try {
-            setLoading(true);
-      
+  const fetchJournals = async (page: number = 1, size: number = pageSize, quartileValue: string = quartileFilter, impactValue: string = impactFilter, searchValue: string = searchQuery) => {
+    try {
+      setLoading(true);
+
       const params: FetchJournalsParams = {
         page,
         pageSize: size,
       };
 
-            if (quartileValue) {
+      if (quartileValue) {
         params.quartile = quartileValue;
-            }
+      }
 
-            if (impactValue) {
-                const selectedRange = impactRanges.find(range => range.label === impactValue);
-                if (selectedRange) {
+      if (impactValue) {
+        const selectedRange = impactRanges.find(range => range.label === impactValue);
+        if (selectedRange) {
           params.impactMin = selectedRange.min;
-                    if (selectedRange.max !== null) {
+          if (selectedRange.max !== null) {
             params.impactMax = selectedRange.max;
-                    }
-                }
-            }
+          }
+        }
+      }
 
-            if (searchValue) {
+      if (searchValue) {
         params.search = searchValue;
-            }
+      }
 
       const data = await fetchJournalsAPI(params);
-                setJournals(data.results);
-                setTotalItems(data.pagination.totalItems);
-                setCurrentPage(data.pagination.page);
-        } catch (error) {
-            console.error('Error fetching journals:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+      setJournals(data.results);
+      setTotalItems(data.pagination.totalItems);
+      setCurrentPage(data.pagination.page);
+    } catch (error) {
+      console.error('Error fetching journals:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchJournals(1, pageSize, quartileFilter, impactFilter, searchQuery);
+  useEffect(() => {
+    fetchJournals(1, pageSize, quartileFilter, impactFilter, searchQuery);
   }, []);
 
 
@@ -154,50 +154,50 @@ export default function JournalsPage() {
       setPageSize(size);
     }
     fetchJournals(page, size, quartileFilter, impactFilter, searchQuery);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-    };
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
 
   const handleSearch = (value?: string) => {
     const searchValue = value !== undefined ? value : searchQuery;
     setSearchQuery(searchValue);
-        setCurrentPage(1);
+    setCurrentPage(1);
     fetchJournals(1, pageSize, quartileFilter, impactFilter, searchValue);
-    };
+  };
 
 
-    const handleQuartileFilterChange = (quartile: string) => {
+  const handleQuartileFilterChange = (quartile: string) => {
 
-        const newQuartileValue = quartileFilter === quartile ? '' : quartile;
-        setQuartileFilter(newQuartileValue);
-        setCurrentPage(1);
+    const newQuartileValue = quartileFilter === quartile ? '' : quartile;
+    setQuartileFilter(newQuartileValue);
+    setCurrentPage(1);
 
-        fetchJournals(1, pageSize, newQuartileValue, impactFilter, searchQuery);
-    };
-
-
-    const handleImpactFilterChange = (impact: string) => {
-        const newImpactValue = impactFilter === impact ? '' : impact;
-        setImpactFilter(newImpactValue);
-        setCurrentPage(1);
-
-        fetchJournals(1, pageSize, quartileFilter, newImpactValue, searchQuery);
-    };
+    fetchJournals(1, pageSize, newQuartileValue, impactFilter, searchQuery);
+  };
 
 
-    const clearFilters = () => {
-        setQuartileFilter('');
-        setImpactFilter('');
-        setSearchQuery('');
-        setCurrentPage(1);
-        fetchJournals(1, pageSize, '', '', '');
-    };
+  const handleImpactFilterChange = (impact: string) => {
+    const newImpactValue = impactFilter === impact ? '' : impact;
+    setImpactFilter(newImpactValue);
+    setCurrentPage(1);
 
-  // Define table columns for Ant Design Table
+    fetchJournals(1, pageSize, quartileFilter, newImpactValue, searchQuery);
+  };
+
+
+  const clearFilters = () => {
+    setQuartileFilter('');
+    setImpactFilter('');
+    setSearchQuery('');
+    setCurrentPage(1);
+    fetchJournals(1, pageSize, '', '', '');
+  };
+
+
   const columns = [
     {
       title: t('table.journal'),
@@ -267,7 +267,7 @@ export default function JournalsPage() {
     },
   ];
 
-    return (
+  return (
     <Content style={{ padding: '24px', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <Title level={2} style={{ marginBottom: 24 }}>
@@ -279,12 +279,12 @@ export default function JournalsPage() {
             <Row gutter={[16, 16]}>
               <Col xs={24} md={18}>
                 <Search
-                                placeholder={t('search.placeholder')}
+                  placeholder={t('search.placeholder')}
                   allowClear
                   enterButton={t('search.button')}
                   size="large"
-                                value={searchQuery}
-                                onChange={handleSearchChange}
+                  value={searchQuery}
+                  onChange={handleSearchChange}
                   onSearch={handleSearch}
                 />
               </Col>
@@ -294,43 +294,43 @@ export default function JournalsPage() {
                 {t('filters.quartile.title')}:
               </Text>
               <Space wrap>
-                        {['Q1', 'Q2', 'Q3', 'Q4'].map(quartile => (
+                {['Q1', 'Q2', 'Q3', 'Q4'].map(quartile => (
                   <Button
-                                key={quartile}
+                    key={quartile}
                     type={quartileFilter === quartile ? 'primary' : 'default'}
-                                onClick={() => handleQuartileFilterChange(quartile)}
+                    onClick={() => handleQuartileFilterChange(quartile)}
                     size="small"
-                            >
-                                {quartile}
+                  >
+                    {quartile}
                   </Button>
-                        ))}
+                ))}
               </Space>
-                </div>
+            </div>
 
             <div>
               <Text strong style={{ marginBottom: 8, display: 'block' }}>
                 {t('filters.impact.title')}:
               </Text>
               <Space wrap>
-                        {impactRanges.map(range => (
+                {impactRanges.map(range => (
                   <Button
-                                key={range.label}
+                    key={range.label}
                     type={impactFilter === range.label ? 'primary' : 'default'}
-                                onClick={() => handleImpactFilterChange(range.label)}
+                    onClick={() => handleImpactFilterChange(range.label)}
                     size="small"
-                            >
-                                {range.label}
+                  >
+                    {range.label}
                   </Button>
-                        ))}
+                ))}
                 {(quartileFilter || impactFilter || searchQuery) && (
                   <Button
                     icon={<ClearOutlined />}
-                                onClick={clearFilters}
+                    onClick={clearFilters}
                     size="small"
-                            >
-                                {t('filters.clearFilters')}
+                  >
+                    {t('filters.clearFilters')}
                   </Button>
-                        )}
+                )}
               </Space>
             </div>
           </Space>
@@ -346,12 +346,12 @@ export default function JournalsPage() {
                 <br />
                 <Button
                   type="primary"
-                        onClick={clearFilters}
+                  onClick={clearFilters}
                   style={{ marginTop: 16 }}
-                    >
-                        {t('filters.clearFilters')}
+                >
+                  {t('filters.clearFilters')}
                 </Button>
-                </div>
+              </div>
             ) : (
               <>
                 <Table
@@ -376,7 +376,7 @@ export default function JournalsPage() {
             )}
           </Spin>
         </Card>
-        </div>
+      </div>
     </Content>
-    );
+  );
 } 
