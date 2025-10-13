@@ -73,7 +73,7 @@ export const fetchProfile = async () => {
   }
 
   try {
-    const response = await fetchWithAuth(`${API_URL}/api/profile`);
+    const response = await fetchWithAuth(`${API_URL}/api/profile/`);
     return response.ok ? await response.json() : null;
   } catch (error) {
     console.error('Error fetching profile:', error);

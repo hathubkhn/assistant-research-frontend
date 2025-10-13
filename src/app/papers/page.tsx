@@ -430,7 +430,7 @@ export default function PapersPage() {
     }
 
     if (activeFilters.venues.length > 0) {
-      result = result.filter(paper => activeFilters.venues.includes(paper.venue));
+      result = result.filter(paper => activeFilters.venues.includes(paper.venue?.name || ''));
     }
 
     if (activeFilters.fields.length > 0) {
