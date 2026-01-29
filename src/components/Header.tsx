@@ -88,6 +88,7 @@ export default function Header() {
       key: 'my-library',
       label: <a href="#" onClick={handleMyLibraryClick}>{t('header.myLibrary')}</a>
     },
+    { key: '/chatbot', label: <Link href="/chatbot">Chat bot</Link> },
   ];
 
   return (
