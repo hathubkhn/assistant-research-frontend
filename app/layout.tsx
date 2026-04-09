@@ -1,25 +1,25 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import PrelineScript from "../components/PrelineScript";
-import { AuthProvider } from "../contexts/AuthContext";
-import Header from "../components/Header";
-import Script from "next/script";
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import './globals.css'
+import PrelineScript from '../components/PrelineScript'
+import { AuthProvider } from '../contexts/AuthContext'
+import Header from '../components/Header'
+import Script from 'next/script'
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+})
 
 export const metadata: Metadata = {
-  title: "Research Assistant",
-  description: "AI-powered research assistant for academic papers",
-};
+  title: 'Research Assistant',
+  description: 'AI-powered research assistant for academic papers',
+}
 
 export default function RootLayout({
   children,
@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
         suppressHydrationWarning={true}
@@ -73,5 +73,5 @@ export default function RootLayout({
         </AuthProvider>
       </body>
     </html>
-  );
+  )
 }
