@@ -44,7 +44,7 @@ const nextConfig = {
                 source: '/public/:path*',
                 destination: 'http://localhost:8000/api/:path*/',
             },
-        ];
+        ]
     },
     typescript: {
         // !! WARN !!
@@ -66,7 +66,7 @@ const nextConfig = {
                 ],
             },
         ]
-    }
-};
+    },
+}
 
-module.exports = nextConfig; 
+module.exports = nextConfig
