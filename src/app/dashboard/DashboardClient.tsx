@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslation } from "@/utils/useTranslation";
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/utils/useTranslation';
 import axios from 'axios';
 import {
   BarChart, Bar, XAxis,
   YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, Cell
-} from "recharts";
-import { Button, Card, Col, Row, Space, Typography, Select, DatePicker, Tag } from "antd";
+} from 'recharts';
+import { Button, Card, Col, Row, Space, Typography, Select, DatePicker, Tag } from 'antd';
 import dayjs from 'dayjs';
 
 const { Text, Paragraph } = Typography;
@@ -194,7 +194,7 @@ export default function Dashboard() {
         });
         setIsLoadingSummaryStats(false);
       } catch (error) {
-        console.error("Error processing summary stats:", error);
+        console.error('Error processing summary stats:', error);
         setIsLoadingSummaryStats(false);
       }
 
@@ -246,7 +246,7 @@ export default function Dashboard() {
         setPaperCountDetail(transformedData);
         setIsLoadingPaperChart(false);
       } catch (error) {
-        console.error("Error processing paper count data:", error);
+        console.error('Error processing paper count data:', error);
         setIsLoadingPaperChart(false);
       }
 
@@ -254,7 +254,7 @@ export default function Dashboard() {
         setPapersPerTask(data.papers_per_task || []);
         setIsLoadingTaskChart(false);
       } catch (error) {
-        console.error("Error processing tasks chart data:", error);
+        console.error('Error processing tasks chart data:', error);
         setIsLoadingTaskChart(false);
       }
 
@@ -262,7 +262,7 @@ export default function Dashboard() {
         setPapersPerDataset(data.papers_per_dataset || []);
         setIsLoadingDatasetChart(false);
       } catch (error) {
-        console.error("Error processing datasets chart data:", error);
+        console.error('Error processing datasets chart data:', error);
         setIsLoadingDatasetChart(false);
       }
 
@@ -270,7 +270,7 @@ export default function Dashboard() {
         setTrendingTasks(data.trending_tasks || []);
         setIsLoadingTrendingTasks(false);
       } catch (error) {
-        console.error("Error processing trending tasks:", error);
+        console.error('Error processing trending tasks:', error);
         setIsLoadingTrendingTasks(false);
       }
     } catch (error: any) {
@@ -377,11 +377,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className='container mx-auto p-4'>
       <Card title={t('dateFilters.title')} style={{ marginBottom: 24 }}>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} md={8}>
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction='vertical' style={{ width: '100%' }}>
               <Text>Date Range:</Text>
               <DatePicker.RangePicker
                 value={[
@@ -402,24 +402,24 @@ export default function Dashboard() {
             </Space>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction='vertical' style={{ width: '100%' }}>
               <Text strong>{t('dateFilters.viewBy')}</Text>
               <Select
                 value={period}
                 onChange={(value) => setPeriod(value)}
                 style={{ width: '100%' }}
               >
-                <Select.Option value="daily">{t('dateFilters.periods.daily')}</Select.Option>
-                <Select.Option value="monthly">{t('dateFilters.periods.monthly')}</Select.Option>
-                <Select.Option value="yearly">{t('dateFilters.periods.yearly')}</Select.Option>
+                <Select.Option value='daily'>{t('dateFilters.periods.daily')}</Select.Option>
+                <Select.Option value='monthly'>{t('dateFilters.periods.monthly')}</Select.Option>
+                <Select.Option value='yearly'>{t('dateFilters.periods.yearly')}</Select.Option>
               </Select>
             </Space>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction='vertical' style={{ width: '100%' }}>
               <div style={{ height: '22px' }}></div>
               <Button
-                type="primary"
+                type='primary'
                 onClick={() => {
                   setStartDate(getDefaultStartDate());
                   setEndDate(getDefaultEndDate());
@@ -465,18 +465,18 @@ export default function Dashboard() {
               </div>
             ) : (
               <div style={{ height: '320px' }}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width='100%' height='100%'>
                   <BarChart data={paperCountDetail}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray='3 3' />
                     <XAxis
-                      dataKey="periodDisplay"
+                      dataKey='periodDisplay'
                       tick={{ fontSize: 12, textAnchor: 'end', dy: 10 }}
                       height={60}
                     />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="count" fill="#d9363e" />
+                    <Bar dataKey='count' fill='#d9363e' />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -494,20 +494,20 @@ export default function Dashboard() {
               </div>
             ) : (
               <div style={{ height: '320px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={taskChartData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
+                <ResponsiveContainer width='100%' height='100%'>
+                  <BarChart data={taskChartData} layout='vertical'>
+                    <CartesianGrid strokeDasharray='3 3' />
                     <XAxis
-                      type="number"
+                      type='number'
                       allowDecimals={false}
                       domain={[0, 'dataMax']}
                       tickCount={6}
                       tick={{ fontSize: 12 }}
                     />
-                    <YAxis dataKey="name" type="category" width={150} />
+                    <YAxis dataKey='name' type='category' width={150} />
                     <Tooltip formatter={(value) => [Math.floor(Number(value)), t('charts.count')]} />
                     <Legend />
-                    <Bar dataKey="count" name={t('charts.count')}>
+                    <Bar dataKey='count' name={t('charts.count')}>
                       {taskChartData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % 5]} />
                       ))}
@@ -527,20 +527,20 @@ export default function Dashboard() {
               </div>
             ) : (
               <div style={{ height: '320px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={datasetChartData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
+                <ResponsiveContainer width='100%' height='100%'>
+                  <BarChart data={datasetChartData} layout='vertical'>
+                    <CartesianGrid strokeDasharray='3 3' />
                     <XAxis
-                      type="number"
+                      type='number'
                       allowDecimals={false}
                       domain={[0, 'dataMax']}
                       tickCount={6}
                       tick={{ fontSize: 12 }}
                     />
-                    <YAxis dataKey="name" type="category" width={150} />
+                    <YAxis dataKey='name' type='category' width={150} />
                     <Tooltip formatter={(value) => [Math.floor(Number(value)), t('charts.count')]} />
                     <Legend />
-                    <Bar dataKey="count" name={t('charts.count')}>
+                    <Bar dataKey='count' name={t('charts.count')}>
                       {datasetChartData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % 5]} />
                       ))}
@@ -557,9 +557,9 @@ export default function Dashboard() {
         <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
           <Col xs={24}>
             <Card title={t('charts.trendingTasks')}>
-              <Space wrap size="middle">
+              <Space wrap size='middle'>
                 {trendingTasks.map((task, index) => (
-                  <Tag key={task.id} color="volcano" style={{ fontSize: '14px', padding: '4px 12px' }}>
+                  <Tag key={task.id} color='volcano' style={{ fontSize: '14px', padding: '4px 12px' }}>
                     {task.name}
                   </Tag>
                 ))}
@@ -572,9 +572,9 @@ export default function Dashboard() {
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={8}>
           <Card title={t('papers.filterByTasks')}>
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction='vertical' style={{ width: '100%' }}>
               <Select
-                mode="multiple"
+                mode='multiple'
                 allowClear
                 showSearch
                 placeholder={t('papers.selectTasks') || 'Select tasks to filter...'}
@@ -595,13 +595,13 @@ export default function Dashboard() {
               />
 
               {selectedTasks.length > 0 && (
-                <Space size="small" style={{ width: '100%', justifyContent: 'space-between' }}>
-                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                <Space size='small' style={{ width: '100%', justifyContent: 'space-between' }}>
+                  <Text type='secondary' style={{ fontSize: '12px' }}>
                     {selectedTasks.length} task{selectedTasks.length !== 1 ? 's' : ''} selected
                   </Text>
                   <Button
-                    type="link"
-                    size="small"
+                    type='link'
+                    size='small'
                     onClick={() => setSelectedTasks([])}
                     style={{ padding: 0, fontSize: '12px', height: 'auto' }}
                   >
@@ -612,7 +612,7 @@ export default function Dashboard() {
 
               {isLoadingPapersList && selectedTasks.length > 0 && (
                 <div style={{ textAlign: 'center', padding: '8px 0' }}>
-                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                  <Text type='secondary' style={{ fontSize: '12px' }}>
                     Filtering papers...
                   </Text>
                 </div>
@@ -625,7 +625,7 @@ export default function Dashboard() {
           <Card title={`${t('papers.researchPapers')} (${filteredPapers.length})`}>
             {filteredPapers.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <Text type="secondary">
+                <Text type='secondary'>
                   {papers.length === 0
                     ? t('papers.noPapers')
                     : t('papers.noMatch')}
@@ -633,7 +633,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div>
-                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                <Space direction='vertical' size='middle' style={{ width: '100%' }}>
                   {currentPapers.map(paper => (
                     <Card
                       key={paper.id}
@@ -653,17 +653,17 @@ export default function Dashboard() {
                       >
                         {paper.title}
                       </Typography.Title>
-                      <Text type="secondary" style={{ fontSize: '14px' }}>
-                        {paper.authors.join(", ")} • {paper.publication} • {paper.year}
+                      <Text type='secondary' style={{ fontSize: '14px' }}>
+                        {paper.authors.join(', ')} • {paper.publication} • {paper.year}
                       </Text>
                       <Paragraph style={{ marginTop: '8px', color: '#333' }}>
                         {paper.abstract}
                       </Paragraph>
 
                       <div style={{ marginTop: '12px' }}>
-                        <Space wrap size="small">
+                        <Space wrap size='small'>
                           {paper.tasks?.map((task: any, idx: number) => (
-                            <Tag key={`${paper.id}-task-${idx}`} color="blue">
+                            <Tag key={`${paper.id}-task-${idx}`} color='blue'>
                               {task.name || task.title}
                             </Tag>
                           )) || []}
@@ -671,19 +671,19 @@ export default function Dashboard() {
                       </div>
 
                       <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text type="secondary" style={{ fontSize: '14px' }}>
+                        <Text type='secondary' style={{ fontSize: '14px' }}>
                           {t('papers.citations')}: {paper.citations}
                         </Text>
                         <Button
-                          type="link"
+                          type='link'
                           href={paper.downloadUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          target='_blank'
+                          rel='noopener noreferrer'
                           onClick={(e) => e.stopPropagation()}
                           style={{ padding: 0, fontSize: '14px' }}
                         >
-                          <svg style={{ width: '16px', height: '16px', marginRight: '4px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                          <svg style={{ width: '16px', height: '16px', marginRight: '4px' }} fill='none' stroke='currentColor' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'></path>
                           </svg>
                           {t('papers.download')}
                         </Button>
@@ -694,9 +694,9 @@ export default function Dashboard() {
 
                 {filteredPapers.length > 0 && (
                   <Card style={{ marginTop: '24px' }}>
-                    <Row justify="space-between" align="middle" gutter={[16, 16]}>
+                    <Row justify='space-between' align='middle' gutter={[16, 16]}>
                       <Col xs={24} md={12}>
-                        <Space align="center">
+                        <Space align='center'>
                           <Text>{t('pagination.show')}:</Text>
                           <Select
                             value={papersPerPage}
@@ -704,7 +704,7 @@ export default function Dashboard() {
                               setPapersPerPage(value);
                               setCurrentPage(1);
                             }}
-                            size="small"
+                            size='small'
                             style={{ width: 80 }}
                           >
                             <Select.Option value={5}>5</Select.Option>
@@ -728,19 +728,19 @@ export default function Dashboard() {
                             <Button
                               onClick={() => paginate(1)}
                               disabled={currentPage === 1}
-                              size="small"
+                              size='small'
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '20px', height: '20px' }}>
-                                <path fillRule="evenodd" d="M15.79 14.77a.75.75 0 01-1.06.02l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 111.04 1.08L11.832 10l3.938 3.71a.75.75 0 01.02 1.06zm-6 0a.75.75 0 01-1.06.02l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 111.04 1.08L5.832 10l3.938 3.71a.75.75 0 01.02 1.06z" clipRule="evenodd" />
+                              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor' style={{ width: '20px', height: '20px' }}>
+                                <path fillRule='evenodd' d='M15.79 14.77a.75.75 0 01-1.06.02l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 111.04 1.08L11.832 10l3.938 3.71a.75.75 0 01.02 1.06zm-6 0a.75.75 0 01-1.06.02l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 111.04 1.08L5.832 10l3.938 3.71a.75.75 0 01.02 1.06z' clipRule='evenodd' />
                               </svg>
                             </Button>
                             <Button
                               onClick={() => paginate(currentPage - 1)}
                               disabled={currentPage === 1}
-                              size="small"
+                              size='small'
                             >
-                              <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                              <svg style={{ width: '20px', height: '20px' }} xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor' aria-hidden='true'>
+                                <path fillRule='evenodd' d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z' clipRule='evenodd' />
                               </svg>
                             </Button>
 
@@ -763,7 +763,7 @@ export default function Dashboard() {
                                       key={pageToShow}
                                       onClick={() => paginate(pageToShow)}
                                       type={currentPage === pageToShow ? 'primary' : 'default'}
-                                      size="small"
+                                      size='small'
                                     >
                                       {pageToShow}
                                     </Button>
@@ -773,27 +773,27 @@ export default function Dashboard() {
                               })}
                             </div>
 
-                            <Button type="primary" size="small">
+                            <Button type='primary' size='small'>
                               {currentPage}
                             </Button>
 
                             <Button
                               onClick={() => paginate(currentPage + 1)}
                               disabled={currentPage === totalPages}
-                              size="small"
+                              size='small'
                             >
-                              <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                              <svg style={{ width: '20px', height: '20px' }} xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor' aria-hidden='true'>
+                                <path fillRule='evenodd' d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z' clipRule='evenodd' />
                               </svg>
                             </Button>
                             <Button
                               onClick={() => paginate(totalPages)}
                               disabled={currentPage === totalPages}
-                              size="small"
+                              size='small'
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '20px', height: '20px' }}>
-                                <path fillRule="evenodd" d="M10.21 14.77a.75.75 0 01.02-1.06L14.168 10 10.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                                <path fillRule="evenodd" d="M4.21 14.77a.75.75 0 01.02-1.06L8.168 10 4.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                              <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor' style={{ width: '20px', height: '20px' }}>
+                                <path fillRule='evenodd' d='M10.21 14.77a.75.75 0 01.02-1.06L14.168 10 10.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z' clipRule='evenodd' />
+                                <path fillRule='evenodd' d='M4.21 14.77a.75.75 0 01.02-1.06L8.168 10 4.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z' clipRule='evenodd' />
                               </svg>
                             </Button>
                           </Space>

@@ -18,14 +18,14 @@ import {
   Checkbox,
   Alert,
   Spin,
-  Divider
+  Divider,
 } from 'antd';
 import {
   UserOutlined,
   LockOutlined,
   GoogleOutlined,
   WindowsOutlined,
-  LoadingOutlined
+  LoadingOutlined,
 } from '@ant-design/icons';
 
 const { Title, Text, Paragraph } = Typography;
@@ -59,11 +59,13 @@ const fetchLoginLinksAPI = async (): Promise<LoginLinks> => {
   }
 };
 
-const loginWithCredentialsAPI = async (formData: LoginFormData): Promise<LoginResponse> => {
+const loginWithCredentialsAPI = async (
+  formData: LoginFormData,
+): Promise<LoginResponse> => {
   try {
     const response = await axios.post(`${API_URL}/api/token-login/`, {
       username: formData.username,
-      password: formData.password
+      password: formData.password,
     });
     return response.data;
   } catch (error: any) {
@@ -80,16 +82,18 @@ const loginWithCredentialsAPI = async (formData: LoginFormData): Promise<LoginRe
         throw new Error(errorData.detail);
       }
     }
-    throw new Error('Login failed. Please check your credentials and try again.');
+    throw new Error(
+      'Login failed. Please check your credentials and try again.',
+    );
   }
 };
 
 const testAuthTokenAPI = async (token: string): Promise<boolean> => {
   try {
-    const response = await axios.get(`${API_URL}/api/test/`, {
+    const response = await axios.get(`${API_URL}/api/profile/`, {
       headers: {
-        'Authorization': `Token ${token}`
-      }
+        Authorization: `Token ${token}`,
+      },
     });
     return response.status === 200;
   } catch (error) {
@@ -108,17 +112,19 @@ function LoginForm() {
   const [loginLinks, setLoginLinks] = useState<LoginLinks>({
     google_login: '',
     microsoft_login: '',
-    token_login: ''
+    token_login: '',
   });
 
   useEffect(() => {
     const errorMsg = searchParams.get('error');
     if (errorMsg) {
-      setError(errorMsg === 'authentication_failed'
-        ? 'Authentication failed. Please try again.'
-        : errorMsg === 'token_invalid'
-          ? 'Your session has expired. Please log in again.'
-          : 'An error occurred. Please try again.');
+      setError(
+        errorMsg === 'authentication_failed'
+          ? 'Authentication failed. Please try again.'
+          : errorMsg === 'token_invalid'
+            ? 'Your session has expired. Please log in again.'
+            : 'An error occurred. Please try again.',
+      );
 
       localStorage.removeItem('authToken');
     }
@@ -130,11 +136,14 @@ function LoginForm() {
         setLoginLinks(data);
       } catch (error: any) {
         console.error('Login fetch error:', error);
-        setError(error.message || 'An error occurred while setting up login options');
+        setError(
+          error.message || 'An error occurred while setting up login options',
+        );
         setLoginLinks({
           google_login: 'https://accounts.google.com/o/oauth2/auth',
-          microsoft_login: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
-          token_login: `${API_URL}/api/token-login/`
+          microsoft_login:
+            'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+          token_login: `${API_URL}/api/token-login/`,
         });
       } finally {
         setIsLoading(false);
@@ -154,13 +163,17 @@ function LoginForm() {
         response_type: 'code',
         scope: 'email profile',
         access_type: 'offline',
-        prompt: 'consent'
+        prompt: 'consent',
       });
-      console.log('Google OAuth URL:', `${googleOAuthUrl}?${params.toString()}`);
+      console.log(
+        'Google OAuth URL:',
+        `${googleOAuthUrl}?${params.toString()}`,
+      );
       console.log('Google redirect URI:', redirectUri);
       window.location.href = `${googleOAuthUrl}?${params.toString()}`;
     } else if (provider === 'microsoft') {
-      const msOAuthUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
+      const msOAuthUrl =
+        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
       const redirectUri = `${window.location.origin}/sso-callback/microsoft`;
       const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '';
 
@@ -172,7 +185,7 @@ function LoginForm() {
         redirect_uri: redirectUri,
         response_type: 'code',
         scope: 'openid profile email User.Read',
-        response_mode: 'query'
+        response_mode: 'query',
       });
       console.log('Microsoft OAuth URL:', `${msOAuthUrl}?${params.toString()}`);
       window.location.href = `${msOAuthUrl}?${params.toString()}`;
@@ -190,7 +203,10 @@ function LoginForm() {
       const data = await loginWithCredentialsAPI(values);
 
       console.log('Login successful, token received:', !!data.token);
-      console.log('Token value (first 10 chars):', data.token ? data.token.substring(0, 10) + '...' : 'No token');
+      console.log(
+        'Token value (first 10 chars):',
+        data.token ? data.token.substring(0, 10) + '...' : 'No token',
+      );
 
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
@@ -206,7 +222,7 @@ function LoginForm() {
       localStorage.setItem('authToken', cleanToken);
 
       console.log('Token stored in localStorage. Current storage state:', {
-        authToken: localStorage.getItem('authToken')
+        authToken: localStorage.getItem('authToken'),
       });
 
       const isTokenValid = await testAuthTokenAPI(cleanToken);
@@ -218,7 +234,10 @@ function LoginForm() {
 
       router.push('/profile');
     } catch (error: any) {
-      setError(error.message || 'An error occurred while trying to log in. Please try again later.');
+      setError(
+        error.message ||
+          'An error occurred while trying to log in. Please try again later.',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -228,9 +247,9 @@ function LoginForm() {
     <div style={{ width: '100%', maxWidth: 400, margin: '0 auto' }}>
       {error && (
         <Alert
-          message="Login Error"
+          message='Login Error'
           description={error}
-          type="error"
+          type='error'
           showIcon
           style={{ marginBottom: 24 }}
           closable
@@ -245,47 +264,55 @@ function LoginForm() {
 
         <Form
           form={form}
-          name="login"
+          name='login'
           onFinish={handleSubmit}
-          autoComplete="off"
-          layout="vertical"
-          size="large"
+          autoComplete='off'
+          layout='vertical'
+          size='large'
         >
           <Form.Item
             label={t('auth.email')}
-            name="username"
+            name='username'
             rules={[
               { required: true, message: 'Please input your email!' },
-              { type: 'email', message: 'Please enter a valid email!' }
+              { type: 'email', message: 'Please enter a valid email!' },
             ]}
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="john@example.com"
-              autoComplete="email"
+              placeholder='john@example.com'
+              autoComplete='email'
             />
           </Form.Item>
 
           <Form.Item
             label={t('auth.password')}
-            name="password"
+            name='password'
             rules={[{ required: true, message: 'Please input your password!' }]}
           >
             <Input.Password
               prefix={<LockOutlined />}
-              placeholder="********"
-              autoComplete="current-password"
+              placeholder='********'
+              autoComplete='current-password'
             />
           </Form.Item>
 
-          <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+          <Row
+            justify='space-between'
+            align='middle'
+            style={{ marginBottom: 24 }}
+          >
             <Col>
-              <Form.Item name="remember" valuePropName="checked" style={{ margin: 0 }}>
+              <Form.Item
+                name='remember'
+                valuePropName='checked'
+                style={{ margin: 0 }}
+              >
                 <Checkbox>{t('auth.rememberMe')}</Checkbox>
               </Form.Item>
             </Col>
             <Col>
-              <Button type="link" style={{ padding: 0 }}>
+              <Button type='link' style={{ padding: 0 }}>
                 {t('auth.forgotPassword')}
               </Button>
             </Col>
@@ -293,8 +320,8 @@ function LoginForm() {
 
           <Form.Item style={{ marginBottom: 24 }}>
             <Button
-              type="primary"
-              htmlType="submit"
+              type='primary'
+              htmlType='submit'
               loading={isLoading}
               style={{ width: '100%', height: 48 }}
             >
@@ -303,10 +330,10 @@ function LoginForm() {
           </Form.Item>
 
           <Divider style={{ margin: '24px 0' }}>
-            <Text type="secondary">{t('common.or')}</Text>
+            <Text type='secondary'>{t('common.or')}</Text>
           </Divider>
 
-          <Space direction="vertical" style={{ width: '100%' }} size="middle">
+          <Space direction='vertical' style={{ width: '100%' }} size='middle'>
             <Button
               icon={<GoogleOutlined />}
               onClick={() => handleSSOLogin('google')}
@@ -328,10 +355,10 @@ function LoginForm() {
       </Card>
 
       <div style={{ textAlign: 'center', marginTop: 24 }}>
-        <Text type="secondary">
+        <Text type='secondary'>
           {t('auth.noAccount')}{' '}
-          <Link href="/signup">
-            <Button type="link" style={{ padding: 0 }}>
+          <Link href='/signup'>
+            <Button type='link' style={{ padding: 0 }}>
               {t('auth.signupButton')}
             </Button>
           </Link>
@@ -343,8 +370,21 @@ function LoginForm() {
 
 export default function Login() {
   return (
-    <Content style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', padding: '48px 24px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+    <Content
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+        padding: '48px 24px',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <div style={{ marginBottom: 32, textAlign: 'center' }}>
           <Title level={1} style={{ margin: 0, color: '#1890ff' }}>
             Research Assistant
@@ -352,11 +392,20 @@ export default function Login() {
         </div>
 
         <div style={{ width: '100%', maxWidth: 400 }}>
-          <Suspense fallback={
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-              <Spin size="large" />
-            </div>
-          }>
+          <Suspense
+            fallback={
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: 200,
+                }}
+              >
+                <Spin size='large' />
+              </div>
+            }
+          >
             <LoginForm />
           </Suspense>
         </div>

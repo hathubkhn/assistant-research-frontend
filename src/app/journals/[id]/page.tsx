@@ -71,18 +71,18 @@ export default function JournalDetailPage() {
 
     if (loading) {
         return (
-            <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+            <div className='container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]'>
+                <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600'></div>
             </div>
         );
     }
 
     if (!journal) {
         return (
-            <div className="container mx-auto px-4 py-8">
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            <div className='container mx-auto px-4 py-8'>
+                <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md'>
                     <p>Journal not found. Please check the URL and try again.</p>
-                    <Link href="/journals" className="mt-2 inline-block text-blue-600 hover:text-blue-800">
+                    <Link href='/journals' className='mt-2 inline-block text-blue-600 hover:text-blue-800'>
                         Go back to Journals
                     </Link>
                 </div>
@@ -109,49 +109,49 @@ export default function JournalDetailPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className='container mx-auto px-4 py-8'>
             {/* Back button */}
-            <div className="mb-6">
-                <Link href="/journals" className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <div className='mb-6'>
+                <Link href='/journals' className='text-blue-600 hover:text-blue-800 flex items-center gap-1'>
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
                     </svg>
                     Back to Journals
                 </Link>
             </div>
 
             {/* Journal header */}
-            <div className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
-                <div className="p-6">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className='bg-white shadow-md rounded-lg overflow-hidden mb-8'>
+                <div className='p-6'>
+                    <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6'>
                         <div>
-                            <h1 className="text-3xl font-bold text-blue-900">{journal.name}</h1>
-                            <p className="text-gray-500 text-lg">{journal.abbreviation}</p>
+                            <h1 className='text-3xl font-bold text-blue-900'>{journal.name}</h1>
+                            <p className='text-gray-500 text-lg'>{journal.abbreviation}</p>
                         </div>
                         {journal.url && (
                             <a
                                 href={journal.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2'
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                                    <path d='M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z' />
+                                    <path d='M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z' />
                                 </svg>
                                 Visit Journal
                             </a>
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-gray-50 p-4 rounded-md">
-                            <h3 className="text-sm font-medium text-gray-500 uppercase">Impact Factor</h3>
-                            <p className="mt-1 font-medium text-lg">{journal.impactFactor ? journal.impactFactor.toFixed(2) : 'N/A'}</p>
+                    <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
+                        <div className='bg-gray-50 p-4 rounded-md'>
+                            <h3 className='text-sm font-medium text-gray-500 uppercase'>Impact Factor</h3>
+                            <p className='mt-1 font-medium text-lg'>{journal.impactFactor ? journal.impactFactor.toFixed(2) : 'N/A'}</p>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-md">
-                            <h3 className="text-sm font-medium text-gray-500 uppercase">Quartile</h3>
-                            <p className="mt-1 font-medium">
+                        <div className='bg-gray-50 p-4 rounded-md'>
+                            <h3 className='text-sm font-medium text-gray-500 uppercase'>Quartile</h3>
+                            <p className='mt-1 font-medium'>
                                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${journal.quartile === 'Q1' ? 'bg-green-100 text-green-800' :
                                         journal.quartile === 'Q2' ? 'bg-blue-100 text-blue-800' :
                                             journal.quartile === 'Q3' ? 'bg-yellow-100 text-yellow-800' :
@@ -162,42 +162,42 @@ export default function JournalDetailPage() {
                                 </span>
                             </p>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-md">
-                            <h3 className="text-sm font-medium text-gray-500 uppercase">Publisher</h3>
-                            <p className="mt-1 font-medium">{journal.publisher || 'N/A'}</p>
+                        <div className='bg-gray-50 p-4 rounded-md'>
+                            <h3 className='text-sm font-medium text-gray-500 uppercase'>Publisher</h3>
+                            <p className='mt-1 font-medium'>{journal.publisher || 'N/A'}</p>
                         </div>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-md mb-6">
-                        <h3 className="text-sm font-medium text-gray-500 uppercase">Total Papers</h3>
-                        <p className="mt-1 font-medium text-lg">{journal.papersCount}</p>
+                    <div className='bg-gray-50 p-4 rounded-md mb-6'>
+                        <h3 className='text-sm font-medium text-gray-500 uppercase'>Total Papers</h3>
+                        <p className='mt-1 font-medium text-lg'>{journal.papersCount}</p>
                     </div>
                 </div>
             </div>
 
             {/* Recent papers */}
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                <div className="p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold text-gray-800">Recent Papers</h2>
+            <div className='bg-white shadow-md rounded-lg overflow-hidden'>
+                <div className='p-6'>
+                    <div className='flex justify-between items-center mb-4'>
+                        <h2 className='text-xl font-bold text-gray-800'>Recent Papers</h2>
                         <button
                             onClick={handleViewMorePapers}
-                            className="text-blue-600 hover:text-blue-800"
+                            className='text-blue-600 hover:text-blue-800'
                         >
                             View All
                         </button>
                     </div>
 
                     {papers.length === 0 ? (
-                        <p className="text-gray-600">No papers found for this journal.</p>
+                        <p className='text-gray-600'>No papers found for this journal.</p>
                     ) : (
-                        <div className="space-y-4">
+                        <div className='space-y-4'>
                             {papers.map((paper) => (
-                                <div key={paper.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-                                    <Link href={`/papers/${paper.id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
-                                        <h3 className="font-medium">{paper.title}</h3>
+                                <div key={paper.id} className='border-b border-gray-200 pb-4 last:border-b-0 last:pb-0'>
+                                    <Link href={`/papers/${paper.id}`} className='text-blue-600 hover:text-blue-800 hover:underline'>
+                                        <h3 className='font-medium'>{paper.title}</h3>
                                     </Link>
-                                    <div className="text-sm text-gray-500 mt-1 flex flex-wrap gap-x-2">
+                                    <div className='text-sm text-gray-500 mt-1 flex flex-wrap gap-x-2'>
                                         <span>{formatAuthors(paper.authors)}</span>
                                         <span>•</span>
                                         <span>{paper.year}</span>

@@ -479,7 +479,7 @@ export default function DatasetsPage() {
               <Search
                 placeholder={t('searchForDatasets')}
                 allowClear
-                size="large"
+                size='large'
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -496,7 +496,7 @@ export default function DatasetsPage() {
               />
             </Col>
             <Col xs={24} md={12}>
-              <Space size="middle" style={{ width: '100%', justifyContent: 'flex-end' }}>
+              <Space size='middle' style={{ width: '100%', justifyContent: 'flex-end' }}>
                 <Segmented
                   value={currentView}
                   onChange={(value) => setCurrentView(value as 'grid' | 'list')}
@@ -528,8 +528,8 @@ export default function DatasetsPage() {
                   <Title level={4} style={{ margin: 0 }}>{t('filters')}</Title>
                   {(activeFilters.categories.length > 0 || activeFilters.tasks.length > 0 || activeFilters.languages.length > 0) && (
                     <Button
-                      type="link"
-                      size="small"
+                      type='link'
+                      size='small'
                       icon={<ClearOutlined />}
                       onClick={clearFilters}
                     >
@@ -540,7 +540,7 @@ export default function DatasetsPage() {
 
                 <div style={{ marginBottom: 24 }}>
                   <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByModality')}</Text>
-                  <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                  <Space direction='vertical' size='small' style={{ width: '100%' }}>
                     {categories.map((category) => (
                       <Checkbox
                         key={category}
@@ -561,7 +561,7 @@ export default function DatasetsPage() {
                 <div style={{ marginBottom: 24 }}>
                   <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByTask')}</Text>
                   <div style={{ maxHeight: 240, overflowY: 'auto' }}>
-                    <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                    <Space direction='vertical' size='small' style={{ width: '100%' }}>
                       {tasks.map((task) => (
                         <Checkbox
                           key={task}
@@ -585,7 +585,7 @@ export default function DatasetsPage() {
 
                 <div>
                   <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByLanguage')}</Text>
-                  <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                  <Space direction='vertical' size='small' style={{ width: '100%' }}>
                     {languages.map((language) => (
                       <Checkbox
                         key={language}
@@ -608,12 +608,12 @@ export default function DatasetsPage() {
               <Spin spinning={loading}>
                 {sortedDatasets.length === 0 && !loading ? (
                   <div style={{ textAlign: 'center', padding: '48px 0', marginBottom: 24, marginTop: 24 }}>
-                    <Text type="secondary" style={{ fontSize: 16 }}>
+                    <Text type='secondary' style={{ fontSize: 16 }}>
                       {t('noDatasetsFoundMatchingCriteria')}
                     </Text>
                   </div>
                 ) : currentView === 'list' ? (
-                  <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                  <Space direction='vertical' size='middle' style={{ width: '100%' }}>
                     {sortedDatasets.map((dataset) => (
                       <Card key={dataset.id} hoverable>
                         <Row gutter={16}>
@@ -641,7 +641,7 @@ export default function DatasetsPage() {
                                   <Title level={4} style={{ margin: 0, color: '#d32f2f' }}>
                                     {dataset.name}
                                   </Title>
-                                  <Text type="secondary">{dataset.abbreviation}</Text>
+                                  <Text type='secondary'>{dataset.abbreviation}</Text>
                                 </Link>
                               </div>
                               <InterestingDatasetButton
@@ -655,7 +655,7 @@ export default function DatasetsPage() {
                               />
                             </div>
                             <div style={{ margin: '8px 0' }}>
-                              <Text type="secondary">
+                              <Text type='secondary'>
                                 {dataset.paperCount} papers • {getBenchmarkCount(dataset.benchmarks)} benchmarks • {dataset.language}
                               </Text>
                             </div>
@@ -664,16 +664,16 @@ export default function DatasetsPage() {
                               <Text strong>{t('tasks')}: </Text>
                               <Space wrap>
                                 {parseTasksArray(dataset.tasks).map((task, index) => (
-                                  <Tag key={index} color="red">{task}</Tag>
+                                  <Tag key={index} color='red'>{task}</Tag>
                                 ))}
                               </Space>
                             </div>
                             <Button
-                              type="link"
+                              type='link'
                               icon={<DownloadOutlined />}
                               href={dataset.downloadUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              target='_blank'
+                              rel='noopener noreferrer'
                               style={{ padding: 0, color: '#d32f2f' }}
                             >
                               {t('download')}
@@ -713,7 +713,7 @@ export default function DatasetsPage() {
                                 <Title level={5} style={{ margin: 0, color: '#d32f2f' }}>
                                   {dataset.name}
                                 </Title>
-                                <Text type="secondary" style={{ fontSize: 12 }}>{dataset.abbreviation}</Text>
+                                <Text type='secondary' style={{ fontSize: 12 }}>{dataset.abbreviation}</Text>
                               </Link>
                             </div>
                             <InterestingDatasetButton
@@ -730,14 +730,14 @@ export default function DatasetsPage() {
                             {dataset.description}
                           </Paragraph>
                           <div style={{ fontSize: 11, color: '#666', marginBottom: 8 }}>
-                            <Text type="secondary">
+                            <Text type='secondary'>
                               {t('papers')}: {dataset.paperCount} • {t('benchmarks')}: {getBenchmarkCount(dataset.benchmarks)} • {t('language')}: {dataset.language}
                             </Text>
                           </div>
                           <div style={{ marginBottom: 8 }}>
-                            <Space wrap size="small">
+                            <Space wrap size='small'>
                               {parseTasksArray(dataset.tasks).slice(0, 3).map((task, index) => (
-                                <Tag key={index} color="red" style={{ fontSize: 10 }}>{task}</Tag>
+                                <Tag key={index} color='red' style={{ fontSize: 10 }}>{task}</Tag>
                               ))}
                               {parseTasksArray(dataset.tasks).length > 3 && (
                                 <Tag style={{ fontSize: 10 }}>+{parseTasksArray(dataset.tasks).length - 3}</Tag>
@@ -756,7 +756,7 @@ export default function DatasetsPage() {
                     total={totalPages * pageSize}
                     pageSize={pageSize}
                     onChange={handlePageChange}
-                    itemName="datasets"
+                    itemName='datasets'
                     loading={loading}
                   />
                 </div>

@@ -19,7 +19,7 @@ import {
   Spin,
   Divider,
   Select,
-  Steps
+  Steps,
 } from 'antd';
 import {
   UserOutlined,
@@ -29,7 +29,7 @@ import {
   BookOutlined,
   TeamOutlined,
   LinkOutlined,
-  ExperimentOutlined
+  ExperimentOutlined,
 } from '@ant-design/icons';
 
 const { Title, Text, Paragraph } = Typography;
@@ -59,7 +59,7 @@ const RESEARCH_AREAS = [
   'Virtual Reality',
   'Augmented Reality',
   'Mobile Computing',
-  'Embedded Systems'
+  'Embedded Systems',
 ];
 
 interface ProfileData {
@@ -103,11 +103,13 @@ interface RegisterResponse {
 }
 
 // API Functions
-const fetchUserProfileAPI = async (token: string): Promise<UserProfileResponse> => {
+const fetchUserProfileAPI = async (
+  token: string,
+): Promise<UserProfileResponse> => {
   try {
     const response = await axios.get(`${API_URL}/api/profile/`, {
       headers: {
-        'Authorization': `Token ${token}`,
+        Authorization: `Token ${token}`,
       },
     });
     return response.data;
@@ -120,10 +122,10 @@ const fetchUserProfileAPI = async (token: string): Promise<UserProfileResponse> 
 const updateProfileAPI = async (profileData: ProfileData): Promise<void> => {
   try {
     const token = localStorage.getItem('authToken');
-    await axios.put(`${API_URL}/api/profile/update/`, profileData, {
+    await axios.patch(`${API_URL}/api/profile/update/`, profileData, {
       headers: {
-        'Authorization': `Token ${token}`
-      }
+        Authorization: `Token ${token}`,
+      },
     });
   } catch (error: any) {
     console.error('Profile update error:', error);
@@ -152,12 +154,15 @@ const registerUserAPI = async (userData: any): Promise<RegisterResponse> => {
   }
 };
 
-const updateProfileAfterRegisterAPI = async (token: string, profileData: any): Promise<void> => {
+const updateProfileAfterRegisterAPI = async (
+  token: string,
+  profileData: any,
+): Promise<void> => {
   try {
-    await axios.put(`${API_URL}/api/profile/`, profileData, {
+    await axios.patch(`${API_URL}/api/profile/update/`, profileData, {
       headers: {
-        'Authorization': `Token ${token}`,
-      }
+        Authorization: `Token ${token}`,
+      },
     });
   } catch (error: any) {
     console.error('Profile update after registration failed:', error);
@@ -185,7 +190,9 @@ function SignupForm() {
   const isNewUser = searchParams.get('is_new') === 'True';
 
   const [isTokenFlow, setIsTokenFlow] = useState(false);
-  const [selectedResearchAreas, setSelectedResearchAreas] = useState<string[]>([]);
+  const [selectedResearchAreas, setSelectedResearchAreas] = useState<string[]>(
+    [],
+  );
 
   useEffect(() => {
     if (token) {
@@ -219,14 +226,16 @@ function SignupForm() {
     try {
       setIsLoading(true);
       setError('');
-      
+
       await updateProfileAPI(values);
       setSuccess(true);
       setTimeout(() => {
         router.push('/dashboard');
       }, 1500);
     } catch (error: any) {
-      setError(error.message || 'An error occurred while updating your profile');
+      setError(
+        error.message || 'An error occurred while updating your profile',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -248,7 +257,9 @@ function SignupForm() {
 
       const keywords = [
         ...selectedResearchAreas,
-        ...(values.custom_keywords ? values.custom_keywords.split(',').map((k: string) => k.trim()) : [])
+        ...(values.custom_keywords
+          ? values.custom_keywords.split(',').map((k: string) => k.trim())
+          : []),
       ].join(', ');
 
       const userData = {
@@ -263,7 +274,7 @@ function SignupForm() {
         position: values.position,
         keywords: keywords,
         google_scholar_link: values.google_scholar_link || '',
-        bio: values.bio || ''
+        bio: values.bio || '',
       };
 
       console.log('Sending user data to API:', userData);
@@ -282,12 +293,12 @@ function SignupForm() {
             position: userData.position,
             keywords: keywords,
             google_scholar_link: userData.google_scholar_link,
-            is_profile_completed: true
+            is_profile_completed: true,
           };
 
           await updateProfileAfterRegisterAPI(registerData.token, profileData);
           console.log('Profile update successful');
-          
+
           setSuccess(true);
           setTimeout(() => {
             router.push('/profile');
@@ -301,26 +312,39 @@ function SignupForm() {
         }
       } catch (registrationError: any) {
         // Handle field-specific errors
-        if (typeof registrationError === 'object' && registrationError.username) {
-          setUsernameError(Array.isArray(registrationError.username) 
-            ? registrationError.username[0] 
-            : registrationError.username);
+        if (
+          typeof registrationError === 'object' &&
+          registrationError.username
+        ) {
+          setUsernameError(
+            Array.isArray(registrationError.username)
+              ? registrationError.username[0]
+              : registrationError.username,
+          );
         }
         if (typeof registrationError === 'object' && registrationError.email) {
-          setEmailError(Array.isArray(registrationError.email) 
-            ? registrationError.email[0] 
-            : registrationError.email);
+          setEmailError(
+            Array.isArray(registrationError.email)
+              ? registrationError.email[0]
+              : registrationError.email,
+          );
         }
 
         // Handle general errors
         if (registrationError instanceof Error) {
-          if (!registrationError.message.includes('username') && !registrationError.message.includes('email')) {
+          if (
+            !registrationError.message.includes('username') &&
+            !registrationError.message.includes('email')
+          ) {
             setError(registrationError.message);
           }
         } else if (typeof registrationError === 'object') {
           const otherErrors = Object.entries(registrationError)
             .filter(([field]) => field !== 'username' && field !== 'email')
-            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
+            .map(
+              ([field, errors]) =>
+                `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`,
+            )
             .join('; ');
 
           if (otherErrors) {
@@ -330,7 +354,10 @@ function SignupForm() {
       }
     } catch (error: any) {
       console.error('Registration error:', error);
-      setError(error.message || 'An error occurred during registration. Please try again later.');
+      setError(
+        error.message ||
+          'An error occurred during registration. Please try again later.',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -342,8 +369,21 @@ function SignupForm() {
 
   if (isTokenFlow) {
     return (
-      <Content style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', padding: '48px 24px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+      <Content
+        style={{
+          minHeight: '100vh',
+          backgroundColor: '#f5f5f5',
+          padding: '48px 24px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <Card style={{ width: '100%', maxWidth: 600, padding: '32px 24px' }}>
             <Title level={2} style={{ textAlign: 'center', marginBottom: 32 }}>
               {isNewUser ? 'Complete Your Profile' : 'Update Your Profile'}
@@ -352,7 +392,7 @@ function SignupForm() {
             {provider && (
               <Alert
                 message={`Successfully signed in with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`}
-                type="success"
+                type='success'
                 style={{ marginBottom: 24 }}
                 showIcon
               />
@@ -360,9 +400,9 @@ function SignupForm() {
 
             {error && (
               <Alert
-                message="Update Error"
+                message='Update Error'
                 description={error}
-                type="error"
+                type='error'
                 showIcon
                 style={{ marginBottom: 24 }}
                 closable
@@ -372,8 +412,8 @@ function SignupForm() {
 
             {success && (
               <Alert
-                message="Profile updated successfully! Redirecting..."
-                type="success"
+                message='Profile updated successfully! Redirecting...'
+                type='success'
                 showIcon
                 style={{ marginBottom: 24 }}
               />
@@ -381,67 +421,92 @@ function SignupForm() {
 
             <Form
               form={profileForm}
-              layout="vertical"
+              layout='vertical'
               onFinish={handleProfileSubmit}
-              size="large"
+              size='large'
             >
               <Form.Item
-                label="Full Name"
-                name="full_name"
-                rules={[{ required: true, message: 'Please input your full name!' }]}
+                label='Full Name'
+                name='full_name'
+                rules={[
+                  { required: true, message: 'Please input your full name!' },
+                ]}
               >
-                <Input prefix={<UserOutlined />} placeholder="John Doe" />
+                <Input prefix={<UserOutlined />} placeholder='John Doe' />
               </Form.Item>
 
               <Form.Item
-                label="Faculty/Institute"
-                name="faculty_institute"
-                rules={[{ required: true, message: 'Please input your faculty/institute!' }]}
+                label='Faculty/Institute'
+                name='faculty_institute'
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input your faculty/institute!',
+                  },
+                ]}
               >
-                <Input prefix={<BankOutlined />} placeholder="Computer Science Faculty" />
-              </Form.Item>
-
-              <Form.Item
-                label="School"
-                name="school"
-                rules={[{ required: true, message: 'Please input your school!' }]}
-              >
-                <Input prefix={<BookOutlined />} placeholder="University Name" />
-              </Form.Item>
-
-              <Form.Item
-                label="Position"
-                name="position"
-                rules={[{ required: true, message: 'Please input your position!' }]}
-              >
-                <Input prefix={<TeamOutlined />} placeholder="Professor, PhD Student, etc." />
-              </Form.Item>
-
-              <Form.Item
-                label="Keywords"
-                name="keywords"
-                rules={[{ required: true, message: 'Please input your research keywords!' }]}
-              >
-                <TextArea
-                  rows={3}
-                  placeholder="Enter keywords separated by commas"
+                <Input
+                  prefix={<BankOutlined />}
+                  placeholder='Computer Science Faculty'
                 />
               </Form.Item>
 
               <Form.Item
-                label="Google Scholar Link (Optional)"
-                name="google_scholar_link"
+                label='School'
+                name='school'
+                rules={[
+                  { required: true, message: 'Please input your school!' },
+                ]}
+              >
+                <Input
+                  prefix={<BookOutlined />}
+                  placeholder='University Name'
+                />
+              </Form.Item>
+
+              <Form.Item
+                label='Position'
+                name='position'
+                rules={[
+                  { required: true, message: 'Please input your position!' },
+                ]}
+              >
+                <Input
+                  prefix={<TeamOutlined />}
+                  placeholder='Professor, PhD Student, etc.'
+                />
+              </Form.Item>
+
+              <Form.Item
+                label='Keywords'
+                name='keywords'
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input your research keywords!',
+                  },
+                ]}
+              >
+                <TextArea
+                  rows={3}
+                  placeholder='Enter keywords separated by commas'
+                />
+              </Form.Item>
+
+              <Form.Item
+                label='Google Scholar Link (Optional)'
+                name='google_scholar_link'
               >
                 <Input
                   prefix={<LinkOutlined />}
-                  placeholder="https://scholar.google.com/citations?user=..."
+                  placeholder='https://scholar.google.com/citations?user=...'
                 />
               </Form.Item>
 
               <Form.Item style={{ marginTop: 32 }}>
                 <Button
-                  type="primary"
-                  htmlType="submit"
+                  type='primary'
+                  htmlType='submit'
                   loading={isLoading}
                   style={{ width: '100%', height: 48 }}
                 >
@@ -456,8 +521,21 @@ function SignupForm() {
   }
 
   return (
-    <Content style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', padding: '24px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+    <Content
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+        padding: '24px',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Card style={{ width: '100%', maxWidth: 800, padding: '32px 24px' }}>
           <Title level={2} style={{ textAlign: 'center', marginBottom: 32 }}>
             Create an Account
@@ -465,9 +543,9 @@ function SignupForm() {
 
           {error && (
             <Alert
-              message="Registration Error"
+              message='Registration Error'
               description={error}
-              type="error"
+              type='error'
               showIcon
               style={{ marginBottom: 24 }}
               closable
@@ -477,8 +555,8 @@ function SignupForm() {
 
           {success && (
             <Alert
-              message="Registration successful! Redirecting..."
-              type="success"
+              message='Registration successful! Redirecting...'
+              type='success'
               showIcon
               style={{ marginBottom: 24 }}
             />
@@ -486,45 +564,47 @@ function SignupForm() {
 
           <Form
             form={form}
-            layout="vertical"
+            layout='vertical'
             onFinish={handleDirectSignup}
-            size="large"
+            size='large'
           >
             <Title level={4} style={{ marginBottom: 16 }}>
               <UserOutlined style={{ marginRight: 8 }} />
               Account Information
             </Title>
-            
+
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="Username"
-                  name="username"
+                  label='Username'
+                  name='username'
                   validateStatus={usernameError ? 'error' : ''}
                   help={usernameError}
-                  rules={[{ required: true, message: 'Please input your username!' }]}
+                  rules={[
+                    { required: true, message: 'Please input your username!' },
+                  ]}
                 >
                   <Input
                     prefix={<UserOutlined />}
-                    placeholder="john_doe"
+                    placeholder='john_doe'
                     onChange={() => setUsernameError('')}
                   />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="Email"
-                  name="email"
+                  label='Email'
+                  name='email'
                   validateStatus={emailError ? 'error' : ''}
                   help={emailError}
                   rules={[
                     { required: true, message: 'Please input your email!' },
-                    { type: 'email', message: 'Please enter a valid email!' }
+                    { type: 'email', message: 'Please enter a valid email!' },
                   ]}
                 >
                   <Input
                     prefix={<MailOutlined />}
-                    placeholder="john@example.com"
+                    placeholder='john@example.com'
                     onChange={() => setEmailError('')}
                   />
                 </Form.Item>
@@ -534,31 +614,44 @@ function SignupForm() {
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="Password"
-                  name="password"
-                  rules={[{ required: true, message: 'Please input your password!' }]}
+                  label='Password'
+                  name='password'
+                  rules={[
+                    { required: true, message: 'Please input your password!' },
+                  ]}
                 >
-                  <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+                  <Input.Password
+                    prefix={<LockOutlined />}
+                    placeholder='Password'
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="Confirm Password"
-                  name="password2"
+                  label='Confirm Password'
+                  name='password2'
                   dependencies={['password']}
                   rules={[
-                    { required: true, message: 'Please confirm your password!' },
+                    {
+                      required: true,
+                      message: 'Please confirm your password!',
+                    },
                     ({ getFieldValue }) => ({
                       validator(_, value) {
                         if (!value || getFieldValue('password') === value) {
                           return Promise.resolve();
                         }
-                        return Promise.reject(new Error('Passwords do not match!'));
+                        return Promise.reject(
+                          new Error('Passwords do not match!'),
+                        );
                       },
                     }),
                   ]}
                 >
-                  <Input.Password prefix={<LockOutlined />} placeholder="Confirm Password" />
+                  <Input.Password
+                    prefix={<LockOutlined />}
+                    placeholder='Confirm Password'
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -573,41 +666,27 @@ function SignupForm() {
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="First Name"
-                  name="first_name"
-                  rules={[{ required: true, message: 'Please input your first name!' }]}
+                  label='First Name'
+                  name='first_name'
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Please input your first name!',
+                    },
+                  ]}
                 >
-                  <Input placeholder="John" />
+                  <Input placeholder='John' />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="Last Name"
-                  name="last_name"
-                  rules={[{ required: true, message: 'Please input your last name!' }]}
+                  label='Last Name'
+                  name='last_name'
+                  rules={[
+                    { required: true, message: 'Please input your last name!' },
+                  ]}
                 >
-                  <Input placeholder="Doe" />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Row gutter={16}>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label="School"
-                  name="school"
-                  rules={[{ required: true, message: 'Please input your school!' }]}
-                >
-                  <Input prefix={<BookOutlined />} placeholder="University Name" />
-                </Form.Item>
-              </Col>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label="Faculty/Institute"
-                  name="faculty_institute"
-                  rules={[{ required: true, message: 'Please input your faculty/institute!' }]}
-                >
-                  <Input prefix={<BankOutlined />} placeholder="Computer Science Faculty" />
+                  <Input placeholder='Doe' />
                 </Form.Item>
               </Col>
             </Row>
@@ -615,21 +694,60 @@ function SignupForm() {
             <Row gutter={16}>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="Position/Title"
-                  name="position"
-                  rules={[{ required: true, message: 'Please input your position!' }]}
+                  label='School'
+                  name='school'
+                  rules={[
+                    { required: true, message: 'Please input your school!' },
+                  ]}
                 >
-                  <Input prefix={<TeamOutlined />} placeholder="Professor, PhD Student, etc." />
+                  <Input
+                    prefix={<BookOutlined />}
+                    placeholder='University Name'
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
                 <Form.Item
-                  label="Google Scholar Link (optional)"
-                  name="google_scholar_link"
+                  label='Faculty/Institute'
+                  name='faculty_institute'
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Please input your faculty/institute!',
+                    },
+                  ]}
+                >
+                  <Input
+                    prefix={<BankOutlined />}
+                    placeholder='Computer Science Faculty'
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col xs={24} md={12}>
+                <Form.Item
+                  label='Position/Title'
+                  name='position'
+                  rules={[
+                    { required: true, message: 'Please input your position!' },
+                  ]}
+                >
+                  <Input
+                    prefix={<TeamOutlined />}
+                    placeholder='Professor, PhD Student, etc.'
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item
+                  label='Google Scholar Link (optional)'
+                  name='google_scholar_link'
                 >
                   <Input
                     prefix={<LinkOutlined />}
-                    placeholder="https://scholar.google.com/citations?user=..."
+                    placeholder='https://scholar.google.com/citations?user=...'
                   />
                 </Form.Item>
               </Col>
@@ -642,59 +760,59 @@ function SignupForm() {
               Research Interests
             </Title>
 
-            <Form.Item label="Select Research Areas (choose all that apply)">
-              <div style={{ 
-                maxHeight: 200, 
-                overflowY: 'auto', 
-                border: '1px solid #d9d9d9', 
-                borderRadius: 6, 
-                padding: 16
-              }}>
-                 <Row gutter={[8, 8]}>
-                   {RESEARCH_AREAS.map(area => (
-                     <Col xs={24} sm={12} md={8} key={area}>
-                       <Checkbox
-                         checked={selectedResearchAreas.includes(area)}
-                         onChange={(e) => {
-                           if (e.target.checked) {
-                             setSelectedResearchAreas([...selectedResearchAreas, area]);
-                           } else {
-                             setSelectedResearchAreas(selectedResearchAreas.filter(item => item !== area));
-                           }
-                         }}
-                       >
-                         {area}
-                       </Checkbox>
-                     </Col>
-                   ))}
-                 </Row>
-               </div>
+            <Form.Item label='Select Research Areas (choose all that apply)'>
+              <div
+                style={{
+                  maxHeight: 200,
+                  overflowY: 'auto',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: 6,
+                  padding: 16,
+                }}
+              >
+                <Row gutter={[8, 8]}>
+                  {RESEARCH_AREAS.map((area) => (
+                    <Col xs={24} sm={12} md={8} key={area}>
+                      <Checkbox
+                        checked={selectedResearchAreas.includes(area)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedResearchAreas([
+                              ...selectedResearchAreas,
+                              area,
+                            ]);
+                          } else {
+                            setSelectedResearchAreas(
+                              selectedResearchAreas.filter(
+                                (item) => item !== area,
+                              ),
+                            );
+                          }
+                        }}
+                      >
+                        {area}
+                      </Checkbox>
+                    </Col>
+                  ))}
+                </Row>
+              </div>
             </Form.Item>
 
-            <Form.Item
-              label="Additional Keywords"
-              name="custom_keywords"
-            >
+            <Form.Item label='Additional Keywords' name='custom_keywords'>
               <TextArea
                 rows={2}
-                placeholder="Enter additional keywords separated by commas"
+                placeholder='Enter additional keywords separated by commas'
               />
             </Form.Item>
 
-            <Form.Item
-              label="Bio (optional)"
-              name="bio"
-            >
-              <TextArea
-                rows={3}
-                placeholder="Tell us about yourself"
-              />
+            <Form.Item label='Bio (optional)' name='bio'>
+              <TextArea rows={3} placeholder='Tell us about yourself' />
             </Form.Item>
 
             <Form.Item style={{ marginTop: 32 }}>
               <Button
-                type="primary"
-                htmlType="submit"
+                type='primary'
+                htmlType='submit'
                 loading={isLoading}
                 style={{ width: '100%', height: 48 }}
               >
@@ -704,20 +822,20 @@ function SignupForm() {
           </Form>
 
           <Divider style={{ margin: '32px 0' }}>
-            <Text type="secondary">OR</Text>
+            <Text type='secondary'>OR</Text>
           </Divider>
 
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <Text type="secondary">
+            <Text type='secondary'>
               You can also sign up with Google or Microsoft from the login page.
             </Text>
           </div>
 
           <div style={{ textAlign: 'center' }}>
-            <Text type="secondary">
+            <Text type='secondary'>
               Already have an account?{' '}
-              <Link href="/login">
-                <Button type="link" style={{ padding: 0 }}>
+              <Link href='/login'>
+                <Button type='link' style={{ padding: 0 }}>
                   Sign in
                 </Button>
               </Link>
@@ -731,13 +849,22 @@ function SignupForm() {
 
 export default function Signup() {
   return (
-    <Suspense fallback={
-      <Content style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-          <Spin size="large" />
-        </div>
-      </Content>
-    }>
+    <Suspense
+      fallback={
+        <Content style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '50vh',
+            }}
+          >
+            <Spin size='large' />
+          </div>
+        </Content>
+      }
+    >
       <SignupForm />
     </Suspense>
   );

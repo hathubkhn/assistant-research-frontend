@@ -111,9 +111,9 @@ const InterestingButton = ({
         }
       }}
     >
-      <Space align="center" size={8}>
+      <Space align='center' size={8}>
         {isLoading ? (
-          <Spin size="small" />
+          <Spin size='small' />
         ) : isInteresting ? (
           <StarFilled style={{ color: '#FFC107', fontSize: '16px' }} />
         ) : (

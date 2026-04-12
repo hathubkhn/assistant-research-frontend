@@ -255,11 +255,11 @@ export default function JournalsPage() {
       render: (record: Journal) =>
         record.url ? (
           <Button
-            type="link"
+            type='link'
             icon={<LinkOutlined />}
             href={record.url}
-            target="_blank"
-            rel="noopener noreferrer"
+            target='_blank'
+            rel='noopener noreferrer'
           >
             {t('visitJournal')}
           </Button>
@@ -275,14 +275,14 @@ export default function JournalsPage() {
         </Title>
 
         <Card style={{ marginBottom: 24 }}>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Space direction='vertical' size='large' style={{ width: '100%' }}>
             <Row gutter={[16, 16]}>
               <Col xs={24} md={18}>
                 <Search
                   placeholder={t('search.placeholder')}
                   allowClear
                   enterButton={t('search.button')}
-                  size="large"
+                  size='large'
                   value={searchQuery}
                   onChange={handleSearchChange}
                   onSearch={handleSearch}
@@ -299,7 +299,7 @@ export default function JournalsPage() {
                     key={quartile}
                     type={quartileFilter === quartile ? 'primary' : 'default'}
                     onClick={() => handleQuartileFilterChange(quartile)}
-                    size="small"
+                    size='small'
                   >
                     {quartile}
                   </Button>
@@ -317,7 +317,7 @@ export default function JournalsPage() {
                     key={range.label}
                     type={impactFilter === range.label ? 'primary' : 'default'}
                     onClick={() => handleImpactFilterChange(range.label)}
-                    size="small"
+                    size='small'
                   >
                     {range.label}
                   </Button>
@@ -326,7 +326,7 @@ export default function JournalsPage() {
                   <Button
                     icon={<ClearOutlined />}
                     onClick={clearFilters}
-                    size="small"
+                    size='small'
                   >
                     {t('filters.clearFilters')}
                   </Button>
@@ -340,12 +340,12 @@ export default function JournalsPage() {
           <Spin spinning={loading}>
             {journals.length === 0 && !loading ? (
               <div style={{ textAlign: 'center', padding: '48px 0' }}>
-                <Text type="secondary" style={{ fontSize: 16 }}>
+                <Text type='secondary' style={{ fontSize: 16 }}>
                   {t('noResults')}
                 </Text>
                 <br />
                 <Button
-                  type="primary"
+                  type='primary'
                   onClick={clearFilters}
                   style={{ marginTop: 16 }}
                 >
@@ -357,10 +357,10 @@ export default function JournalsPage() {
                 <Table
                   columns={columns}
                   dataSource={journals}
-                  rowKey="id"
+                  rowKey='id'
                   pagination={false}
                   scroll={{ x: 800 }}
-                  size="middle"
+                  size='middle'
                 />
                 <div style={{ marginTop: 16 }}>
                   <DataPagination
@@ -368,7 +368,7 @@ export default function JournalsPage() {
                     total={totalItems}
                     pageSize={pageSize}
                     onChange={handlePageChange}
-                    itemName="journals"
+                    itemName='journals'
                     loading={loading}
                   />
                 </div>

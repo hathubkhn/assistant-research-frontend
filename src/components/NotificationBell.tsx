@@ -109,7 +109,7 @@ export default function NotificationBell() {
           padding: '24px',
           textAlign: 'center'
         }}>
-          <Spin size="default" />
+          <Spin size='default' />
         </div>
       ) : recommendedPapers.length > 0 ? (
         <div style={{ maxHeight: '384px', overflowY: 'auto' }}>
@@ -151,7 +151,7 @@ export default function NotificationBell() {
                         color: '#6b7280'
                       }}
                     >
-                      {paper.venue_name || paper.conference || "Unknown Venue"}
+                      {paper.venue_name || paper.conference || 'Unknown Venue'}
                     </Text>
                   </div>
                 </Link>
@@ -196,24 +196,24 @@ export default function NotificationBell() {
         trigger={['click']}
         open={isOpen}
         onOpenChange={setIsOpen}
-        placement="bottomRight"
+        placement='bottomRight'
       >
         <Badge
           count={newPapersCount > 9 ? '9+' : newPapersCount}
-          size="small"
+          size='small'
           style={{
             backgroundColor: '#ff4d4f'
           }}
         >
           <Button
-            type="text"
+            type='text'
             icon={<BellOutlined />}
             style={{
               color: 'white',
               border: 'none',
               fontSize: '16px'
             }}
-            aria-label="Notifications"
+            aria-label='Notifications'
           />
         </Badge>
       </Dropdown>

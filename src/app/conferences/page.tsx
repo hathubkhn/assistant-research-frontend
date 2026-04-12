@@ -200,12 +200,12 @@ export default function ConferencesPage() {
       render: (text: any, record: Conference) => (
         record.url && (
           <Button
-            type="link"
+            type='link'
             icon={<ExportOutlined />}
             href={record.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            size="small"
+            target='_blank'
+            rel='noopener noreferrer'
+            size='small'
           >
             Visit
           </Button>
@@ -221,14 +221,14 @@ export default function ConferencesPage() {
       </Title>
 
       <Card style={{ marginBottom: '24px' }}>
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Space direction='vertical' size='large' style={{ width: '100%' }}>
           <Row gutter={[16, 16]}>
             <Col xs={24} md={16}>
               <Search
-                placeholder="Search conferences..."
+                placeholder='Search conferences...'
                 allowClear
                 enterButton={<SearchOutlined />}
-                size="large"
+                size='large'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onSearch={handleSearch}
@@ -240,13 +240,13 @@ export default function ConferencesPage() {
             <Text strong style={{ marginBottom: '8px', display: 'block' }}>
               Filter by Rank:
             </Text>
-            <Space size="small" wrap>
+            <Space size='small' wrap>
               {['A*', 'A', 'B', 'C', 'Not ranked'].map(rank => (
                 <Button
                   key={rank}
                   type={rankFilter === rank ? 'primary' : 'default'}
                   onClick={() => handleRankFilterChange(rank)}
-                  size="small"
+                  size='small'
                 >
                   {rank}
                 </Button>
@@ -255,7 +255,7 @@ export default function ConferencesPage() {
                 <Button
                   icon={<ClearOutlined />}
                   onClick={clearFilters}
-                  size="small"
+                  size='small'
                 >
                   Clear Filters
                 </Button>
@@ -273,17 +273,17 @@ export default function ConferencesPage() {
             alignItems: 'center', 
             minHeight: '300px' 
           }}>
-            <Spin size="large" />
+            <Spin size='large' />
           </div>
         ) : conferences.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
             <Alert
-              message="No conferences found"
-              description="No conferences found matching your criteria."
-              type="info"
+              message='No conferences found'
+              description='No conferences found matching your criteria.'
+              type='info'
               showIcon
               action={
-                <Button onClick={clearFilters} type="primary">
+                <Button onClick={clearFilters} type='primary'>
                   Clear Filters
                 </Button>
               }
@@ -294,7 +294,7 @@ export default function ConferencesPage() {
             <Table
               columns={columns}
               dataSource={conferences}
-              rowKey="id"
+              rowKey='id'
               pagination={false}
               scroll={{ x: 800 }}
             />
@@ -304,7 +304,7 @@ export default function ConferencesPage() {
               total={totalItems}
               pageSize={pageSize}
               onChange={handlePageChange}
-              itemName="conferences"
+              itemName='conferences'
               loading={loading}
             />
           </>

@@ -30,15 +30,15 @@ function SSOCallbackContent() {
     }, [router, searchParams]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900">Processing login...</h1>
-                    <div className="mt-4">
-                        <div className="flex justify-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className='min-h-screen flex items-center justify-center bg-gray-100'>
+            <div className='w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md'>
+                <div className='text-center'>
+                    <h1 className='text-2xl font-bold text-gray-900'>Processing login...</h1>
+                    <div className='mt-4'>
+                        <div className='flex justify-center'>
+                            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
                         </div>
-                        <p className="mt-4 text-gray-600">
+                        <p className='mt-4 text-gray-600'>
                             Please wait while we authenticate your account.
                         </p>
                     </div>
@@ -50,8 +50,8 @@ function SSOCallbackContent() {
 
 export default function SSOCallback() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <Suspense fallback={<div className='min-h-screen flex items-center justify-center bg-gray-100'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
         </div>}>
             <SSOCallbackContent />
         </Suspense>

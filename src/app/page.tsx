@@ -1,8 +1,8 @@
 'use client';
 
-import Link from "next/link";
-import { HomeStatistics } from "./components/HomeStatistics";
-import { useTranslation } from "@/utils/useTranslation";
+import Link from 'next/link';
+import { HomeStatistics } from './components/HomeStatistics';
+import { useTranslation } from '@/utils/useTranslation';
 import { Row, Col, Card, Typography, Space, Button } from 'antd';
 import { FileTextOutlined, RobotOutlined, CalendarOutlined, ExperimentOutlined, ArrowRightOutlined } from '@ant-design/icons';
 
@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <main style={{ minHeight: '100vh' }}>
       <Space
-        direction="vertical"
+        direction='vertical'
         style={{
           background: 'linear-gradient(to bottom, #d9363e, #b91c1c)',
           padding: '96px 0',
@@ -24,8 +24,8 @@ export default function Home() {
         }}
       >
         <Space
-          direction="vertical"
-          align="center"
+          direction='vertical'
+          align='center'
           style={{
             width: '100%',
             margin: '0 auto',
@@ -58,7 +58,7 @@ export default function Home() {
       </Space>
 
       <Space
-        direction="vertical"
+        direction='vertical'
         style={{
           margin: '0 auto',
           padding: '40px 24px 56px',
@@ -145,9 +145,9 @@ export default function Home() {
                 <Paragraph style={{ color: '#6b7280', margin: '12px 0 0' }}>
                   {t('features.scientist.description')}
                 </Paragraph>
-                <Link href="/ai-scientist">
+                <Link href='/ai-scientist'>
                   <Button
-                    type="link"
+                    type='link'
                     style={{
                       color: '#d9363e',
                       padding: 0,
@@ -155,7 +155,7 @@ export default function Home() {
                       fontSize: '14px'
                     }}
                     icon={<ArrowRightOutlined />}
-                    iconPosition="end"
+                    iconPosition='end'
                   >
                     {t('features.scientist.tryNow')}
                   </Button>
@@ -176,16 +176,16 @@ export default function Home() {
         width: '100%'
       }}>
         <Space
-          direction="vertical"
-          align="center"
+          direction='vertical'
+          align='center'
           style={{
             width: '100%',
             margin: '0 auto',
             alignItems: 'center',
           }}>
           <Space
-            direction="vertical"
-            align="center"
+            direction='vertical'
+            align='center'
             style={{
               margin: '0 auto 40px',
               textAlign: 'center',
@@ -220,14 +220,14 @@ export default function Home() {
         borderRadius: 0
       }}>
         <Space
-          direction="vertical"
-          align="center"
+          direction='vertical'
+          align='center'
           style={{
             width: '100%',
             margin: '0 auto',
             textAlign: 'center'
           }}>
-          <Space direction="vertical" size="small">
+          <Space direction='vertical' size='small'>
             <Title level={3} style={{
               color: 'white',
               fontWeight: 600,

@@ -83,7 +83,7 @@ async function countVenues() {
       },
       withCredentials: true
     });
-    console.log("Venues counts response:", response.data);
+    console.log('Venues counts response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching venues counts:', error);
@@ -126,7 +126,7 @@ async function fetchPapers(page: number = 1, size: number = 20, searchQuery: str
       },
       withCredentials: true
     });
-    console.log("Papers response:", response.data);
+    console.log('Papers response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching papers:', error);
@@ -147,7 +147,7 @@ async function fetchConferences() {
       },
       withCredentials: true
     });
-    console.log("Conferences response:", response.data);
+    console.log('Conferences response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching conferences:', error);
@@ -168,7 +168,7 @@ async function fetchJournals() {
       },
       withCredentials: true
     });
-    console.log("Journals response:", response.data);
+    console.log('Journals response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching journals:', error);
@@ -233,7 +233,7 @@ export default function PapersPage() {
     const topRanked = filtered.filter(conf => conf.rank === 'A*');
     setTopRankedConferences(topRanked);
 
-    console.log("Filtered conferences updated:", filtered.length, "with", topRanked.length, "top-ranked conferences");
+    console.log('Filtered conferences updated:', filtered.length, 'with', topRanked.length, 'top-ranked conferences');
   }, [conferences, conferenceSearch]);
 
   const filteredJournals = journals.filter(journal =>
@@ -259,7 +259,7 @@ export default function PapersPage() {
 
   useEffect(() => {
     if (conferences.length > 0 && filteredConferences.length > 0 && conferencesToDisplay.length === 0) {
-      console.log("Conferences loaded but none displayed, forcing update...");
+      console.log('Conferences loaded but none displayed, forcing update...');
       setExpandedFilters(prev => ({
         ...prev,
         conferences: true
@@ -313,7 +313,7 @@ export default function PapersPage() {
       setLoading(true);
       try {
         const paperData = await fetchPapers(page, size, searchQuery, activeFilters);
-        console.log("Paper data:", paperData);
+        console.log('Paper data:', paperData);
         setPapers(paperData.results);
         setFilteredPapers(paperData.results);
         setTotalItems(paperData.pagination ? paperData.pagination.totalItems : 0);
@@ -477,10 +477,10 @@ export default function PapersPage() {
   }, [activeFilters, pageSize]);
 
   const filtersContent = (
-    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+    <Space direction='vertical' size='middle' style={{ width: '100%' }}>
       <>
         <Title level={5} style={{ marginBottom: 8 }}>Publication Type</Title>
-        <Space direction="vertical" size="small">
+        <Space direction='vertical' size='small'>
           <Checkbox
             checked={activeFilters.venueTypes.includes('conference')}
             onChange={() => toggleVenueTypeFilter('conference')}
@@ -499,30 +499,30 @@ export default function PapersPage() {
       <>
         <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 8 }}>
           <Title level={5} style={{ margin: 0 }}>Conferences</Title>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type='secondary' style={{ fontSize: '12px' }}>
             {loadingVenues ? 'Loading...' : conferencesCount}
           </Text>
         </Space>
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+        <Space direction='vertical' size='small' style={{ width: '100%' }}>
           <Search
-            placeholder="Search conferences..."
+            placeholder='Search conferences...'
             value={conferenceSearch}
             onChange={(e) => {
               setConferenceSearch(e.target.value);
               setCurrentPage(1);
               fetchConferences(1, pageSize, conferenceSearch);
             }}
-            size="small"
+            size='small'
             prefix={<SearchOutlined />}
             allowClear
           />
           <div style={{ maxHeight: !expandedFilters.conferences ? '240px' : 'auto', overflowY: 'auto' }}>
             {loadingVenues ? (
               <div style={{ textAlign: 'center', padding: '16px' }}>
-                <Spin size="small" />
+                <Spin size='small' />
               </div>
             ) : conferencesToDisplay.length > 0 ? (
-              <Space direction="vertical" size="small">
+              <Space direction='vertical' size='small'>
                 {conferencesToDisplay.map(conf => (
                   <Space key={conf.id} style={{ width: '100%', justifyContent: 'space-between' }}>
                     <Checkbox
@@ -535,13 +535,13 @@ export default function PapersPage() {
                       </Text>
                     </Checkbox>
                     {conf.rank && (
-                      <Tag color="blue">{conf.rank}</Tag>
+                      <Tag color='blue'>{conf.rank}</Tag>
                     )}
                   </Space>
                 ))}
               </Space>
             ) : conferences.length > 0 ? (
-              <Space direction="vertical" size="small">
+              <Space direction='vertical' size='small'>
                 {conferences.slice(0, 100).map(conf => (
                   <Space key={conf.id} style={{ width: '100%', justifyContent: 'space-between' }}>
                     <Checkbox
@@ -554,23 +554,23 @@ export default function PapersPage() {
                       </Text>
                     </Checkbox>
                     {conf.rank && (
-                      <Tag color="blue">{conf.rank}</Tag>
+                      <Tag color='blue'>{conf.rank}</Tag>
                     )}
                   </Space>
                 ))}
               </Space>
             ) : (
-              <Space direction="vertical" size="small">
-                <Text type="secondary" style={{ fontSize: '12px' }}>No conferences found</Text>
-                <Text type="secondary" style={{ fontSize: '11px' }}>Try clearing your search or check network connection</Text>
+              <Space direction='vertical' size='small'>
+                <Text type='secondary' style={{ fontSize: '12px' }}>No conferences found</Text>
+                <Text type='secondary' style={{ fontSize: '11px' }}>Try clearing your search or check network connection</Text>
               </Space>
             )}
           </div>
 
           {(conferences.length > 0 || filteredConferences.length > 0) && (
             <Button
-              type="link"
-              size="small"
+              type='link'
+              size='small'
               onClick={() => toggleExpandedSection('conferences')}
               style={{ width: '100%', marginTop: '8px', padding: 0, height: 'auto' }}
             >
@@ -585,26 +585,26 @@ export default function PapersPage() {
       <>
         <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 8 }}>
           <Title level={5} style={{ margin: 0 }}>Journals</Title>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type='secondary' style={{ fontSize: '12px' }}>
             {loadingVenues ? 'Loading...' : journalsCount}
           </Text>
         </Space>
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+        <Space direction='vertical' size='small' style={{ width: '100%' }}>
           <Search
-            placeholder="Search journals..."
+            placeholder='Search journals...'
             value={journalSearch}
             onChange={(e) => setJournalSearch(e.target.value)}
-            size="small"
+            size='small'
             prefix={<SearchOutlined />}
             allowClear
           />
           <div style={{ maxHeight: !expandedFilters.journals ? '240px' : 'auto', overflowY: 'auto' }}>
             {loadingVenues ? (
               <div style={{ textAlign: 'center', padding: '16px' }}>
-                <Spin size="small" />
+                <Spin size='small' />
               </div>
             ) : journalsToDisplay.length > 0 ? (
-              <Space direction="vertical" size="small">
+              <Space direction='vertical' size='small'>
                 {journalsToDisplay.map(journal => (
                   <Space key={journal.id} style={{ width: '100%', justifyContent: 'space-between' }}>
                     <Checkbox
@@ -617,7 +617,7 @@ export default function PapersPage() {
                       </Text>
                     </Checkbox>
                     {journal.impactFactor && (
-                      <Tag color="green">
+                      <Tag color='green'>
                         IF: {Number(journal.impactFactor).toFixed(journal.impactFactor >= 100 ? 0 : 1)}
                       </Tag>
                     )}
@@ -625,15 +625,15 @@ export default function PapersPage() {
                 ))}
               </Space>
             ) : (
-              <Text type="secondary" style={{ fontSize: '12px' }}>No journals found</Text>
+              <Text type='secondary' style={{ fontSize: '12px' }}>No journals found</Text>
             )}
           </div>
 
           {((expandedFilters.journals && sortedJournals.length > 10) ||
             (!expandedFilters.journals && sortedJournals.length > 10)) && (
               <Button
-                type="link"
-                size="small"
+                type='link'
+                size='small'
                 onClick={() => toggleExpandedSection('journals')}
                 style={{ width: '100%', marginTop: '8px', padding: 0, height: 'auto' }}
               >
@@ -648,8 +648,8 @@ export default function PapersPage() {
       <>
         <Title level={5} style={{ marginBottom: 8 }}>Publication Year</Title>
         <Select
-          mode="multiple"
-          placeholder="Select publication years"
+          mode='multiple'
+          placeholder='Select publication years'
           value={activeFilters.years}
           onChange={(selectedYears) => {
             setActiveFilters(prev => ({ ...prev, years: selectedYears }));
@@ -659,8 +659,8 @@ export default function PapersPage() {
             }, 0);
           }}
           style={{ width: '100%' }}
-          size="small"
-          maxTagCount="responsive"
+          size='small'
+          maxTagCount='responsive'
           allowClear
           showSearch
           filterOption={(input, option) =>
@@ -682,7 +682,7 @@ export default function PapersPage() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <Space direction="vertical" style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '20px 16px' }}>
+      <Space direction='vertical' style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '20px 16px' }}>
         <Row gutter={[16, 24]}>
           <Col xs={0} sm={0} md={8} lg={6} xl={6}>
             <Card
@@ -691,8 +691,8 @@ export default function PapersPage() {
                   <Title level={4} style={{ margin: 0 }}>Filters</Title>
                   {(activeFilters.years.length > 0 || activeFilters.venues.length > 0 || activeFilters.fields.length > 0 || activeFilters.venueTypes.length > 0) && (
                     <Button
-                      type="link"
-                      size="small"
+                      type='link'
+                      size='small'
                       icon={<ClearOutlined />}
                       onClick={clearFilters}
                     >
@@ -701,48 +701,48 @@ export default function PapersPage() {
                   )}
                 </Space>
               }
-              size="small"
+              size='small'
             >
               {filtersContent}
             </Card>
           </Col>
 
           <Col xs={24} sm={24} md={16} lg={18} xl={18}>
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Space direction='vertical' size='large' style={{ width: '100%' }}>
               <Space style={{ width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Title level={2} style={{ margin: 0 }}>{t('title')}</Title>
               </Space>
 
               <Search
-                placeholder="Search papers by title..."
+                placeholder='Search papers by title...'
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onSearch={handleSearch}
-                size="large"
+                size='large'
                 style={{ width: '100%', maxWidth: 600 }}
-                enterButton="Search"
+                enterButton='Search'
                 allowClear
               />
 
               {loading && (
                 <div style={{ textAlign: 'center', padding: '80px 0' }}>
-                  <Spin size="large" />
+                  <Spin size='large' />
                 </div>
               )}
 
               {error && (
                 <Alert
-                  message="Error"
+                  message='Error'
                   description={error}
-                  type="error"
+                  type='error'
                   showIcon
                   closable
                 />
               )}
 
               {!loading && !error && filteredPapers.length > 0 ? (
-                <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  <Text type="secondary">
+                <Space direction='vertical' size='large' style={{ width: '100%' }}>
+                  <Text type='secondary'>
                     Showing {filteredPapers.length} {filteredPapers.length === 1 ? 'result' : 'results'}
                     {searchQuery.trim() && (
                       <span> for "{searchQuery.trim()}"</span>
@@ -751,7 +751,7 @@ export default function PapersPage() {
                       <span> with applied filters</span>
                     )}
                   </Text>
-                  <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                  <Space direction='vertical' size='middle' style={{ width: '100%' }}>
                     {filteredPapers.map((paper) => (
                       <Link
                         key={paper.id}
@@ -763,16 +763,16 @@ export default function PapersPage() {
                           style={{ width: '100%' }}
                           styles={{ body: { padding: '24px' } }}
                         >
-                          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                          <Space direction='vertical' size='middle' style={{ width: '100%' }}>
                             <Space style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                               <Title level={4} style={{ margin: 0, color: '#1890ff', cursor: 'pointer' }}>
                                 {paper.title}
                               </Title>
-                              <Space direction="vertical" align="end">
+                              <Space direction='vertical' align='end'>
                                 {paper.venue ? (
                                   <Button
-                                    type="primary"
-                                    size="small"
+                                    type='primary'
+                                    size='small'
                                     icon={<LinkOutlined />}
                                     onClick={(e) => {
                                       if (paper.venueType === 'conference') {
@@ -785,21 +785,21 @@ export default function PapersPage() {
                                     {paper.venue.abbreviation || paper.venue.name}
                                   </Button>
                                 ) : (
-                                  <Tag color="blue">
+                                  <Tag color='blue'>
                                     Venue: Unknown
                                   </Tag>
                                 )}
-                                <Text type="secondary" style={{ fontSize: '12px' }}>{paper.year}</Text>
+                                <Text type='secondary' style={{ fontSize: '12px' }}>{paper.year}</Text>
                               </Space>
                             </Space>
 
-                            <Text type="secondary">
+                            <Text type='secondary'>
                               <Text strong>Authors:</Text> {paper.authors.join(', ')}
                             </Text>
 
-                            <Space wrap size="small">
+                            <Space wrap size='small'>
                               {paper.keywords.map((keyword, idx) => (
-                                <Tag key={idx} color="orange">
+                                <Tag key={idx} color='orange'>
                                   {keyword}
                                 </Tag>
                               ))}
@@ -810,7 +810,7 @@ export default function PapersPage() {
                             </Paragraph>
 
                             <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                              <Text type="secondary" style={{ fontSize: '12px' }}>{paper.field}</Text>
+                              <Text type='secondary' style={{ fontSize: '12px' }}>{paper.field}</Text>
                             </Space>
                           </Space>
                         </Card>
@@ -819,10 +819,10 @@ export default function PapersPage() {
                   </Space>
                 </Space>
               ) : (!loading && !error && filteredPapers.length === 0 && (
-                <Space direction="vertical" size="middle" style={{ width: '100%', alignItems: 'center' }}>
+                <Space direction='vertical' size='middle' style={{ width: '100%', alignItems: 'center' }}>
                   <div style={{ fontSize: '48px', color: '#d9d9d9' }}>📄</div>
-                  <Title level={4} type="secondary">No papers found</Title>
-                  <Text type="secondary">Try adjusting your filters to find what you're looking for.</Text>
+                  <Title level={4} type='secondary'>No papers found</Title>
+                  <Text type='secondary'>Try adjusting your filters to find what you're looking for.</Text>
                 </Space>
               )
               )}
@@ -833,7 +833,7 @@ export default function PapersPage() {
                   total={totalItems}
                   pageSize={pageSize}
                   onChange={handlePageChange}
-                  itemName="papers"
+                  itemName='papers'
                   loading={loading}
                 />
               )}

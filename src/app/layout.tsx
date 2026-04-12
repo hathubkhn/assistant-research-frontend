@@ -1,12 +1,12 @@
 'use client';
 
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import PrelineScript from "../components/PrelineScript";
-import { AuthProvider } from "../contexts/AuthContext";
-import { LanguageProvider } from "../contexts/LanguageContext";
-import Header from "../components/Header";
-import { useEffect } from "react";
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import PrelineScript from '../components/PrelineScript';
+import { AuthProvider } from '../contexts/AuthContext';
+import { LanguageProvider } from '../contexts/LanguageContext';
+import Header from '../components/Header';
+import { useEffect } from 'react';
 import { ConfigProvider } from 'antd';
 
 export function removeBisSkinCheckedAttributes() {
@@ -35,13 +35,13 @@ export function removeBisSkinCheckedAttributes() {
 }
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode;}>) {
@@ -57,7 +57,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
     <html>
       <head>
         <title>Research Assistant</title>
-        <meta name="description" content="AI-powered research assistant for academic papers" />
+        <meta name='description' content='AI-powered research assistant for academic papers' />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
