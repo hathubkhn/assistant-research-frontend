@@ -298,7 +298,7 @@ export default function Profile() {
       }
 
       const response = await fetchWithAuth(
-        `${API_URL}/api/publications/${editingPublication.id}`,
+        `${API_URL}/api/publications/${editingPublication.id}/`,
         {
           method: "PUT",
           headers: {
@@ -365,7 +365,7 @@ export default function Profile() {
       }
 
       const response = await fetchWithAuth(
-        `${API_URL}/api/publications/${id}`,
+        `${API_URL}/api/publications/${id}/`,
         {
           method: "DELETE",
         },
