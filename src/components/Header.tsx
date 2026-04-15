@@ -1,66 +1,66 @@
-'use client';
+'use client'
 
-import { useTranslation } from '@/utils/useTranslation';
+import { useTranslation } from '@/utils/useTranslation'
 import {
   LogoutOutlined,
   ProfileOutlined,
   UserOutlined,
-} from '@ant-design/icons';
-import { Avatar, Button, Dropdown, Layout, Menu, Space } from 'antd';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import LanguageSwitcher from './LanguageSwitcher';
-import NotificationBell from './NotificationBell';
+} from '@ant-design/icons'
+import { Avatar, Button, Dropdown, Layout, Menu, Space } from 'antd'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import LanguageSwitcher from './LanguageSwitcher'
+import NotificationBell from './NotificationBell'
 
-const { Header: AntHeader } = Layout;
+const { Header: AntHeader } = Layout
 
 export default function Header() {
-  const { user, loading, logout, checkAuth } = useAuth();
-  const { t } = useTranslation('common');
-  const router = useRouter();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
+  const { user, loading, logout, checkAuth } = useAuth()
+  const { t } = useTranslation('common')
+  const router = useRouter()
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [loginDropdownOpen, setLoginDropdownOpen] = useState(false)
 
   const handleLogout = async () => {
-    await logout();
-    router.push('/login');
-  };
+    await logout()
+    router.push('/login')
+  }
 
   const handleMyLibraryClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     console.log('My Library clicked, auth status:', {
       userExists: !!user,
       userData: user,
       authToken: localStorage.getItem('authToken'),
       loading,
-    });
+    })
 
     if (user) {
-      router.push('/my-library');
+      router.push('/my-library')
     } else {
       if (loading) {
-        console.log('Auth still loading, please wait...');
-        return;
+        console.log('Auth still loading, please wait...')
+        return
       }
 
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('authToken')
       if (token) {
-        console.log('Token exists but user data is missing, forcing recheck');
+        console.log('Token exists but user data is missing, forcing recheck')
         checkAuth().then(() => {
           if (user) {
-            router.push('/my-library');
+            router.push('/my-library')
           } else {
-            router.push('/login');
+            router.push('/login')
           }
-        });
+        })
       } else {
-        console.log('No token found, redirecting to login');
-        router.push('/login');
+        console.log('No token found, redirecting to login')
+        router.push('/login')
       }
     }
-  };
+  }
 
   const menuItems = [
     {
@@ -98,7 +98,7 @@ export default function Header() {
         </a>
       ),
     },
-  ];
+  ]
 
   return (
     <AntHeader
@@ -180,8 +180,8 @@ export default function Header() {
                       label: t('header.viewProfile'),
                       icon: <ProfileOutlined />,
                       onClick: () => {
-                        setDropdownOpen(false);
-                        router.push('/profile');
+                        setDropdownOpen(false)
+                        router.push('/profile')
                       },
                     },
                     {
@@ -220,8 +220,8 @@ export default function Header() {
                     label: (
                       <div
                         onClick={() => {
-                          console.log('Login clicked');
-                          router.push('/login');
+                          console.log('Login clicked')
+                          router.push('/login')
                         }}
                       >
                         <UserOutlined style={{ marginRight: 8 }} />
@@ -250,5 +250,5 @@ export default function Header() {
         </Space>
       </div>
     </AntHeader>
-  );
+  )
 }

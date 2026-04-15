@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -26,55 +26,55 @@ interface Paper {
 }
 
 export default function JournalDetailPage() {
-    const params = useParams();
-    const router = useRouter();
-    const id = params.id as string;
+    const params = useParams()
+    const router = useRouter()
+    const id = params.id as string
 
-    const [journal, setJournal] = useState<Journal | null>(null);
-    const [papers, setPapers] = useState<Paper[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [journal, setJournal] = useState<Journal | null>(null)
+    const [papers, setPapers] = useState<Paper[]>([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchJournalDetails = async () => {
             try {
-                setLoading(true);
-                const response = await fetch(`${API_URL}/api/journals/${id}/`);
+                setLoading(true)
+                const response = await fetch(`${API_URL}/api/journals/${id}/`)
 
                 if (response.status === 404) {
-                    console.error(`Journal not found with ID: ${id}`);
-                    setLoading(false);
-                    return;
+                    console.error(`Journal not found with ID: ${id}`)
+                    setLoading(false)
+                    return
                 }
 
                 if (response.ok) {
-                    const data = await response.json();
-                    setJournal(data);
-                    setPapers(data.papers || []);
+                    const data = await response.json()
+                    setJournal(data)
+                    setPapers(data.papers || [])
                 } else {
-                    console.error(`Error fetching journal details: ${response.status} ${response.statusText}`);
+                    console.error(`Error fetching journal details: ${response.status} ${response.statusText}`)
                 }
             } catch (error) {
-                console.error('Error fetching journal details:', error);
+                console.error('Error fetching journal details:', error)
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
-        };
+        }
 
         if (id) {
-            fetchJournalDetails();
+            fetchJournalDetails()
         }
-    }, [id]);
+    }, [id])
 
     const handleViewMorePapers = () => {
-        router.push(`/papers?venueType=journal&venue_id=${id}`);
-    };
+        router.push(`/papers?venueType=journal&venue_id=${id}`)
+    }
 
     if (loading) {
         return (
             <div className='container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]'>
                 <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600'></div>
             </div>
-        );
+        )
     }
 
     if (!journal) {
@@ -87,26 +87,26 @@ export default function JournalDetailPage() {
                     </Link>
                 </div>
             </div>
-        );
+        )
     }
 
     // Format authors for display
     const formatAuthors = (authors: string[] | string): string => {
         if (typeof authors === 'string') {
             try {
-                const parsedAuthors = JSON.parse(authors);
+                const parsedAuthors = JSON.parse(authors)
                 if (Array.isArray(parsedAuthors)) {
-                    return parsedAuthors.join(', ');
+                    return parsedAuthors.join(', ')
                 }
-                return authors;
+                return authors
             } catch {
-                return authors;
+                return authors
             }
         } else if (Array.isArray(authors)) {
-            return authors.join(', ');
+            return authors.join(', ')
         }
-        return 'Unknown';
-    };
+        return 'Unknown'
+    }
 
     return (
         <div className='container mx-auto px-4 py-8'>
@@ -209,5 +209,5 @@ export default function JournalDetailPage() {
                 </div>
             </div>
         </div>
-    );
-} 
+    )
+}

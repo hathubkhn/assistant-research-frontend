@@ -1,11 +1,11 @@
-'use client';
+'use client'
 
-import { Layout } from 'antd';
-import DashboardClient from './DashboardClient';
-import { useTranslation } from '@/utils/useTranslation';
+import { Layout } from 'antd'
+import DashboardClient from './DashboardClient'
+import { useTranslation } from '@/utils/useTranslation'
 
 export default function DashboardPage() {
-    const { t } = useTranslation('dashboard');
+    const { t } = useTranslation('dashboard')
 
     return (
         <Layout style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
@@ -14,5 +14,5 @@ export default function DashboardPage() {
                 <DashboardClient />
             </div>
         </Layout>
-    );
-} 
+    )
+}

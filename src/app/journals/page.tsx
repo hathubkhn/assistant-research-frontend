@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useTranslation } from '@/utils/useTranslation';
-import axios from 'axios';
+import { useState, useEffect } from 'react'
+import { useTranslation } from '@/utils/useTranslation'
+import axios from 'axios'
 import {
   Card,
   Table,
@@ -14,20 +14,20 @@ import {
   Tag,
   Row,
   Col,
-  Layout
-} from 'antd';
+  Layout,
+} from 'antd'
 import {
   ClearOutlined,
-  LinkOutlined
-} from '@ant-design/icons';
-import DataPagination from '@/app/components/DataPagination';
+  LinkOutlined,
+} from '@ant-design/icons'
+import DataPagination from '@/app/components/DataPagination'
 
-const { Title, Text } = Typography;
-const { Search } = Input;
-const { Content } = Layout;
+const { Title, Text } = Typography
+const { Search } = Input
+const { Content } = Layout
 
 // API Functions
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 interface JournalsResponse {
   results: Journal[];
@@ -50,22 +50,22 @@ interface FetchJournalsParams {
 
 const fetchJournalsAPI = async (params: FetchJournalsParams): Promise<JournalsResponse> => {
   try {
-    const queryParams = new URLSearchParams();
+    const queryParams = new URLSearchParams()
 
-    if (params.page) queryParams.append('page', params.page.toString());
-    if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-    if (params.quartile) queryParams.append('quartile', params.quartile);
-    if (params.impactMin !== undefined) queryParams.append('impactMin', params.impactMin.toString());
-    if (params.impactMax !== undefined) queryParams.append('impactMax', params.impactMax.toString());
-    if (params.search) queryParams.append('search', params.search);
+    if (params.page) queryParams.append('page', params.page.toString())
+    if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString())
+    if (params.quartile) queryParams.append('quartile', params.quartile)
+    if (params.impactMin !== undefined) queryParams.append('impactMin', params.impactMin.toString())
+    if (params.impactMax !== undefined) queryParams.append('impactMax', params.impactMax.toString())
+    if (params.search) queryParams.append('search', params.search)
 
-    const response = await axios.get(`${API_URL}/api/journals/?${queryParams.toString()}`);
-    return response.data;
+    const response = await axios.get(`${API_URL}/api/journals/?${queryParams.toString()}`)
+    return response.data
   } catch (error) {
-    console.error('Error fetching journals:', error);
-    throw error;
+    console.error('Error fetching journals:', error)
+    throw error
   }
-};
+}
 
 interface Journal {
   id: string;
@@ -86,116 +86,116 @@ interface ImpactRange {
 }
 
 export default function JournalsPage() {
-  const { t } = useTranslation('journals');
-  const [journals, setJournals] = useState<Journal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { t } = useTranslation('journals')
+  const [journals, setJournals] = useState<Journal[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(20);
-  const [totalItems, setTotalItems] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(20)
+  const [totalItems, setTotalItems] = useState<number>(0)
 
-  const [quartileFilter, setQuartileFilter] = useState<string>('');
-  const [impactFilter, setImpactFilter] = useState<string>('');
+  const [quartileFilter, setQuartileFilter] = useState<string>('')
+  const [impactFilter, setImpactFilter] = useState<string>('')
 
   const impactRanges: ImpactRange[] = [
     { min: 0, max: 3, label: '0~3' },
     { min: 3, max: 5, label: '3~5' },
     { min: 5, max: 7, label: '5~7' },
-    { min: 7, max: null, label: '7+' }
-  ];
+    { min: 7, max: null, label: '7+' },
+  ]
 
   const fetchJournals = async (page: number = 1, size: number = pageSize, quartileValue: string = quartileFilter, impactValue: string = impactFilter, searchValue: string = searchQuery) => {
     try {
-      setLoading(true);
+      setLoading(true)
 
       const params: FetchJournalsParams = {
         page,
         pageSize: size,
-      };
+      }
 
       if (quartileValue) {
-        params.quartile = quartileValue;
+        params.quartile = quartileValue
       }
 
       if (impactValue) {
-        const selectedRange = impactRanges.find(range => range.label === impactValue);
+        const selectedRange = impactRanges.find(range => range.label === impactValue)
         if (selectedRange) {
-          params.impactMin = selectedRange.min;
+          params.impactMin = selectedRange.min
           if (selectedRange.max !== null) {
-            params.impactMax = selectedRange.max;
+            params.impactMax = selectedRange.max
           }
         }
       }
 
       if (searchValue) {
-        params.search = searchValue;
+        params.search = searchValue
       }
 
-      const data = await fetchJournalsAPI(params);
-      setJournals(data.results);
-      setTotalItems(data.pagination.totalItems);
-      setCurrentPage(data.pagination.page);
+      const data = await fetchJournalsAPI(params)
+      setJournals(data.results)
+      setTotalItems(data.pagination.totalItems)
+      setCurrentPage(data.pagination.page)
     } catch (error) {
-      console.error('Error fetching journals:', error);
+      console.error('Error fetching journals:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchJournals(1, pageSize, quartileFilter, impactFilter, searchQuery);
-  }, []);
+    fetchJournals(1, pageSize, quartileFilter, impactFilter, searchQuery)
+  }, [])
 
 
   const handlePageChange = (page: number, size: number) => {
-    setCurrentPage(page);
+    setCurrentPage(page)
     if (size !== pageSize) {
-      setPageSize(size);
+      setPageSize(size)
     }
-    fetchJournals(page, size, quartileFilter, impactFilter, searchQuery);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    fetchJournals(page, size, quartileFilter, impactFilter, searchQuery)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
+    setSearchQuery(e.target.value)
+  }
 
 
   const handleSearch = (value?: string) => {
-    const searchValue = value !== undefined ? value : searchQuery;
-    setSearchQuery(searchValue);
-    setCurrentPage(1);
-    fetchJournals(1, pageSize, quartileFilter, impactFilter, searchValue);
-  };
+    const searchValue = value !== undefined ? value : searchQuery
+    setSearchQuery(searchValue)
+    setCurrentPage(1)
+    fetchJournals(1, pageSize, quartileFilter, impactFilter, searchValue)
+  }
 
 
   const handleQuartileFilterChange = (quartile: string) => {
 
-    const newQuartileValue = quartileFilter === quartile ? '' : quartile;
-    setQuartileFilter(newQuartileValue);
-    setCurrentPage(1);
+    const newQuartileValue = quartileFilter === quartile ? '' : quartile
+    setQuartileFilter(newQuartileValue)
+    setCurrentPage(1)
 
-    fetchJournals(1, pageSize, newQuartileValue, impactFilter, searchQuery);
-  };
+    fetchJournals(1, pageSize, newQuartileValue, impactFilter, searchQuery)
+  }
 
 
   const handleImpactFilterChange = (impact: string) => {
-    const newImpactValue = impactFilter === impact ? '' : impact;
-    setImpactFilter(newImpactValue);
-    setCurrentPage(1);
+    const newImpactValue = impactFilter === impact ? '' : impact
+    setImpactFilter(newImpactValue)
+    setCurrentPage(1)
 
-    fetchJournals(1, pageSize, quartileFilter, newImpactValue, searchQuery);
-  };
+    fetchJournals(1, pageSize, quartileFilter, newImpactValue, searchQuery)
+  }
 
 
   const clearFilters = () => {
-    setQuartileFilter('');
-    setImpactFilter('');
-    setSearchQuery('');
-    setCurrentPage(1);
-    fetchJournals(1, pageSize, '', '', '');
-  };
+    setQuartileFilter('')
+    setImpactFilter('')
+    setSearchQuery('')
+    setCurrentPage(1)
+    fetchJournals(1, pageSize, '', '', '')
+  }
 
 
   const columns = [
@@ -230,9 +230,9 @@ export default function JournalsPage() {
           Q1: 'green',
           Q2: 'blue',
           Q3: 'orange',
-          Q4: 'red'
-        };
-        return <Tag color={colors[quartile as keyof typeof colors]}>{quartile}</Tag>;
+          Q4: 'red',
+        }
+        return <Tag color={colors[quartile as keyof typeof colors]}>{quartile}</Tag>
       },
     },
     {
@@ -265,7 +265,7 @@ export default function JournalsPage() {
           </Button>
         ) : null,
     },
-  ];
+  ]
 
   return (
     <Content style={{ padding: '24px', minHeight: '100vh' }}>
@@ -378,5 +378,5 @@ export default function JournalsPage() {
         </Card>
       </div>
     </Content>
-  );
-} 
+  )
+}

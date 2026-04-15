@@ -1,10 +1,10 @@
-'use client';
+'use client'
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { useTranslation } from '@/utils/useTranslation';
-import axios from 'axios';
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { useTranslation } from '@/utils/useTranslation'
+import axios from 'axios'
 import {
   Layout,
   Card,
@@ -19,19 +19,19 @@ import {
   Alert,
   Spin,
   Divider,
-} from 'antd';
+} from 'antd'
 import {
   UserOutlined,
   LockOutlined,
   GoogleOutlined,
   WindowsOutlined,
   LoadingOutlined,
-} from '@ant-design/icons';
+} from '@ant-design/icons'
 
-const { Title, Text, Paragraph } = Typography;
-const { Content } = Layout;
+const { Title, Text, Paragraph } = Typography
+const { Content } = Layout
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 interface LoginLinks {
   google_login: string;
@@ -51,13 +51,13 @@ interface LoginResponse {
 
 const fetchLoginLinksAPI = async (): Promise<LoginLinks> => {
   try {
-    const response = await axios.get(`${API_URL}/api/login/`);
-    return response.data;
+    const response = await axios.get(`${API_URL}/api/login/`)
+    return response.data
   } catch (error) {
-    console.error('Login fetch error:', error);
-    throw new Error('Failed to load login options');
+    console.error('Login fetch error:', error)
+    throw new Error('Failed to load login options')
   }
-};
+}
 
 const loginWithCredentialsAPI = async (
   formData: LoginFormData,
@@ -66,27 +66,27 @@ const loginWithCredentialsAPI = async (
     const response = await axios.post(`${API_URL}/api/token-login/`, {
       username: formData.username,
       password: formData.password,
-    });
-    return response.data;
+    })
+    return response.data
   } catch (error: any) {
-    console.error('Login failed:', error);
+    console.error('Login failed:', error)
     if (error.response?.data) {
-      const errorData = error.response.data;
+      const errorData = error.response.data
       if (errorData.non_field_errors) {
-        throw new Error(errorData.non_field_errors[0]);
+        throw new Error(errorData.non_field_errors[0])
       } else if (errorData.username) {
-        throw new Error(`Username error: ${errorData.username[0]}`);
+        throw new Error(`Username error: ${errorData.username[0]}`)
       } else if (errorData.password) {
-        throw new Error(`Password error: ${errorData.password[0]}`);
+        throw new Error(`Password error: ${errorData.password[0]}`)
       } else if (errorData.detail) {
-        throw new Error(errorData.detail);
+        throw new Error(errorData.detail)
       }
     }
     throw new Error(
       'Login failed. Please check your credentials and try again.',
-    );
+    )
   }
-};
+}
 
 const testAuthTokenAPI = async (token: string): Promise<boolean> => {
   try {
@@ -94,29 +94,29 @@ const testAuthTokenAPI = async (token: string): Promise<boolean> => {
       headers: {
         Authorization: `Token ${token}`,
       },
-    });
-    return response.status === 200;
+    })
+    return response.status === 200
   } catch (error) {
-    console.error('Test API call error:', error);
-    return false;
+    console.error('Test API call error:', error)
+    return false
   }
-};
+}
 
 function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [form] = Form.useForm();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { t } = useTranslation();
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [form] = Form.useForm()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const { t } = useTranslation()
   const [loginLinks, setLoginLinks] = useState<LoginLinks>({
     google_login: '',
     microsoft_login: '',
     token_login: '',
-  });
+  })
 
   useEffect(() => {
-    const errorMsg = searchParams.get('error');
+    const errorMsg = searchParams.get('error')
     if (errorMsg) {
       setError(
         errorMsg === 'authentication_failed'
@@ -124,39 +124,39 @@ function LoginForm() {
           : errorMsg === 'token_invalid'
             ? 'Your session has expired. Please log in again.'
             : 'An error occurred. Please try again.',
-      );
+      )
 
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('authToken')
     }
 
     const fetchLoginLinks = async () => {
       try {
-        setIsLoading(true);
-        const data = await fetchLoginLinksAPI();
-        setLoginLinks(data);
+        setIsLoading(true)
+        const data = await fetchLoginLinksAPI()
+        setLoginLinks(data)
       } catch (error: any) {
-        console.error('Login fetch error:', error);
+        console.error('Login fetch error:', error)
         setError(
           error.message || 'An error occurred while setting up login options',
-        );
+        )
         setLoginLinks({
           google_login: 'https://accounts.google.com/o/oauth2/auth',
           microsoft_login:
             'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
           token_login: `${API_URL}/api/token-login/`,
-        });
+        })
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchLoginLinks();
-  }, [searchParams]);
+    fetchLoginLinks()
+  }, [searchParams])
 
   const handleSSOLogin = (provider: string) => {
     if (provider === 'google') {
-      const googleOAuthUrl = 'https://accounts.google.com/o/oauth2/auth';
-      const redirectUri = `${window.location.origin}/sso-callback/google`;
+      const googleOAuthUrl = 'https://accounts.google.com/o/oauth2/auth'
+      const redirectUri = `${window.location.origin}/sso-callback/google`
       const params = new URLSearchParams({
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
         redirect_uri: redirectUri,
@@ -164,21 +164,21 @@ function LoginForm() {
         scope: 'email profile',
         access_type: 'offline',
         prompt: 'consent',
-      });
+      })
       console.log(
         'Google OAuth URL:',
         `${googleOAuthUrl}?${params.toString()}`,
-      );
-      console.log('Google redirect URI:', redirectUri);
-      window.location.href = `${googleOAuthUrl}?${params.toString()}`;
+      )
+      console.log('Google redirect URI:', redirectUri)
+      window.location.href = `${googleOAuthUrl}?${params.toString()}`
     } else if (provider === 'microsoft') {
       const msOAuthUrl =
-        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
-      const redirectUri = `${window.location.origin}/sso-callback/microsoft`;
-      const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || '';
+        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+      const redirectUri = `${window.location.origin}/sso-callback/microsoft`
+      const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || ''
 
-      console.log('Microsoft client ID:', clientId);
-      console.log('Microsoft redirect URI:', redirectUri);
+      console.log('Microsoft client ID:', clientId)
+      console.log('Microsoft redirect URI:', redirectUri)
 
       const params = new URLSearchParams({
         client_id: clientId,
@@ -186,62 +186,62 @@ function LoginForm() {
         response_type: 'code',
         scope: 'openid profile email User.Read',
         response_mode: 'query',
-      });
-      console.log('Microsoft OAuth URL:', `${msOAuthUrl}?${params.toString()}`);
-      window.location.href = `${msOAuthUrl}?${params.toString()}`;
+      })
+      console.log('Microsoft OAuth URL:', `${msOAuthUrl}?${params.toString()}`)
+      window.location.href = `${msOAuthUrl}?${params.toString()}`
     } else {
-      setError(`${provider} login link is not available`);
+      setError(`${provider} login link is not available`)
     }
-  };
+  }
 
   const handleSubmit = async (values: LoginFormData) => {
     try {
-      setIsLoading(true);
-      setError('');
+      setIsLoading(true)
+      setError('')
 
-      console.log('Attempting login to:', `${API_URL}/api/token-login/`);
-      const data = await loginWithCredentialsAPI(values);
+      console.log('Attempting login to:', `${API_URL}/api/token-login/`)
+      const data = await loginWithCredentialsAPI(values)
 
-      console.log('Login successful, token received:', !!data.token);
+      console.log('Login successful, token received:', !!data.token)
       console.log(
         'Token value (first 10 chars):',
         data.token ? data.token.substring(0, 10) + '...' : 'No token',
-      );
+      )
 
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('authToken');
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('authToken')
+      localStorage.removeItem('authToken')
 
-      let cleanToken = data.token;
+      let cleanToken = data.token
       if (cleanToken && cleanToken.startsWith('Token ')) {
-        cleanToken = cleanToken.substring(6);
-        console.log('Removed "Token " prefix from token');
+        cleanToken = cleanToken.substring(6)
+        console.log('Removed "Token " prefix from token')
       }
 
-      localStorage.setItem('authToken', cleanToken);
+      localStorage.setItem('authToken', cleanToken)
 
       console.log('Token stored in localStorage. Current storage state:', {
         authToken: localStorage.getItem('authToken'),
-      });
+      })
 
-      const isTokenValid = await testAuthTokenAPI(cleanToken);
+      const isTokenValid = await testAuthTokenAPI(cleanToken)
       if (isTokenValid) {
-        console.log('Test API call successful');
+        console.log('Test API call successful')
       } else {
-        console.warn('Test API call failed');
+        console.warn('Test API call failed')
       }
 
-      router.push('/profile');
+      router.push('/profile')
     } catch (error: any) {
       setError(
         error.message ||
           'An error occurred while trying to log in. Please try again later.',
-      );
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div style={{ width: '100%', maxWidth: 400, margin: '0 auto' }}>
@@ -365,7 +365,7 @@ function LoginForm() {
         </Text>
       </div>
     </div>
-  );
+  )
 }
 
 export default function Login() {
@@ -411,5 +411,5 @@ export default function Login() {
         </div>
       </div>
     </Content>
-  );
+  )
 }

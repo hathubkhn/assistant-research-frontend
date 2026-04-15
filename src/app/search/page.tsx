@@ -1,11 +1,11 @@
-'use client';
+'use client'
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import InterestingButton from '@/components/InterestingButton';
-import DataPagination from '@/app/components/DataPagination';
-import axios from 'axios';
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import InterestingButton from '@/components/InterestingButton'
+import DataPagination from '@/app/components/DataPagination'
+import axios from 'axios'
 import {
   Layout,
   Card,
@@ -20,15 +20,15 @@ import {
   Avatar,
   Empty,
   Tag,
-} from 'antd';
-import { UserOutlined, FileTextOutlined } from '@ant-design/icons';
+} from 'antd'
+import { UserOutlined, FileTextOutlined } from '@ant-design/icons'
 
-const { Title, Text } = Typography;
-const { Search } = Input;
-const { Content } = Layout;
-const { Option } = Select;
+const { Title, Text } = Typography
+const { Search } = Input
+const { Content } = Layout
+const { Option } = Select
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 interface UserResult {
   id: number;
@@ -82,37 +82,37 @@ const performSearchAPI = async (
       type: params.type,
       page: params.page.toString(),
       pageSize: params.pageSize.toString(),
-    });
+    })
 
     const response = await axios.get(
       `${API_URL}/api/search/?${queryParams.toString()}`,
-    );
-    return response.data;
+    )
+    return response.data
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('Search error:', error)
     throw new Error(
       'An error occurred while searching. Please try again later.',
-    );
+    )
   }
-};
+}
 
 function SearchPageContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const queryParam = searchParams.get('query') || '';
-  const typeParam = searchParams.get('type') || 'all';
-  const pageParam = searchParams.get('page') || '1';
-  const sizeParam = searchParams.get('pageSize') || '10';
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const queryParam = searchParams.get('query') || ''
+  const typeParam = searchParams.get('type') || 'all'
+  const pageParam = searchParams.get('page') || '1'
+  const sizeParam = searchParams.get('pageSize') || '10'
 
-  const [searchQuery, setSearchQuery] = useState(queryParam);
-  const [searchType, setSearchType] = useState(typeParam);
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [currentPage, setCurrentPage] = useState(parseInt(pageParam, 10));
-  const [pageSize, setPageSize] = useState(parseInt(sizeParam, 10));
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [searchQuery, setSearchQuery] = useState(queryParam)
+  const [searchType, setSearchType] = useState(typeParam)
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [currentPage, setCurrentPage] = useState(parseInt(pageParam, 10))
+  const [pageSize, setPageSize] = useState(parseInt(sizeParam, 10))
+  const [totalItems, setTotalItems] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
 
   useEffect(() => {
     if (queryParam) {
@@ -121,9 +121,9 @@ function SearchPageContent() {
         typeParam,
         parseInt(pageParam, 10),
         parseInt(sizeParam, 10),
-      );
+      )
     }
-  }, [queryParam, typeParam, pageParam, sizeParam]);
+  }, [queryParam, typeParam, pageParam, sizeParam])
 
   const performSearch = async (
     query: string,
@@ -131,66 +131,66 @@ function SearchPageContent() {
     page: number = 1,
     size: number = pageSize,
   ) => {
-    setLoading(true);
-    setError('');
+    setLoading(true)
+    setError('')
     try {
       const data = await performSearchAPI({
         query,
         type,
         page,
         pageSize: size,
-      });
-      setResults(data.results.papers || []);
+      })
+      setResults(data.results.papers || [])
 
       if (data.pagination) {
-        setTotalItems(data.pagination.totalItems);
-        setTotalPages(data.pagination.totalPages);
-        setCurrentPage(data.pagination.page);
+        setTotalItems(data.pagination.totalItems)
+        setTotalPages(data.pagination.totalPages)
+        setCurrentPage(data.pagination.page)
       }
     } catch (err: any) {
       setError(
         err.message ||
           'An error occurred while searching. Please try again later.',
-      );
+      )
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleSearch = (value: string) => {
-    if (!value.trim()) return;
+    if (!value.trim()) return
 
-    setSearchQuery(value);
+    setSearchQuery(value)
     router.push(
       `/search?query=${encodeURIComponent(value)}&type=${searchType}&page=1&pageSize=${pageSize}`,
-    );
-    performSearch(value, searchType, 1, pageSize);
-  };
+    )
+    performSearch(value, searchType, 1, pageSize)
+  }
 
   const handleTypeChange = (newType: string) => {
-    setSearchType(newType);
+    setSearchType(newType)
 
     if (searchQuery.trim()) {
       router.push(
         `/search?query=${encodeURIComponent(searchQuery)}&type=${newType}&page=1&pageSize=${pageSize}`,
-      );
-      performSearch(searchQuery, newType, 1, pageSize);
+      )
+      performSearch(searchQuery, newType, 1, pageSize)
     }
-  };
+  }
 
   const handlePageChange = (newPage: number, newPageSize: number) => {
-    setCurrentPage(newPage);
+    setCurrentPage(newPage)
     if (newPageSize !== pageSize) {
-      setPageSize(newPageSize);
+      setPageSize(newPageSize)
     }
 
     router.push(
       `/search?query=${encodeURIComponent(searchQuery)}&type=${searchType}&page=${newPage}&pageSize=${newPageSize}`,
-    );
-    performSearch(searchQuery, searchType, newPage, newPageSize);
+    )
+    performSearch(searchQuery, searchType, newPage, newPageSize)
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const renderUserResult = (result: UserResult) => (
     <Card
@@ -226,7 +226,7 @@ function SearchPageContent() {
         </Col>
       </Row>
     </Card>
-  );
+  )
 
   const renderPaperResult = (result: PaperResult) => (
     <Card
@@ -267,7 +267,7 @@ function SearchPageContent() {
         </Col>
       </Row>
     </Card>
-  );
+  )
 
   return (
     <Content
@@ -375,7 +375,7 @@ function SearchPageContent() {
         </Card>
       </div>
     </Content>
-  );
+  )
 }
 
 export default function SearchPage() {
@@ -404,5 +404,5 @@ export default function SearchPage() {
     >
       <SearchPageContent />
     </Suspense>
-  );
+  )
 }

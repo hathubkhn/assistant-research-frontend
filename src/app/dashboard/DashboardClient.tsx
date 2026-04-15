@@ -1,21 +1,21 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/utils/useTranslation';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { useTranslation } from '@/utils/useTranslation'
+import axios from 'axios'
 import {
   BarChart, Bar, XAxis,
   YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, Cell
-} from 'recharts';
-import { Button, Card, Col, Row, Space, Typography, Select, DatePicker, Tag } from 'antd';
-import dayjs from 'dayjs';
+  ResponsiveContainer, Cell,
+} from 'recharts'
+import { Button, Card, Col, Row, Space, Typography, Select, DatePicker, Tag } from 'antd'
+import dayjs from 'dayjs'
 
-const { Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography
 
-const COLORS = ['#d9363e', '#ff474c', '#f87171', '#fca5a5', '#ef4444', '#b91c1c', '#dc2626', '#991b1b', '#7f1d1d', '#f43f5e'];
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const COLORS = ['#d9363e', '#ff474c', '#f87171', '#fca5a5', '#ef4444', '#b91c1c', '#dc2626', '#991b1b', '#7f1d1d', '#f43f5e']
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 interface DashboardData {
   paper_count: number;
@@ -74,266 +74,266 @@ interface FetchFilteredPapersParams {
 }
 
 const formatDate = (date: Date): string => {
-  return date.toISOString().split('T')[0];
-};
+  return date.toISOString().split('T')[0]
+}
 
 const getDefaultStartDate = (): string => {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  return formatDate(thirtyDaysAgo);
-};
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  return formatDate(thirtyDaysAgo)
+}
 
 const getDefaultEndDate = (): string => {
-  return formatDate(new Date());
-};
+  return formatDate(new Date())
+}
 
 // Add debounce utility
 const debounce = (func: Function, wait: number) => {
-  let timeout: NodeJS.Timeout;
+  let timeout: NodeJS.Timeout
   return function executedFunction(...args: any[]) {
     const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
+      clearTimeout(timeout)
+      func(...args)
+    }
+    clearTimeout(timeout)
+    timeout = setTimeout(later, wait)
+  }
+}
 
 // API Functions
 const fetchDashboardData = async (params: FetchDashboardParams): Promise<DashboardData> => {
-  const { startDate, endDate, period } = params;
+  const { startDate, endDate, period } = params
 
   try {
     const response = await axios.get(
-      `${API_URL}/api/dashboard/?startDate=${startDate}&endDate=${endDate}&period=${period}`
-    );
-    return response.data;
+      `${API_URL}/api/dashboard/?startDate=${startDate}&endDate=${endDate}&period=${period}`,
+    )
+    return response.data
   } catch (error: any) {
-    throw new Error(`Error fetching dashboard data: ${error.response?.status} ${error.response?.statusText || error.message}`);
+    throw new Error(`Error fetching dashboard data: ${error.response?.status} ${error.response?.statusText || error.message}`)
   }
-};
+}
 
 const fetchTasksList = async (): Promise<Task[]> => {
   try {
-    const response = await axios.get(`${API_URL}/api/tasks/`);
-    return response.data.results || response.data || [];
+    const response = await axios.get(`${API_URL}/api/tasks/`)
+    return response.data.results || response.data || []
   } catch (error: any) {
-    throw new Error(`Error fetching tasks: ${error.response?.status} ${error.response?.statusText || error.message}`);
+    throw new Error(`Error fetching tasks: ${error.response?.status} ${error.response?.statusText || error.message}`)
   }
-};
+}
 
 const fetchFilteredPapers = async (params: FetchFilteredPapersParams): Promise<Paper[]> => {
-  const { startDate, endDate, taskIds = [] } = params;
+  const { startDate, endDate, taskIds = [] } = params
 
   try {
     const queryParams = new URLSearchParams({
       startDate,
       endDate,
-      ...(taskIds.length > 0 && { tasks: taskIds.join(',') })
-    });
+      ...(taskIds.length > 0 && { tasks: taskIds.join(',') }),
+    })
 
-    const response = await axios.get(`${API_URL}/api/papers/?${queryParams}`);
-    return response.data?.results || [];
+    const response = await axios.get(`${API_URL}/api/papers/?${queryParams}`)
+    return response.data?.results || []
   } catch (error: any) {
-    throw new Error(`Error fetching filtered papers: ${error.response?.status} ${error.response?.statusText || error.message}`);
+    throw new Error(`Error fetching filtered papers: ${error.response?.status} ${error.response?.statusText || error.message}`)
   }
-};
+}
 
 
 
 export default function Dashboard() {
-  const router = useRouter();
-  const { t } = useTranslation('dashboard');
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
-  const [papers, setPapers] = useState<any[]>([]);
-  const [filteredPapers, setFilteredPapers] = useState<any[]>([]);
-  const [tasks, setTasks] = useState<any[]>([]);
+  const router = useRouter()
+  const { t } = useTranslation('dashboard')
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([])
+  const [papers, setPapers] = useState<any[]>([])
+  const [filteredPapers, setFilteredPapers] = useState<any[]>([])
+  const [tasks, setTasks] = useState<any[]>([])
 
-  const [startDate, setStartDate] = useState(getDefaultStartDate());
-  const [endDate, setEndDate] = useState(getDefaultEndDate());
-  const [period, setPeriod] = useState('daily');
+  const [startDate, setStartDate] = useState(getDefaultStartDate())
+  const [endDate, setEndDate] = useState(getDefaultEndDate())
+  const [period, setPeriod] = useState('daily')
 
-  const [paperCountDetail, setPaperCountDetail] = useState<any[]>([]);
-  const [papersPerDataset, setPapersPerDataset] = useState<any[]>([]);
-  const [papersPerTask, setPapersPerTask] = useState<any[]>([]);
-  const [trendingTasks, setTrendingTasks] = useState<any[]>([]);
+  const [paperCountDetail, setPaperCountDetail] = useState<any[]>([])
+  const [papersPerDataset, setPapersPerDataset] = useState<any[]>([])
+  const [papersPerTask, setPapersPerTask] = useState<any[]>([])
+  const [trendingTasks, setTrendingTasks] = useState<any[]>([])
 
-  const [isLoadingPaperChart, setIsLoadingPaperChart] = useState(true);
-  const [isLoadingTaskChart, setIsLoadingTaskChart] = useState(true);
-  const [isLoadingDatasetChart, setIsLoadingDatasetChart] = useState(true);
-  const [isLoadingTrendingTasks, setIsLoadingTrendingTasks] = useState(true);
-  const [isLoadingSummaryStats, setIsLoadingSummaryStats] = useState(true);
-  const [isLoadingPapersList, setIsLoadingPapersList] = useState(true);
-  const [isLoadingTasksList, setIsLoadingTasksList] = useState(true);
+  const [isLoadingPaperChart, setIsLoadingPaperChart] = useState(true)
+  const [isLoadingTaskChart, setIsLoadingTaskChart] = useState(true)
+  const [isLoadingDatasetChart, setIsLoadingDatasetChart] = useState(true)
+  const [isLoadingTrendingTasks, setIsLoadingTrendingTasks] = useState(true)
+  const [isLoadingSummaryStats, setIsLoadingSummaryStats] = useState(true)
+  const [isLoadingPapersList, setIsLoadingPapersList] = useState(true)
+  const [isLoadingTasksList, setIsLoadingTasksList] = useState(true)
 
   const [summaryStats, setSummaryStats] = useState({
     paperCount: 0,
-    datasetCount: 0
-  });
+    datasetCount: 0,
+  })
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [papersPerPage, setPapersPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1)
+  const [papersPerPage, setPapersPerPage] = useState(5)
 
 
 
   const loadDashboardData = async () => {
-    setIsLoadingSummaryStats(true);
-    setIsLoadingPaperChart(true);
-    setIsLoadingTaskChart(true);
-    setIsLoadingDatasetChart(true);
-    setIsLoadingTrendingTasks(true);
+    setIsLoadingSummaryStats(true)
+    setIsLoadingPaperChart(true)
+    setIsLoadingTaskChart(true)
+    setIsLoadingDatasetChart(true)
+    setIsLoadingTrendingTasks(true)
 
     try {
-      const data = await fetchDashboardData({ startDate, endDate, period });
+      const data = await fetchDashboardData({ startDate, endDate, period })
 
       try {
         setSummaryStats({
           paperCount: data.paper_count || 0,
-          datasetCount: data.dataset_count || 0
-        });
-        setIsLoadingSummaryStats(false);
+          datasetCount: data.dataset_count || 0,
+        })
+        setIsLoadingSummaryStats(false)
       } catch (error) {
-        console.error('Error processing summary stats:', error);
-        setIsLoadingSummaryStats(false);
+        console.error('Error processing summary stats:', error)
+        setIsLoadingSummaryStats(false)
       }
 
       try {
         const transformedData = (data.paper_count_detail || []).map((item: any, index: number) => {
-          let formattedPeriod = '';
+          let formattedPeriod = ''
 
           if (item.period && item.period.start) {
             const formatters = {
               daily: (v: { start: string, end: string }) => {
-                const date = new Date(v.start);
-                return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+                const date = new Date(v.start)
+                return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
               },
               weekly: (v: { start: string, end: string }) => {
-                const startDate = new Date(v.start);
-                const endDate = new Date(v.end);
-                const startFormatted = startDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
-                const endFormatted = endDate.getDate().toString().padStart(2, '0');
-                return `${startFormatted}-${endFormatted}`;
+                const startDate = new Date(v.start)
+                const endDate = new Date(v.end)
+                const startFormatted = startDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
+                const endFormatted = endDate.getDate().toString().padStart(2, '0')
+                return `${startFormatted}-${endFormatted}`
               },
               monthly: (v: { start: string, end: string }) => {
-                const date = new Date(v.start);
-                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                const date = new Date(v.start)
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
               },
               yearly: (v: { start: string, end: string }) => {
-                return v.start.split('-')[0];
-              }
-            };
+                return v.start.split('-')[0]
+              },
+            }
 
             try {
-              const formatter = formatters[period as keyof typeof formatters];
-              formattedPeriod = formatter ? formatter(item.period) : item.period.start;
+              const formatter = formatters[period as keyof typeof formatters]
+              formattedPeriod = formatter ? formatter(item.period) : item.period.start
             } catch (error) {
-              console.error('Error formatting period:', error, item.period);
-              formattedPeriod = item.period.start;
+              console.error('Error formatting period:', error, item.period)
+              formattedPeriod = item.period.start
             }
           } else {
-            formattedPeriod = `Period ${index + 1}`;
+            formattedPeriod = `Period ${index + 1}`
           }
 
           return {
             ...item,
             periodDisplay: formattedPeriod,
             periodIndex: index,
-            originalPeriod: item.period
-          };
-        });
+            originalPeriod: item.period,
+          }
+        })
 
-        setPaperCountDetail(transformedData);
-        setIsLoadingPaperChart(false);
+        setPaperCountDetail(transformedData)
+        setIsLoadingPaperChart(false)
       } catch (error) {
-        console.error('Error processing paper count data:', error);
-        setIsLoadingPaperChart(false);
+        console.error('Error processing paper count data:', error)
+        setIsLoadingPaperChart(false)
       }
 
       try {
-        setPapersPerTask(data.papers_per_task || []);
-        setIsLoadingTaskChart(false);
+        setPapersPerTask(data.papers_per_task || [])
+        setIsLoadingTaskChart(false)
       } catch (error) {
-        console.error('Error processing tasks chart data:', error);
-        setIsLoadingTaskChart(false);
+        console.error('Error processing tasks chart data:', error)
+        setIsLoadingTaskChart(false)
       }
 
       try {
-        setPapersPerDataset(data.papers_per_dataset || []);
-        setIsLoadingDatasetChart(false);
+        setPapersPerDataset(data.papers_per_dataset || [])
+        setIsLoadingDatasetChart(false)
       } catch (error) {
-        console.error('Error processing datasets chart data:', error);
-        setIsLoadingDatasetChart(false);
+        console.error('Error processing datasets chart data:', error)
+        setIsLoadingDatasetChart(false)
       }
 
       try {
-        setTrendingTasks(data.trending_tasks || []);
-        setIsLoadingTrendingTasks(false);
+        setTrendingTasks(data.trending_tasks || [])
+        setIsLoadingTrendingTasks(false)
       } catch (error) {
-        console.error('Error processing trending tasks:', error);
-        setIsLoadingTrendingTasks(false);
+        console.error('Error processing trending tasks:', error)
+        setIsLoadingTrendingTasks(false)
       }
     } catch (error: any) {
-      console.error(error.message);
-      setIsLoadingSummaryStats(false);
-      setIsLoadingPaperChart(false);
-      setIsLoadingTaskChart(false);
-      setIsLoadingDatasetChart(false);
-      setIsLoadingTrendingTasks(false);
+      console.error(error.message)
+      setIsLoadingSummaryStats(false)
+      setIsLoadingPaperChart(false)
+      setIsLoadingTaskChart(false)
+      setIsLoadingDatasetChart(false)
+      setIsLoadingTrendingTasks(false)
     }
-  };
+  }
 
   useEffect(() => {
-    loadDashboardData();
-  }, [startDate, endDate, period]);
+    loadDashboardData()
+  }, [startDate, endDate, period])
 
   const loadTasksList = async () => {
     try {
-      setIsLoadingTasksList(true);
-      const tasksData = await fetchTasksList();
-      setTasks(tasksData);
+      setIsLoadingTasksList(true)
+      const tasksData = await fetchTasksList()
+      setTasks(tasksData)
     } catch (error: any) {
-      console.error(error.message);
-      setTasks([]);
+      console.error(error.message)
+      setTasks([])
     } finally {
-      setIsLoadingTasksList(false);
+      setIsLoadingTasksList(false)
     }
-  };
+  }
 
   useEffect(() => {
-    loadTasksList();
-    loadFilteredPapers([]);
-  }, []);
+    loadTasksList()
+    loadFilteredPapers([])
+  }, [])
 
   const loadFilteredPapers = async (taskIds: string[] = []) => {
     try {
-      setIsLoadingPapersList(true);
+      setIsLoadingPapersList(true)
       const papersData = await fetchFilteredPapers({
         startDate,
         endDate,
-        taskIds
-      });
-      setPapers(papersData);
-      setFilteredPapers(papersData);
+        taskIds,
+      })
+      setPapers(papersData)
+      setFilteredPapers(papersData)
     } catch (error: any) {
-      console.error(error.message);
-      setPapers([]);
-      setFilteredPapers([]);
+      console.error(error.message)
+      setPapers([])
+      setFilteredPapers([])
     } finally {
-      setIsLoadingPapersList(false);
+      setIsLoadingPapersList(false)
     }
-  };
+  }
 
   const debouncedTaskFilter = useCallback(
     debounce((taskIds: string[]) => {
-      loadFilteredPapers(taskIds);
+      loadFilteredPapers(taskIds)
     }, 300),
-    [startDate, endDate]
-  );
+    [startDate, endDate],
+  )
 
   useEffect(() => {
-    debouncedTaskFilter(selectedTasks);
-  }, [selectedTasks, debouncedTaskFilter]);
+    debouncedTaskFilter(selectedTasks)
+  }, [selectedTasks, debouncedTaskFilter])
 
   const createSlug = (title: string): string => {
     return title
@@ -341,40 +341,40 @@ export default function Dashboard() {
       .replace(/[^\w\s-]/g, '') // Remove special characters
       .replace(/\s+/g, '-')     // Replace spaces with hyphens
       .replace(/--+/g, '-')     // Replace multiple hyphens with single hyphen
-      .trim();                  // Trim whitespace
-  };
+      .trim()                  // Trim whitespace
+  }
 
   const viewPaperDetails = (paperId: string) => {
-    const paper = filteredPapers.find(p => p.id === paperId);
+    const paper = filteredPapers.find(p => p.id === paperId)
     if (paper) {
-      router.push(`/papers/${createSlug(paper.title)}`);
+      router.push(`/papers/${createSlug(paper.title)}`)
     }
-  };
+  }
 
   const taskChartData = papersPerTask.slice(0, 5).map((item, index) => ({
     id: item.id,
     name: item.name,
     count: item.filtered_paper_count || 0,
-    fill: COLORS[index % COLORS.length]
-  }));
+    fill: COLORS[index % COLORS.length],
+  }))
 
   const datasetChartData = papersPerDataset.slice(0, 5).map((item, index) => ({
     id: item.id,
     name: item.name,
     count: item.filtered_paper_count || 0,
-    fill: COLORS[index % COLORS.length]
-  }));
+    fill: COLORS[index % COLORS.length],
+  }))
 
-  const indexOfLastPaper = currentPage * papersPerPage;
-  const indexOfFirstPaper = indexOfLastPaper - papersPerPage;
-  const currentPapers = filteredPapers.slice(indexOfFirstPaper, indexOfLastPaper);
-  const totalPages = Math.ceil(filteredPapers.length / papersPerPage);
+  const indexOfLastPaper = currentPage * papersPerPage
+  const indexOfFirstPaper = indexOfLastPaper - papersPerPage
+  const currentPapers = filteredPapers.slice(indexOfFirstPaper, indexOfLastPaper)
+  const totalPages = Math.ceil(filteredPapers.length / papersPerPage)
 
   const paginate = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
+      setCurrentPage(pageNumber)
     }
-  };
+  }
 
   return (
     <div className='container mx-auto p-4'>
@@ -386,15 +386,15 @@ export default function Dashboard() {
               <DatePicker.RangePicker
                 value={[
                   startDate ? dayjs(startDate) : null,
-                  endDate ? dayjs(endDate) : null
+                  endDate ? dayjs(endDate) : null,
                 ]}
                 onChange={(dates) => {
                   if (dates) {
-                    setStartDate(dates[0] ? dates[0].format('YYYY-MM-DD') : getDefaultStartDate());
-                    setEndDate(dates[1] ? dates[1].format('YYYY-MM-DD') : getDefaultEndDate());
+                    setStartDate(dates[0] ? dates[0].format('YYYY-MM-DD') : getDefaultStartDate())
+                    setEndDate(dates[1] ? dates[1].format('YYYY-MM-DD') : getDefaultEndDate())
                   } else {
-                    setStartDate(getDefaultStartDate());
-                    setEndDate(getDefaultEndDate());
+                    setStartDate(getDefaultStartDate())
+                    setEndDate(getDefaultEndDate())
                   }
                 }}
                 style={{ width: '100%' }}
@@ -421,8 +421,8 @@ export default function Dashboard() {
               <Button
                 type='primary'
                 onClick={() => {
-                  setStartDate(getDefaultStartDate());
-                  setEndDate(getDefaultEndDate());
+                  setStartDate(getDefaultStartDate())
+                  setEndDate(getDefaultEndDate())
                 }}
                 style={{ width: '100%' }}
               >
@@ -589,7 +589,7 @@ export default function Dashboard() {
                 }
                 options={tasks.map(task => ({
                   value: task.id,
-                  label: task.name || task.title
+                  label: task.name || task.title,
                 }))}
                 notFoundContent={isLoadingTasksList ? 'Loading...' : 'No tasks found'}
               />
@@ -648,7 +648,7 @@ export default function Dashboard() {
                           color: '#1890ff',
                           cursor: 'pointer',
                           fontSize: '18px',
-                          fontWeight: 600
+                          fontWeight: 600,
                         }}
                       >
                         {paper.title}
@@ -701,8 +701,8 @@ export default function Dashboard() {
                           <Select
                             value={papersPerPage}
                             onChange={(value) => {
-                              setPapersPerPage(value);
-                              setCurrentPage(1);
+                              setPapersPerPage(value)
+                              setCurrentPage(1)
                             }}
                             size='small'
                             style={{ width: 80 }}
@@ -746,15 +746,15 @@ export default function Dashboard() {
 
                             <div style={{ display: 'none' }}>
                               {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
-                                let pageToShow;
+                                let pageToShow
                                 if (totalPages <= 5) {
-                                  pageToShow = index + 1;
+                                  pageToShow = index + 1
                                 } else if (currentPage <= 3) {
-                                  pageToShow = index + 1;
+                                  pageToShow = index + 1
                                 } else if (currentPage >= totalPages - 2) {
-                                  pageToShow = totalPages - 4 + index;
+                                  pageToShow = totalPages - 4 + index
                                 } else {
-                                  pageToShow = currentPage - 2 + index;
+                                  pageToShow = currentPage - 2 + index
                                 }
 
                                 if (pageToShow > 0 && pageToShow <= totalPages) {
@@ -767,9 +767,9 @@ export default function Dashboard() {
                                     >
                                       {pageToShow}
                                     </Button>
-                                  );
+                                  )
                                 }
-                                return null;
+                                return null
                               })}
                             </div>
 
@@ -808,5 +808,5 @@ export default function Dashboard() {
         </Col>
       </Row>
     </div>
-  );
-} 
+  )
+}

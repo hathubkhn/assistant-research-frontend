@@ -1,11 +1,11 @@
-'use client';
+'use client'
 
-import { getAuthHeaders } from '@/utils/auth';
-import { StarFilled, StarOutlined } from '@ant-design/icons';
-import { Card, Space, Spin } from 'antd';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { getAuthHeaders } from '@/utils/auth'
+import { StarFilled, StarOutlined } from '@ant-design/icons'
+import { Card, Space, Spin } from 'antd'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 interface InterestingButtonProps {
   paperId: string;
@@ -16,64 +16,64 @@ interface InterestingButtonProps {
 const InterestingButton = ({
   paperId,
   initialState = false,
-  onToggle
+  onToggle,
 }: InterestingButtonProps) => {
-  const [isInteresting, setIsInteresting] = useState(initialState);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isInteresting, setIsInteresting] = useState(initialState)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const savedState = localStorage.getItem(`paper-starred-${paperId}`);
+    const savedState = localStorage.getItem(`paper-starred-${paperId}`)
     if (savedState !== null) {
-      const newState = savedState === 'true';
-      setIsInteresting(newState);
+      const newState = savedState === 'true'
+      setIsInteresting(newState)
       if (onToggle && newState !== initialState) {
-        onToggle(newState);
+        onToggle(newState)
       }
     } else {
-      setIsInteresting(initialState);
+      setIsInteresting(initialState)
     }
-  }, [paperId, initialState, onToggle]);
+  }, [paperId, initialState, onToggle])
 
   const updateState = (newState: boolean) => {
-    setIsInteresting(newState);
-    localStorage.setItem(`paper-starred-${paperId}`, String(newState));
-    onToggle?.(newState);
-  };
+    setIsInteresting(newState)
+    localStorage.setItem(`paper-starred-${paperId}`, String(newState))
+    onToggle?.(newState)
+  }
 
   const toggleInteresting = async () => {
-    if (isLoading) return;
+    if (isLoading) return
 
     try {
-      setIsLoading(true);
+      setIsLoading(true)
 
-      const newState = !isInteresting;
-      updateState(newState);
+      const newState = !isInteresting
+      updateState(newState)
 
       const hasToken = localStorage.getItem('authToken') ||
         sessionStorage.getItem('authToken') ||
         localStorage.getItem('token') ||
-        sessionStorage.getItem('token');
+        sessionStorage.getItem('token')
 
       if (!hasToken) {
-        throw new Error('You must be logged in to mark papers as interesting');
+        throw new Error('You must be logged in to mark papers as interesting')
       }
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const method = newState ? 'POST' : 'DELETE';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL
+      const method = newState ? 'POST' : 'DELETE'
       const endpoint = newState
         ? `/api/papers/mark-interesting/${paperId}/`
-        : `/api/papers/${paperId}/unmark-interesting/`;
+        : `/api/papers/${paperId}/unmark-interesting/`
 
       await axios({
         method,
         url: `${API_URL}${endpoint}`,
         headers: getAuthHeaders(true) as Record<string, string>,
-        withCredentials: true
-      });
+        withCredentials: true,
+      })
 
-      toast.success(newState ? 'Paper added to your interests' : 'Paper removed from your interests');
+      toast.success(newState ? 'Paper added to your interests' : 'Paper removed from your interests')
     } catch (error) {
-      updateState(isInteresting);
+      updateState(isInteresting)
 
       const errorMessage = axios.isAxiosError(error)
         ? error.response?.status === 401
@@ -81,13 +81,13 @@ const InterestingButton = ({
           : error.response?.data?.error || 'Failed to toggle interesting state'
         : error instanceof Error
           ? error.message
-          : 'An error occurred';
+          : 'An error occurred'
 
-      toast.error(errorMessage);
+      toast.error(errorMessage)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <Card
@@ -99,7 +99,7 @@ const InterestingButton = ({
         cursor: isLoading ? 'not-allowed' : 'pointer',
         height: '40px',
         minWidth: '160px',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
       }}
       styles={{
         body: {
@@ -107,8 +107,8 @@ const InterestingButton = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100%'
-        }
+          height: '100%',
+        },
       }}
     >
       <Space align='center' size={8}>
@@ -122,13 +122,13 @@ const InterestingButton = ({
         <span style={{
           color: isInteresting ? '#FFC107' : '#8c8c8c',
           fontWeight: isInteresting ? 500 : 400,
-          fontSize: '14px'
+          fontSize: '14px',
         }}>
           {isInteresting ? 'Interested' : 'Mark as Interesting'}
         </span>
       </Space>
     </Card>
-  );
-};
+  )
+}
 
-export default InterestingButton;
+export default InterestingButton

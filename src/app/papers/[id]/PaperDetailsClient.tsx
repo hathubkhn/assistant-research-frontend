@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import InterestingButton from '@/components/InterestingButton';
+import InterestingButton from '@/components/InterestingButton'
 import {
   ArrowLeftOutlined,
   CopyOutlined,
   DownloadOutlined,
   GithubOutlined,
-  LinkOutlined
-} from '@ant-design/icons';
+  LinkOutlined,
+} from '@ant-design/icons'
 import {
   Alert,
   Button,
@@ -21,27 +21,27 @@ import {
   Space,
   Spin,
   Tag,
-  Typography
-} from 'antd';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+  Typography,
+} from 'antd'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
-const { Title, Paragraph, Text } = Typography;
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const { Title, Paragraph, Text } = Typography
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 async function fetchPaperDetails(paper_id: string): Promise<Paper> {
-  const response = await fetch(`${API_URL}/api/papers/${paper_id}/`);
+  const response = await fetch(`${API_URL}/api/papers/${paper_id}/`)
 
   if (!response.ok) {
     if (response.status === 404) {
-      throw new Error('Paper not found');
+      throw new Error('Paper not found')
     }
-    throw new Error('Failed to fetch paper details');
+    throw new Error('Failed to fetch paper details')
   }
 
-  return await response.json();
+  return await response.json()
 }
 
 interface CitationData {
@@ -117,7 +117,7 @@ const PaperHeader = ({ paper }: { paper: Paper }) => (
       )}
     </Space>
   </Space>
-);
+)
 
 
 const PublicationDetails = ({ paper, onShowBibtex }: { paper: Paper; onShowBibtex: () => void }) => (
@@ -219,7 +219,7 @@ const PublicationDetails = ({ paper, onShowBibtex }: { paper: Paper; onShowBibte
       </Descriptions.Item>
     )}
   </Descriptions>
-);
+)
 
 const PaperAbstract = ({ abstract }: { abstract?: string }) => (
   <>
@@ -228,7 +228,7 @@ const PaperAbstract = ({ abstract }: { abstract?: string }) => (
       {abstract || 'No abstract found.'}
     </Paragraph>
   </>
-);
+)
 
 const PaperDatasets = ({ datasets, router }: { datasets?: Paper['datasets']; router: any }) => (
   <>
@@ -309,7 +309,7 @@ const PaperDatasets = ({ datasets, router }: { datasets?: Paper['datasets']; rou
       <Paragraph style={{ color: '#6b7280' }}>No datasets associated with this paper.</Paragraph>
     )}
   </>
-);
+)
 
 const CitationMetrics = ({ citationsByYear }: { citationsByYear?: CitationData[] }) => (
   <>
@@ -320,7 +320,7 @@ const CitationMetrics = ({ citationsByYear }: { citationsByYear?: CitationData[]
           <BarChart
             data={citationsByYear.map(item => ({
               year: item.year.toString(),
-              citations: item.count
+              citations: item.count,
             }))}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
@@ -337,7 +337,7 @@ const CitationMetrics = ({ citationsByYear }: { citationsByYear?: CitationData[]
       <Paragraph style={{ color: '#6b7280' }}>No citation data available for this paper.</Paragraph>
     )}
   </>
-);
+)
 
 const PaperSection = ({ title, content }: { title: string; content?: string }) => (
   <>
@@ -352,7 +352,7 @@ const PaperSection = ({ title, content }: { title: string; content?: string }) =
       }
     </div>
   </>
-);
+)
 
 const CitingPapers = ({ citingPapers, router }: { citingPapers?: CitingPaper[]; router: any }) => (
   <>
@@ -388,7 +388,7 @@ const CitingPapers = ({ citingPapers, router }: { citingPapers?: CitingPaper[]; 
       <Paragraph style={{ color: '#6b7280' }}>No citing papers found.</Paragraph>
     )}
   </>
-);
+)
 
 const PaperReferences = ({ references }: { references?: string[] }) => (
   <>
@@ -408,39 +408,39 @@ const PaperReferences = ({ references }: { references?: string[] }) => (
       <Paragraph style={{ color: '#6b7280' }}>No references found.</Paragraph>
     )}
   </>
-);
+)
 
 export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
-  const router = useRouter();
-  const [paper, setPaper] = useState<Paper | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showBibtexModal, setShowBibtexModal] = useState(false);
+  const router = useRouter()
+  const [paper, setPaper] = useState<Paper | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [showBibtexModal, setShowBibtexModal] = useState(false)
 
   useEffect(() => {
     const fetchPaper = async () => {
       try {
-        setLoading(true);
-        const data = await fetchPaperDetails(paper_id);
-        setPaper(data);
-        setError(null);
+        setLoading(true)
+        const data = await fetchPaperDetails(paper_id)
+        setPaper(data)
+        setError(null)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-        setPaper(null);
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        setPaper(null)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchPaper();
-  }, [paper_id]);
+    fetchPaper()
+  }, [paper_id])
 
   const copyBibtex = () => {
     if (paper?.bibtex) {
-      navigator.clipboard.writeText(paper.bibtex);
-      toast.success('BibTeX citation copied to clipboard');
+      navigator.clipboard.writeText(paper.bibtex)
+      toast.success('BibTeX citation copied to clipboard')
     }
-  };
+  }
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', minHeight: '100vh' }}>
@@ -456,7 +456,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                   borderColor: '#1890ff',
                   height: '40px',
                   minWidth: '160px',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
                 }}
                 styles={{
                   body: {
@@ -464,8 +464,8 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '100%'
-                  }
+                    height: '100%',
+                  },
                 }}
               >
                 <Space align='center' size={8}>
@@ -484,7 +484,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
           </Space>
         </Space>
       </div>
-    );
+    )
   }
 
   if (error && !loading) {
@@ -502,7 +502,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                   borderColor: '#1890ff',
                   height: '40px',
                   minWidth: '160px',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
                 }}
                 styles={{
                   body: {
@@ -510,8 +510,8 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '100%'
-                  }
+                    height: '100%',
+                  },
                 }}
               >
                 <Space align='center' size={8}>
@@ -530,7 +530,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
           </Space>
         </Space>
       </div>
-    );
+    )
   }
 
   if (!paper && !loading && !error) {
@@ -548,7 +548,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                   borderColor: '#1890ff',
                   height: '40px',
                   minWidth: '160px',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
                 }}
                 styles={{
                   body: {
@@ -556,8 +556,8 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '100%'
-                  }
+                    height: '100%',
+                  },
                 }}
               >
                 <Space align='center' size={8}>
@@ -581,7 +581,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
           </Space>
         </Space>
       </div>
-    );
+    )
   }
 
   return (
@@ -594,7 +594,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
           footer={[
             <Button key='copy' type='primary' icon={<CopyOutlined />} onClick={copyBibtex}>
               Copy to Clipboard
-            </Button>
+            </Button>,
           ]}
         >
           <pre style={{
@@ -605,7 +605,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
             fontSize: '14px',
             fontFamily: 'monospace',
             whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
           }}>
             {paper?.bibtex}
           </pre>
@@ -623,7 +623,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                   borderColor: '#1890ff',
                   height: '40px',
                   minWidth: '160px',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
                 }}
                 styles={{
                   body: {
@@ -631,8 +631,8 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '100%'
-                  }
+                    height: '100%',
+                  },
                 }}
               >
                 <Space align='center' size={8}>
@@ -661,7 +661,7 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                     borderColor: '#16a34a',
                     height: '40px',
                     minWidth: '160px',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
                   }}
                   styles={{
                     body: {
@@ -669,8 +669,8 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: '100%'
-                    }
+                      height: '100%',
+                    },
                   }}
                 >
                   <Space align='center' size={8}>
@@ -712,5 +712,5 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
         </Space>
       </Space>
     </div>
-  );
-} 
+  )
+}

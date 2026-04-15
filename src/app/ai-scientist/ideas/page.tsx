@@ -1,5 +1,5 @@
-import React from 'react';
-import Link from 'next/link';
+import React from 'react'
+import Link from 'next/link'
 
 interface ResearchIdea {
     id: string;
@@ -19,7 +19,7 @@ export default function AllIdeas() {
             description: 'Research into optimizing quantum algorithms for practical applications in cryptography.',
             status: 'active',
             createdAt: '2024-03-15T10:30:00Z',
-            domain: 'Computer Science'
+            domain: 'Computer Science',
         },
         {
             id: '2',
@@ -27,7 +27,7 @@ export default function AllIdeas() {
             description: 'Using machine learning to predict and discover new materials with specific properties.',
             status: 'active',
             createdAt: '2024-03-10T14:20:00Z',
-            domain: 'Materials Science'
+            domain: 'Materials Science',
         },
         {
             id: '3',
@@ -35,7 +35,7 @@ export default function AllIdeas() {
             description: 'Improving climate prediction models with advanced neural network architectures.',
             status: 'completed',
             createdAt: '2024-02-28T09:15:00Z',
-            domain: 'Environmental Science'
+            domain: 'Environmental Science',
         },
         {
             id: '4',
@@ -43,7 +43,7 @@ export default function AllIdeas() {
             description: 'Developing NLP techniques specific to scientific literature analysis.',
             status: 'active',
             createdAt: '2024-02-25T11:45:00Z',
-            domain: 'Computer Science'
+            domain: 'Computer Science',
         },
         {
             id: '5',
@@ -51,7 +51,7 @@ export default function AllIdeas() {
             description: 'Improving the accuracy of protein structure prediction algorithms.',
             status: 'failed',
             createdAt: '2024-02-20T16:30:00Z',
-            domain: 'Biology'
+            domain: 'Biology',
         },
         {
             id: '6',
@@ -59,7 +59,7 @@ export default function AllIdeas() {
             description: 'Researching novel materials and methods for efficient energy storage.',
             status: 'active',
             createdAt: '2024-02-15T13:20:00Z',
-            domain: 'Energy Science'
+            domain: 'Energy Science',
         },
         {
             id: '7',
@@ -67,7 +67,7 @@ export default function AllIdeas() {
             description: 'Developing specialized neural network architectures for analyzing medical images.',
             status: 'completed',
             createdAt: '2024-02-10T09:45:00Z',
-            domain: 'Medical Imaging'
+            domain: 'Medical Imaging',
         },
         {
             id: '8',
@@ -75,9 +75,9 @@ export default function AllIdeas() {
             description: 'Designing and analyzing new quantum-resistant cryptographic protocols.',
             status: 'active',
             createdAt: '2024-02-05T11:30:00Z',
-            domain: 'Computer Science'
-        }
-    ];
+            domain: 'Computer Science',
+        },
+    ]
 
     return (
         <div className='max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto'>
@@ -218,5 +218,5 @@ export default function AllIdeas() {
                 </div>
             </div>
         </div>
-    );
-} 
+    )
+}

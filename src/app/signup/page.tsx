@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import axios from 'axios';
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import axios from 'axios'
 import {
   Layout,
   Card,
@@ -20,7 +20,7 @@ import {
   Divider,
   Select,
   Steps,
-} from 'antd';
+} from 'antd'
 import {
   UserOutlined,
   LockOutlined,
@@ -30,14 +30,14 @@ import {
   TeamOutlined,
   LinkOutlined,
   ExperimentOutlined,
-} from '@ant-design/icons';
+} from '@ant-design/icons'
 
-const { Title, Text, Paragraph } = Typography;
-const { Content } = Layout;
-const { TextArea } = Input;
-const { Step } = Steps;
+const { Title, Text, Paragraph } = Typography
+const { Content } = Layout
+const { TextArea } = Input
+const { Step } = Steps
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 const RESEARCH_AREAS = [
   'Artificial Intelligence',
@@ -60,7 +60,7 @@ const RESEARCH_AREAS = [
   'Augmented Reality',
   'Mobile Computing',
   'Embedded Systems',
-];
+]
 
 interface ProfileData {
   full_name: string;
@@ -111,48 +111,48 @@ const fetchUserProfileAPI = async (
       headers: {
         Authorization: `Token ${token}`,
       },
-    });
-    return response.data;
+    })
+    return response.data
   } catch (error) {
-    console.error('Error fetching profile:', error);
-    throw error;
+    console.error('Error fetching profile:', error)
+    throw error
   }
-};
+}
 
 const updateProfileAPI = async (profileData: ProfileData): Promise<void> => {
   try {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken')
     await axios.patch(`${API_URL}/api/profile/update/`, profileData, {
       headers: {
         Authorization: `Token ${token}`,
       },
-    });
+    })
   } catch (error: any) {
-    console.error('Profile update error:', error);
+    console.error('Profile update error:', error)
     if (error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+      throw new Error(error.response.data.detail)
     }
-    throw new Error('Failed to update profile');
+    throw new Error('Failed to update profile')
   }
-};
+}
 
 const registerUserAPI = async (userData: any): Promise<RegisterResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/api/register/`, userData);
-    return response.data;
+    const response = await axios.post(`${API_URL}/api/register/`, userData)
+    return response.data
   } catch (error: any) {
-    console.error('Registration failed:', error);
+    console.error('Registration failed:', error)
     if (error.response?.data) {
-      const errorData = error.response.data;
+      const errorData = error.response.data
       if (errorData.non_field_errors) {
-        throw new Error(errorData.non_field_errors[0]);
+        throw new Error(errorData.non_field_errors[0])
       }
       // Return the full error data for field-specific errors
-      throw error.response.data;
+      throw error.response.data
     }
-    throw new Error('Registration failed. Please try again.');
+    throw new Error('Registration failed. Please try again.')
   }
-};
+}
 
 const updateProfileAfterRegisterAPI = async (
   token: string,
@@ -163,44 +163,44 @@ const updateProfileAfterRegisterAPI = async (
       headers: {
         Authorization: `Token ${token}`,
       },
-    });
+    })
   } catch (error: any) {
-    console.error('Profile update after registration failed:', error);
+    console.error('Profile update after registration failed:', error)
     if (error.response?.data?.detail) {
-      throw new Error(error.response.data.detail);
+      throw new Error(error.response.data.detail)
     }
-    throw new Error('Failed to update profile after registration');
+    throw new Error('Failed to update profile after registration')
   }
-};
+}
 
 function SignupForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [form] = Form.useForm();
-  const [profileForm] = Form.useForm();
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [form] = Form.useForm()
+  const [profileForm] = Form.useForm()
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [usernameError, setUsernameError] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [usernameError, setUsernameError] = useState('')
+  const [emailError, setEmailError] = useState('')
 
-  const token = searchParams.get('token');
-  const provider = searchParams.get('provider');
-  const isNewUser = searchParams.get('is_new') === 'True';
+  const token = searchParams.get('token')
+  const provider = searchParams.get('provider')
+  const isNewUser = searchParams.get('is_new') === 'True'
 
-  const [isTokenFlow, setIsTokenFlow] = useState(false);
+  const [isTokenFlow, setIsTokenFlow] = useState(false)
   const [selectedResearchAreas, setSelectedResearchAreas] = useState<string[]>(
     [],
-  );
+  )
 
   useEffect(() => {
     if (token) {
-      setIsTokenFlow(true);
+      setIsTokenFlow(true)
 
       const fetchUserProfile = async () => {
         try {
-          const data = await fetchUserProfileAPI(token);
+          const data = await fetchUserProfileAPI(token)
           profileForm.setFieldsValue({
             full_name: data.full_name || '',
             faculty_institute: data.faculty_institute || '',
@@ -208,51 +208,51 @@ function SignupForm() {
             keywords: data.keywords || '',
             position: data.position || '',
             google_scholar_link: data.google_scholar_link || '',
-          });
+          })
 
           if (data.is_profile_completed) {
-            router.push('/dashboard');
+            router.push('/dashboard')
           }
         } catch (error) {
-          console.error('Error fetching profile:', error);
+          console.error('Error fetching profile:', error)
         }
-      };
+      }
 
-      fetchUserProfile();
+      fetchUserProfile()
     }
-  }, [token, router, profileForm]);
+  }, [token, router, profileForm])
 
   const handleProfileSubmit = async (values: ProfileData) => {
     try {
-      setIsLoading(true);
-      setError('');
+      setIsLoading(true)
+      setError('')
 
-      await updateProfileAPI(values);
-      setSuccess(true);
+      await updateProfileAPI(values)
+      setSuccess(true)
       setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
+        router.push('/dashboard')
+      }, 1500)
     } catch (error: any) {
       setError(
         error.message || 'An error occurred while updating your profile',
-      );
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleDirectSignup = async (values: any) => {
     try {
-      setIsLoading(true);
-      setError('');
-      setUsernameError('');
-      setEmailError('');
+      setIsLoading(true)
+      setError('')
+      setUsernameError('')
+      setEmailError('')
 
-      console.log('Starting signup process');
+      console.log('Starting signup process')
 
       if (values.password !== values.password2) {
-        setError('Passwords do not match');
-        return;
+        setError('Passwords do not match')
+        return
       }
 
       const keywords = [
@@ -260,7 +260,7 @@ function SignupForm() {
         ...(values.custom_keywords
           ? values.custom_keywords.split(',').map((k: string) => k.trim())
           : []),
-      ].join(', ');
+      ].join(', ')
 
       const userData = {
         username: values.username,
@@ -275,16 +275,16 @@ function SignupForm() {
         keywords: keywords,
         google_scholar_link: values.google_scholar_link || '',
         bio: values.bio || '',
-      };
+      }
 
-      console.log('Sending user data to API:', userData);
+      console.log('Sending user data to API:', userData)
 
       try {
-        const registerData = await registerUserAPI(userData);
-        console.log('Registration successful');
+        const registerData = await registerUserAPI(userData)
+        console.log('Registration successful')
 
         if (registerData.token) {
-          localStorage.setItem('authToken', registerData.token);
+          localStorage.setItem('authToken', registerData.token)
 
           const profileData = {
             full_name: userData.full_name,
@@ -294,21 +294,21 @@ function SignupForm() {
             keywords: keywords,
             google_scholar_link: userData.google_scholar_link,
             is_profile_completed: true,
-          };
+          }
 
-          await updateProfileAfterRegisterAPI(registerData.token, profileData);
-          console.log('Profile update successful');
+          await updateProfileAfterRegisterAPI(registerData.token, profileData)
+          console.log('Profile update successful')
 
-          setSuccess(true);
+          setSuccess(true)
           setTimeout(() => {
-            router.push('/profile');
-          }, 1500);
+            router.push('/profile')
+          }, 1500)
         } else {
-          console.log('No token received, redirecting to dashboard');
-          setSuccess(true);
+          console.log('No token received, redirecting to dashboard')
+          setSuccess(true)
           setTimeout(() => {
-            router.push('/dashboard');
-          }, 1500);
+            router.push('/dashboard')
+          }, 1500)
         }
       } catch (registrationError: any) {
         // Handle field-specific errors
@@ -320,14 +320,14 @@ function SignupForm() {
             Array.isArray(registrationError.username)
               ? registrationError.username[0]
               : registrationError.username,
-          );
+          )
         }
         if (typeof registrationError === 'object' && registrationError.email) {
           setEmailError(
             Array.isArray(registrationError.email)
               ? registrationError.email[0]
               : registrationError.email,
-          );
+          )
         }
 
         // Handle general errors
@@ -336,7 +336,7 @@ function SignupForm() {
             !registrationError.message.includes('username') &&
             !registrationError.message.includes('email')
           ) {
-            setError(registrationError.message);
+            setError(registrationError.message)
           }
         } else if (typeof registrationError === 'object') {
           const otherErrors = Object.entries(registrationError)
@@ -345,27 +345,27 @@ function SignupForm() {
               ([field, errors]) =>
                 `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`,
             )
-            .join('; ');
+            .join('; ')
 
           if (otherErrors) {
-            setError(`Registration failed: ${otherErrors}`);
+            setError(`Registration failed: ${otherErrors}`)
           }
         }
       }
     } catch (error: any) {
-      console.error('Registration error:', error);
+      console.error('Registration error:', error)
       setError(
         error.message ||
           'An error occurred during registration. Please try again later.',
-      );
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleResearchAreaChange = (checkedValues: string[]) => {
-    setSelectedResearchAreas(checkedValues);
-  };
+    setSelectedResearchAreas(checkedValues)
+  }
 
   if (isTokenFlow) {
     return (
@@ -517,7 +517,7 @@ function SignupForm() {
           </Card>
         </div>
       </Content>
-    );
+    )
   }
 
   return (
@@ -639,11 +639,11 @@ function SignupForm() {
                     ({ getFieldValue }) => ({
                       validator(_, value) {
                         if (!value || getFieldValue('password') === value) {
-                          return Promise.resolve();
+                          return Promise.resolve()
                         }
                         return Promise.reject(
                           new Error('Passwords do not match!'),
-                        );
+                        )
                       },
                     }),
                   ]}
@@ -780,13 +780,13 @@ function SignupForm() {
                             setSelectedResearchAreas([
                               ...selectedResearchAreas,
                               area,
-                            ]);
+                            ])
                           } else {
                             setSelectedResearchAreas(
                               selectedResearchAreas.filter(
                                 (item) => item !== area,
                               ),
-                            );
+                            )
                           }
                         }}
                       >
@@ -844,7 +844,7 @@ function SignupForm() {
         </Card>
       </div>
     </Content>
-  );
+  )
 }
 
 export default function Signup() {
@@ -867,5 +867,5 @@ export default function Signup() {
     >
       <SignupForm />
     </Suspense>
-  );
+  )
 }
