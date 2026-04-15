@@ -349,14 +349,17 @@ export default function MyLibraryPage() {
 
       // Use the new helper method for authenticated requests
       const response = await makeAuthenticatedRequest(
-        `${API_URL}/api/papers/interesting/`,
+        `${API_URL}/api/my-library/?section=interesting`,
       );
       console.log('Interesting papers response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
+        const interestingPaperItems = Array.isArray(data)
+          ? data
+          : data.results || data.data || [];
         // Convert API data format to our Paper format
-        const interestingPapers = data.map((paper: any) => ({
+        const interestingPapers = interestingPaperItems.map((paper: any) => ({
           id: paper.id,
           title: paper.title,
           authors: Array.isArray(paper.authors)
@@ -1217,7 +1220,7 @@ export default function MyLibraryPage() {
     try {
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const endpoint = `/api/papers/mark-downloaded/${paperId}/`;
+      const endpoint = `/api/papers/${paperId}/unmark-downloaded/`;
 
       const headers = getAuthHeaders(true);
 
