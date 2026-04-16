@@ -21,10 +21,7 @@ import {
   Empty,
   Tag,
 } from 'antd';
-import {
-  UserOutlined,
-  FileTextOutlined
-} from '@ant-design/icons';
+import { UserOutlined, FileTextOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -76,20 +73,26 @@ interface SearchResponse {
 }
 
 // API Functions
-const performSearchAPI = async (params: SearchParams): Promise<SearchResponse> => {
+const performSearchAPI = async (
+  params: SearchParams,
+): Promise<SearchResponse> => {
   try {
     const queryParams = new URLSearchParams({
       q: params.query,
       type: params.type,
       page: params.page.toString(),
-      pageSize: params.pageSize.toString()
+      pageSize: params.pageSize.toString(),
     });
 
-    const response = await axios.get(`${API_URL}/api/search?${queryParams.toString()}`);
+    const response = await axios.get(
+      `${API_URL}/api/search/?${queryParams.toString()}`,
+    );
     return response.data;
   } catch (error) {
     console.error('Search error:', error);
-    throw new Error('An error occurred while searching. Please try again later.');
+    throw new Error(
+      'An error occurred while searching. Please try again later.',
+    );
   }
 };
 
@@ -100,7 +103,7 @@ function SearchPageContent() {
   const typeParam = searchParams.get('type') || 'all';
   const pageParam = searchParams.get('page') || '1';
   const sizeParam = searchParams.get('pageSize') || '10';
-  
+
   const [searchQuery, setSearchQuery] = useState(queryParam);
   const [searchType, setSearchType] = useState(typeParam);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -113,15 +116,30 @@ function SearchPageContent() {
 
   useEffect(() => {
     if (queryParam) {
-      performSearch(queryParam, typeParam, parseInt(pageParam, 10), parseInt(sizeParam, 10));
+      performSearch(
+        queryParam,
+        typeParam,
+        parseInt(pageParam, 10),
+        parseInt(sizeParam, 10),
+      );
     }
   }, [queryParam, typeParam, pageParam, sizeParam]);
 
-  const performSearch = async (query: string, type: string, page: number = 1, size: number = pageSize) => {
+  const performSearch = async (
+    query: string,
+    type: string,
+    page: number = 1,
+    size: number = pageSize,
+  ) => {
     setLoading(true);
     setError('');
     try {
-      const data = await performSearchAPI({ query, type, page, pageSize: size });
+      const data = await performSearchAPI({
+        query,
+        type,
+        page,
+        pageSize: size,
+      });
       setResults(data.results.papers || []);
 
       if (data.pagination) {
@@ -130,7 +148,10 @@ function SearchPageContent() {
         setCurrentPage(data.pagination.page);
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred while searching. Please try again later.');
+      setError(
+        err.message ||
+          'An error occurred while searching. Please try again later.',
+      );
     } finally {
       setLoading(false);
     }
@@ -140,7 +161,9 @@ function SearchPageContent() {
     if (!value.trim()) return;
 
     setSearchQuery(value);
-    router.push(`/search?query=${encodeURIComponent(value)}&type=${searchType}&page=1&pageSize=${pageSize}`);
+    router.push(
+      `/search?query=${encodeURIComponent(value)}&type=${searchType}&page=1&pageSize=${pageSize}`,
+    );
     performSearch(value, searchType, 1, pageSize);
   };
 
@@ -148,7 +171,9 @@ function SearchPageContent() {
     setSearchType(newType);
 
     if (searchQuery.trim()) {
-      router.push(`/search?query=${encodeURIComponent(searchQuery)}&type=${newType}&page=1&pageSize=${pageSize}`);
+      router.push(
+        `/search?query=${encodeURIComponent(searchQuery)}&type=${newType}&page=1&pageSize=${pageSize}`,
+      );
       performSearch(searchQuery, newType, 1, pageSize);
     }
   };
@@ -159,7 +184,9 @@ function SearchPageContent() {
       setPageSize(newPageSize);
     }
 
-    router.push(`/search?query=${encodeURIComponent(searchQuery)}&type=${searchType}&page=${newPage}&pageSize=${newPageSize}`);
+    router.push(
+      `/search?query=${encodeURIComponent(searchQuery)}&type=${searchType}&page=${newPage}&pageSize=${newPageSize}`,
+    );
     performSearch(searchQuery, searchType, newPage, newPageSize);
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -171,33 +198,29 @@ function SearchPageContent() {
       style={{ marginBottom: 16 }}
       bodyStyle={{ padding: 16 }}
     >
-      <Row gutter={16} align="middle">
-        <Col flex="none">
-          <Avatar
-            size={64}
-            src={result.avatar_url}
-            icon={<UserOutlined />}
-          >
+      <Row gutter={16} align='middle'>
+        <Col flex='none'>
+          <Avatar size={64} src={result.avatar_url} icon={<UserOutlined />}>
             {!result.avatar_url && result.full_name.charAt(0).toUpperCase()}
           </Avatar>
         </Col>
-        <Col flex="auto">
-          <Space direction="vertical" size="small" style={{ width: '100%' }}>
+        <Col flex='auto'>
+          <Space direction='vertical' size='small' style={{ width: '100%' }}>
             <Link href={`/profile/${result.username}`}>
               <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
                 {result.full_name}
               </Title>
             </Link>
-            <Text type="secondary">
+            <Text type='secondary'>
               {result.position} - {result.faculty_institute}
             </Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>
+            <Text type='secondary' style={{ fontSize: 12 }}>
               {result.keywords}
             </Text>
           </Space>
         </Col>
-        <Col flex="none">
-          <Tag color="blue" icon={<UserOutlined />}>
+        <Col flex='none'>
+          <Tag color='blue' icon={<UserOutlined />}>
             User
           </Tag>
         </Col>
@@ -211,11 +234,17 @@ function SearchPageContent() {
       style={{ marginBottom: 16 }}
       bodyStyle={{ padding: 16 }}
     >
-      <Row justify="space-between" align="top">
-        <Col flex="auto">
-          <Space direction="vertical" size="small" style={{ width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <a href={result.url} target="_blank" rel="noopener noreferrer">
+      <Row justify='space-between' align='top'>
+        <Col flex='auto'>
+          <Space direction='vertical' size='small' style={{ width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+              }}
+            >
+              <a href={result.url} target='_blank' rel='noopener noreferrer'>
                 <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
                   {result.title}
                 </Title>
@@ -225,14 +254,14 @@ function SearchPageContent() {
                 initialState={result.isInteresting}
               />
             </div>
-            <Text type="secondary">{result.authors}</Text>
-            <Text type="secondary">
+            <Text type='secondary'>{result.authors}</Text>
+            <Text type='secondary'>
               <Text strong>{result.journal}</Text> ({result.year})
             </Text>
           </Space>
         </Col>
-        <Col flex="none">
-          <Tag color="green" icon={<FileTextOutlined />}>
+        <Col flex='none'>
+          <Tag color='green' icon={<FileTextOutlined />}>
             Paper
           </Tag>
         </Col>
@@ -241,7 +270,13 @@ function SearchPageContent() {
   );
 
   return (
-    <Content style={{ padding: '24px', minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+    <Content
+      style={{
+        padding: '24px',
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+      }}
+    >
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <Card style={{ marginBottom: 24 }}>
           <Title level={2} style={{ marginBottom: 24 }}>
@@ -251,12 +286,12 @@ function SearchPageContent() {
           <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
             <Col xs={24} md={16}>
               <Search
-                placeholder="Enter search keywords..."
-                size="large"
+                placeholder='Enter search keywords...'
+                size='large'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onSearch={handleSearch}
-                enterButton="Search"
+                enterButton='Search'
               />
             </Col>
             <Col xs={24} md={8}>
@@ -264,20 +299,20 @@ function SearchPageContent() {
                 value={searchType}
                 onChange={handleTypeChange}
                 style={{ width: '100%' }}
-                size="large"
+                size='large'
               >
-                <Option value="all">All</Option>
-                <Option value="users">Users</Option>
-                <Option value="papers">Papers</Option>
+                <Option value='all'>All</Option>
+                <Option value='users'>Users</Option>
+                <Option value='papers'>Papers</Option>
               </Select>
             </Col>
           </Row>
 
           {error && (
             <Alert
-              message="Search Error"
+              message='Search Error'
               description={error}
-              type="error"
+              type='error'
               showIcon
               style={{ marginBottom: 24 }}
             />
@@ -296,18 +331,27 @@ function SearchPageContent() {
 
                     <div style={{ marginBottom: 24 }}>
                       {results.map((result) =>
-                        result.type === 'user' ? renderUserResult(result) : renderPaperResult(result)
+                        result.type === 'user'
+                          ? renderUserResult(result)
+                          : renderPaperResult(result),
                       )}
                     </div>
 
                     {results.length > 0 && (
-                      <Space direction="vertical" style={{ width: '100%', marginTop: 24, marginBottom: 24 }}>
+                      <Space
+                        direction='vertical'
+                        style={{
+                          width: '100%',
+                          marginTop: 24,
+                          marginBottom: 24,
+                        }}
+                      >
                         <DataPagination
                           current={currentPage}
                           total={totalItems}
                           pageSize={pageSize}
                           onChange={handlePageChange}
-                          itemName="results"
+                          itemName='results'
                           loading={loading}
                         />
                       </Space>
@@ -318,7 +362,8 @@ function SearchPageContent() {
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                     description={
                       <span>
-                        No results found<br />
+                        No results found
+                        <br />
                         Try searching with different keywords
                       </span>
                     }
@@ -335,14 +380,29 @@ function SearchPageContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={
-      <Content style={{ padding: '24px', minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-          <Spin size="large" />
-        </div>
-      </Content>
-    }>
+    <Suspense
+      fallback={
+        <Content
+          style={{
+            padding: '24px',
+            minHeight: '100vh',
+            backgroundColor: '#f5f5f5',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '50vh',
+            }}
+          >
+            <Spin size='large' />
+          </div>
+        </Content>
+      }
+    >
       <SearchPageContent />
     </Suspense>
   );
-} 
+}

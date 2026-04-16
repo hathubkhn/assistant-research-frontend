@@ -86,11 +86,11 @@ export default function ResearchAssistantAdmin() {
     };
 
     return (
-        <div className="bg-gray-900 min-h-screen text-white p-6">
-            <div className="max-w-4xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-4xl font-bold">Research Assistant Admin</h1>
-                    <Link href="/research-assistant" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+        <div className='bg-gray-900 min-h-screen text-white p-6'>
+            <div className='max-w-4xl mx-auto'>
+                <div className='flex justify-between items-center mb-8'>
+                    <h1 className='text-4xl font-bold'>Research Assistant Admin</h1>
+                    <Link href='/research-assistant' className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded'>
                         Back to Search
                     </Link>
                 </div>
@@ -101,76 +101,76 @@ export default function ResearchAssistantAdmin() {
                     </div>
                 )}
 
-                <div className="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
-                    <h2 className="text-xl font-semibold mb-4">Add New Research Paper</h2>
+                <div className='bg-gray-800 p-6 rounded-lg shadow-lg mb-8'>
+                    <h2 className='text-xl font-semibold mb-4'>Add New Research Paper</h2>
 
                     <form onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Paper ID</label>
+                                <label className='block text-sm font-medium text-gray-400 mb-1'>Paper ID</label>
                                 <input
-                                    type="text"
-                                    name="paper_id"
+                                    type='text'
+                                    name='paper_id'
                                     value={paperData.paper_id}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white"
-                                    placeholder="Unique identifier (e.g., paper123)"
+                                    className='w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white'
+                                    placeholder='Unique identifier (e.g., paper123)'
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">User ID</label>
+                                <label className='block text-sm font-medium text-gray-400 mb-1'>User ID</label>
                                 <input
-                                    type="text"
-                                    name="user_id"
+                                    type='text'
+                                    name='user_id'
                                     value={paperData.user_id}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white"
+                                    className='w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white'
                                     placeholder="Owner's user ID"
                                 />
                             </div>
                         </div>
 
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
+                        <div className='mb-6'>
+                            <label className='block text-sm font-medium text-gray-400 mb-1'>Title</label>
                             <input
-                                type="text"
-                                name="title"
+                                type='text'
+                                name='title'
                                 value={paperData.title}
                                 onChange={handleChange}
-                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white"
-                                placeholder="Paper title"
+                                className='w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white'
+                                placeholder='Paper title'
                             />
                         </div>
 
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Abstract</label>
+                        <div className='mb-6'>
+                            <label className='block text-sm font-medium text-gray-400 mb-1'>Abstract</label>
                             <textarea
-                                name="abstract"
+                                name='abstract'
                                 value={paperData.abstract}
                                 onChange={handleChange}
                                 rows={5}
-                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white"
-                                placeholder="Paper abstract..."
+                                className='w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white'
+                                placeholder='Paper abstract...'
                             />
                         </div>
 
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Keywords (comma separated)</label>
+                        <div className='mb-6'>
+                            <label className='block text-sm font-medium text-gray-400 mb-1'>Keywords (comma separated)</label>
                             <input
-                                type="text"
+                                type='text'
                                 value={keywordsInput}
                                 onChange={handleKeywordsChange}
-                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white"
-                                placeholder="AI, machine learning, NLP"
+                                className='w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white'
+                                placeholder='AI, machine learning, NLP'
                             />
                         </div>
 
-                        <div className="flex justify-end">
+                        <div className='flex justify-end'>
                             <button
-                                type="submit"
+                                type='submit'
                                 disabled={isLoading}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium disabled:opacity-50"
+                                className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium disabled:opacity-50'
                             >
                                 {isLoading ? 'Adding...' : 'Add Paper'}
                             </button>

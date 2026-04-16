@@ -69,8 +69,8 @@ const DataPagination: React.FC<DataPaginationProps> = ({
 
   return (
     <Space 
-      direction="vertical" 
-      size="middle" 
+      direction='vertical' 
+      size='middle' 
       style={{ 
         width: '100%', 
         justifyContent: 'space-between',

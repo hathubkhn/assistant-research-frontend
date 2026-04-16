@@ -70,10 +70,10 @@ export default function ConferenceDetailPage() {
 
       try {
         setLoading(true);
-        console.log("Fetching conference with ID:", id);
+        console.log('Fetching conference with ID:', id);
 
         const data = await fetchConferenceById(id);
-        console.log("Conference data received:", data);
+        console.log('Conference data received:', data);
 
         setConference(data);
         setPapers(data.papers || []);
@@ -110,7 +110,7 @@ export default function ConferenceDetailPage() {
         minHeight: '60vh',
         padding: '32px'
       }}>
-        <Spin size="large" />
+        <Spin size='large' />
       </div>
     );
   }
@@ -119,13 +119,13 @@ export default function ConferenceDetailPage() {
     return (
       <div style={{ padding: '32px' }}>
         <Alert
-          message="Conference Not Found"
-          description="Conference not found. Please check the URL and try again."
-          type="error"
+          message='Conference Not Found'
+          description='Conference not found. Please check the URL and try again.'
+          type='error'
           showIcon
           action={
-            <Link href="/conferences">
-              <Button type="primary">Go back to Conferences</Button>
+            <Link href='/conferences'>
+              <Button type='primary'>Go back to Conferences</Button>
             </Link>
           }
         />
@@ -155,8 +155,8 @@ export default function ConferenceDetailPage() {
     <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
       {/* Back button */}
       <Space style={{ marginBottom: '24px' }}>
-        <Link href="/conferences">
-          <Button icon={<ArrowLeftOutlined />} type="link">
+        <Link href='/conferences'>
+          <Button icon={<ArrowLeftOutlined />} type='link'>
             Back to Conferences
           </Button>
         </Link>
@@ -164,13 +164,13 @@ export default function ConferenceDetailPage() {
 
       {/* Conference header */}
       <Card style={{ marginBottom: '32px' }}>
-        <Row justify="space-between" align="top" gutter={[16, 16]}>
+        <Row justify='space-between' align='top' gutter={[16, 16]}>
           <Col xs={24} md={18}>
-            <Space direction="vertical" size="small">
+            <Space direction='vertical' size='small'>
               <Title level={1} style={{ marginBottom: 0, color: '#1890ff' }}>
                 {conference.name}
               </Title>
-              <Text type="secondary" style={{ fontSize: '18px' }}>
+              <Text type='secondary' style={{ fontSize: '18px' }}>
                 {conference.abbreviation}
               </Text>
             </Space>
@@ -178,11 +178,11 @@ export default function ConferenceDetailPage() {
           <Col xs={24} md={6} style={{ textAlign: 'right' }}>
             {conference.url && (
               <Button
-                type="primary"
+                type='primary'
                 icon={<ExportOutlined />}
                 href={conference.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                target='_blank'
+                rel='noopener noreferrer'
               >
                 Visit Conference
               </Button>
@@ -194,9 +194,9 @@ export default function ConferenceDetailPage() {
 
         <Row gutter={[24, 16]}>
           <Col xs={24} sm={8}>
-            <Card size="small" style={{ backgroundColor: '#fafafa' }}>
-              <Space direction="vertical" size="small">
-                <Text type="secondary" strong style={{ textTransform: 'uppercase', fontSize: '12px' }}>
+            <Card size='small' style={{ backgroundColor: '#fafafa' }}>
+              <Space direction='vertical' size='small'>
+                <Text type='secondary' strong style={{ textTransform: 'uppercase', fontSize: '12px' }}>
                   Rank
                 </Text>
                 <Tag color={getRankColor(conference.rank)} style={{ fontSize: '14px', fontWeight: 600 }}>
@@ -206,9 +206,9 @@ export default function ConferenceDetailPage() {
             </Card>
           </Col>
           <Col xs={24} sm={8}>
-            <Card size="small" style={{ backgroundColor: '#fafafa' }}>
-              <Space direction="vertical" size="small">
-                <Text type="secondary" strong style={{ textTransform: 'uppercase', fontSize: '12px' }}>
+            <Card size='small' style={{ backgroundColor: '#fafafa' }}>
+              <Space direction='vertical' size='small'>
+                <Text type='secondary' strong style={{ textTransform: 'uppercase', fontSize: '12px' }}>
                   Location
                 </Text>
                 <Text strong>{conference.location || 'Various Locations'}</Text>
@@ -216,9 +216,9 @@ export default function ConferenceDetailPage() {
             </Card>
           </Col>
           <Col xs={24} sm={8}>
-            <Card size="small" style={{ backgroundColor: '#fafafa' }}>
-              <Space direction="vertical" size="small">
-                <Text type="secondary" strong style={{ textTransform: 'uppercase', fontSize: '12px' }}>
+            <Card size='small' style={{ backgroundColor: '#fafafa' }}>
+              <Space direction='vertical' size='small'>
+                <Text type='secondary' strong style={{ textTransform: 'uppercase', fontSize: '12px' }}>
                   Total Papers
                 </Text>
                 <Text strong style={{ fontSize: '18px' }}>{conference.papersCount}</Text>
@@ -230,38 +230,38 @@ export default function ConferenceDetailPage() {
 
       {/* Recent papers */}
       <Card>
-        <Row justify="space-between" align="middle" style={{ marginBottom: '16px' }}>
+        <Row justify='space-between' align='middle' style={{ marginBottom: '16px' }}>
           <Col>
             <Title level={3} style={{ marginBottom: 0 }}>Recent Papers</Title>
           </Col>
           <Col>
-            <Button type="link" onClick={handleViewMorePapers}>
+            <Button type='link' onClick={handleViewMorePapers}>
               View All
             </Button>
           </Col>
         </Row>
 
         {papers.length === 0 ? (
-          <Text type="secondary">No papers found for this conference.</Text>
+          <Text type='secondary'>No papers found for this conference.</Text>
         ) : (
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Space direction='vertical' size='large' style={{ width: '100%' }}>
             {papers.map((paper, index) => (
               <div key={paper.id}>
-                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                <Space direction='vertical' size='small' style={{ width: '100%' }}>
                   <Link href={`/papers/${paper.id}`}>
                     <Text strong style={{ color: '#1890ff', cursor: 'pointer' }}>
                       {paper.title}
                     </Text>
                   </Link>
-                  <Space size="small" wrap>
-                    <Space size="small">
+                  <Space size='small' wrap>
+                    <Space size='small'>
                       <TeamOutlined />
-                      <Text type="secondary">{formatAuthors(paper.authors)}</Text>
+                      <Text type='secondary'>{formatAuthors(paper.authors)}</Text>
                     </Space>
-                    <Text type="secondary">•</Text>
-                    <Space size="small">
+                    <Text type='secondary'>•</Text>
+                    <Space size='small'>
                       <CalendarOutlined />
-                      <Text type="secondary">{paper.year}</Text>
+                      <Text type='secondary'>{paper.year}</Text>
                     </Space>
                   </Space>
                 </Space>

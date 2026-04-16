@@ -71,7 +71,7 @@ export function HomeStatistics() {
 
   return (
     <>
-      <Row gutter={[24, 24]} align="stretch">
+      <Row gutter={[24, 24]} align='stretch'>
         <Col xs={12} sm={12} lg={6}>
           <Card style={{
             height: '100%',
@@ -176,7 +176,7 @@ export function HomeStatistics() {
       {error && (
         <Alert
           message={error}
-          type="error"
+          type='error'
           showIcon
           style={{ marginTop: '16px' }}
         />
