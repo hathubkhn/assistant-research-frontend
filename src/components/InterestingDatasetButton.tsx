@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { getAuthHeaders } from '../utils/auth';
-import { toast } from 'react-hot-toast';
+import { useState, useEffect } from 'react'
+import { getAuthHeaders } from '../utils/auth'
+import { toast } from 'react-hot-toast'
 
 interface InterestingDatasetButtonProps {
     datasetId: string;
@@ -13,113 +13,113 @@ const InterestingDatasetButton = ({
     datasetId,
     initialState = false,
     className = '',
-    onToggle
+    onToggle,
 }: InterestingDatasetButtonProps) => {
-    const [isInteresting, setIsInteresting] = useState(initialState);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isAnimating, setIsAnimating] = useState(false);
+    const [isInteresting, setIsInteresting] = useState(initialState)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isAnimating, setIsAnimating] = useState(false)
 
     // Update state if initialState prop changes
     useEffect(() => {
-        setIsInteresting(initialState);
-    }, [initialState]);
+        setIsInteresting(initialState)
+    }, [initialState])
 
     // Load state from localStorage on component mount
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const interestState = localStorage.getItem(`dataset-starred-${datasetId}`);
+            const interestState = localStorage.getItem(`dataset-starred-${datasetId}`)
             if (interestState !== null) {
-                const newState = interestState === 'true';
-                setIsInteresting(newState);
+                const newState = interestState === 'true'
+                setIsInteresting(newState)
                 // Call the onToggle callback if provided and state is different from initialState
                 if (onToggle && newState !== initialState) {
-                    onToggle(newState);
+                    onToggle(newState)
                 }
             }
         }
-    }, [datasetId, initialState, onToggle]);
+    }, [datasetId, initialState, onToggle])
 
     const toggleInteresting = async () => {
         try {
-            setIsLoading(true);
-            setIsAnimating(true);
+            setIsLoading(true)
+            setIsAnimating(true)
 
             // Optimistically update UI
-            const newState = !isInteresting;
-            setIsInteresting(newState);
+            const newState = !isInteresting
+            setIsInteresting(newState)
 
             // Store state in localStorage to persist across page reloads
             if (typeof window !== 'undefined') {
-                localStorage.setItem(`dataset-starred-${datasetId}`, String(newState));
+                localStorage.setItem(`dataset-starred-${datasetId}`, String(newState))
             }
 
             // Call the onToggle callback if provided
             if (onToggle) {
-                onToggle(newState);
+                onToggle(newState)
             }
 
-            const headers = getAuthHeaders();
+            const headers = getAuthHeaders()
             // Check if user is logged in
             if (typeof window !== 'undefined' &&
                 !(localStorage.getItem('authToken') ||
                     sessionStorage.getItem('authToken') ||
                     localStorage.getItem('token') ||
                     sessionStorage.getItem('token'))) {
-                console.error('No authentication token found');
-                throw new Error('You must be logged in to mark datasets as interesting');
+                console.error('No authentication token found')
+                throw new Error('You must be logged in to mark datasets as interesting')
             }
 
             // Call the API with the appropriate method depending on the new state
-            const method = newState ? 'POST' : 'DELETE';
+            const method = newState ? 'POST' : 'DELETE'
             const endpoint = newState
                 ? `/api/datasets/mark-interesting/${datasetId}/`
-                : `/api/datasets/${datasetId}/unmark-interesting/`;
+                : `/api/datasets/${datasetId}/unmark-interesting/`
 
             const response = await fetch(endpoint, {
                 method,
                 headers,
-                credentials: 'include'
-            });
+                credentials: 'include',
+            })
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.error || 'Failed to toggle interesting state';
+                const errorData = await response.json().catch(() => ({}))
+                const errorMessage = errorData.error || 'Failed to toggle interesting state'
 
                 if (response.status === 401) {
-                    throw new Error('Authentication failed. Please log in again.');
+                    throw new Error('Authentication failed. Please log in again.')
                 }
 
-                throw new Error(errorMessage);
+                throw new Error(errorMessage)
             }
 
             // Success message
-            toast.success(newState ? 'Added to your interests' : 'Removed from your interests');
+            toast.success(newState ? 'Added to your interests' : 'Removed from your interests')
         } catch (error) {
-            console.error('Error toggling interesting state:', error);
-            toast.error(error instanceof Error ? error.message : 'An error occurred');
+            console.error('Error toggling interesting state:', error)
+            toast.error(error instanceof Error ? error.message : 'An error occurred')
 
             // Revert optimistic update on error
-            const revertedState = isInteresting;
-            setIsInteresting(revertedState);
+            const revertedState = isInteresting
+            setIsInteresting(revertedState)
 
             // Update localStorage with the reverted state
             if (typeof window !== 'undefined') {
-                localStorage.setItem(`dataset-starred-${datasetId}`, String(revertedState));
+                localStorage.setItem(`dataset-starred-${datasetId}`, String(revertedState))
             }
 
             // Call the onToggle callback with the reverted state
             if (onToggle) {
-                onToggle(revertedState);
+                onToggle(revertedState)
             }
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
 
             // End animation after slight delay
             setTimeout(() => {
-                setIsAnimating(false);
-            }, 300);
+                setIsAnimating(false)
+            }, 300)
         }
-    };
+    }
 
     return (
         <button
@@ -161,7 +161,7 @@ const InterestingDatasetButton = ({
             )}
             {isInteresting ? 'Interested' : 'Add to Interests'}
         </button>
-    );
-};
+    )
+}
 
-export default InterestingDatasetButton; 
+export default InterestingDatasetButton

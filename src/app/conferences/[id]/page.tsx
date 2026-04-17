@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import axios from 'axios';
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import axios from 'axios'
 import {
   Card,
   Button,
@@ -14,17 +14,17 @@ import {
   Spin,
   Alert,
   Divider,
-  Tag
-} from 'antd';
+  Tag,
+} from 'antd'
 import {
   ArrowLeftOutlined,
   ExportOutlined,
   CalendarOutlined,
-  TeamOutlined
-} from '@ant-design/icons';
+  TeamOutlined,
+} from '@ant-design/icons'
 
-const { Title, Text } = Typography;
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const { Title, Text } = Typography
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 interface Conference {
   id: string;
   name: string;
@@ -45,61 +45,61 @@ interface Paper {
 
 const fetchConferenceById = async (id: string): Promise<Conference & { papers: Paper[] }> => {
   try {
-    const response = await axios.get(`${API_URL}/api/conferences/${id}/`);
-    return response.data;
+    const response = await axios.get(`${API_URL}/api/conferences/${id}/`)
+    return response.data
   } catch (error: any) {
     if (error.response?.status === 404) {
-      throw new Error(`Conference not found with ID: ${id}`);
+      throw new Error(`Conference not found with ID: ${id}`)
     }
-    throw new Error(`Error fetching conference details: ${error.response?.status} ${error.response?.statusText || error.message}`);
+    throw new Error(`Error fetching conference details: ${error.response?.status} ${error.response?.statusText || error.message}`)
   }
-};
+}
 
 export default function ConferenceDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const id = params.id as string;
+  const params = useParams()
+  const router = useRouter()
+  const id = params.id as string
 
-  const [conference, setConference] = useState<Conference | null>(null);
-  const [papers, setPapers] = useState<Paper[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [conference, setConference] = useState<Conference | null>(null)
+  const [papers, setPapers] = useState<Paper[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadConferenceData = async () => {
-      if (!id) return;
+      if (!id) return
 
       try {
-        setLoading(true);
-        console.log('Fetching conference with ID:', id);
+        setLoading(true)
+        console.log('Fetching conference with ID:', id)
 
-        const data = await fetchConferenceById(id);
-        console.log('Conference data received:', data);
+        const data = await fetchConferenceById(id)
+        console.log('Conference data received:', data)
 
-        setConference(data);
-        setPapers(data.papers || []);
+        setConference(data)
+        setPapers(data.papers || [])
       } catch (error: any) {
-        console.error(error.message);
+        console.error(error.message)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadConferenceData();
-  }, [id]);
+    loadConferenceData()
+  }, [id])
 
   const handleViewMorePapers = () => {
-    router.push(`/papers?venueType=conference&venue_id=${id}`);
-  };
+    router.push(`/papers?venueType=conference&venue_id=${id}`)
+  }
 
   const getRankColor = (rank: string) => {
     switch (rank) {
-      case 'A*': return 'purple';
-      case 'A': return 'green';
-      case 'B': return 'blue';
-      case 'C': return 'orange';
-      default: return 'default';
+      case 'A*': return 'purple'
+      case 'A': return 'green'
+      case 'B': return 'blue'
+      case 'C': return 'orange'
+      default: return 'default'
     }
-  };
+  }
 
   if (loading) {
     return (
@@ -108,11 +108,11 @@ export default function ConferenceDetailPage() {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '60vh',
-        padding: '32px'
+        padding: '32px',
       }}>
         <Spin size='large' />
       </div>
-    );
+    )
   }
 
   if (!conference) {
@@ -130,26 +130,26 @@ export default function ConferenceDetailPage() {
           }
         />
       </div>
-    );
+    )
   }
 
   // Format authors for display
   const formatAuthors = (authors: string[] | string): string => {
     if (typeof authors === 'string') {
       try {
-        const parsedAuthors = JSON.parse(authors);
+        const parsedAuthors = JSON.parse(authors)
         if (Array.isArray(parsedAuthors)) {
-          return parsedAuthors.join(', ');
+          return parsedAuthors.join(', ')
         }
-        return authors;
+        return authors
       } catch {
-        return authors;
+        return authors
       }
     } else if (Array.isArray(authors)) {
-      return authors.join(', ');
+      return authors.join(', ')
     }
-    return 'Unknown';
-  };
+    return 'Unknown'
+  }
 
   return (
     <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -272,5 +272,5 @@ export default function ConferenceDetailPage() {
         )}
       </Card>
     </div>
-  );
-} 
+  )
+}

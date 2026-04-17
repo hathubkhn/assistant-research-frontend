@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useState } from 'react'
+import Link from 'next/link'
 
 interface Paper {
     paper_id: string;
@@ -18,35 +18,35 @@ export default function ResearchAssistantAdmin() {
         abstract: '',
         keywords: [],
         user_id: '',
-    });
+    })
 
-    const [keywordsInput, setKeywordsInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+    const [keywordsInput, setKeywordsInput] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setPaperData(prev => ({ ...prev, [name]: value }));
-    };
+        const { name, value } = e.target
+        setPaperData(prev => ({ ...prev, [name]: value }))
+    }
 
     const handleKeywordsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setKeywordsInput(e.target.value);
-    };
+        setKeywordsInput(e.target.value)
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+        e.preventDefault()
 
         // Validate form
         if (!paperData.paper_id || !paperData.title || !paperData.abstract || !paperData.user_id) {
-            setMessage({ text: 'All fields except keywords are required', type: 'error' });
-            return;
+            setMessage({ text: 'All fields except keywords are required', type: 'error' })
+            return
         }
 
         // Format keywords
-        const keywords = keywordsInput.split(',').map(kw => kw.trim()).filter(kw => kw);
+        const keywords = keywordsInput.split(',').map(kw => kw.trim()).filter(kw => kw)
 
-        setIsLoading(true);
-        setMessage(null);
+        setIsLoading(true)
+        setMessage(null)
 
         try {
             // Connect directly to the FastAPI backend
@@ -57,16 +57,16 @@ export default function ResearchAssistantAdmin() {
                 },
                 body: JSON.stringify({
                     ...paperData,
-                    keywords
+                    keywords,
                 }),
-            });
+            })
 
             if (!res.ok) {
-                throw new Error(`Error: ${res.status}`);
+                throw new Error(`Error: ${res.status}`)
             }
 
-            const data = await res.json();
-            setMessage({ text: `Paper added successfully! ID: ${data.paper_id}`, type: 'success' });
+            const data = await res.json()
+            setMessage({ text: `Paper added successfully! ID: ${data.paper_id}`, type: 'success' })
 
             // Reset form
             setPaperData({
@@ -75,15 +75,15 @@ export default function ResearchAssistantAdmin() {
                 abstract: '',
                 keywords: [],
                 user_id: '',
-            });
-            setKeywordsInput('');
+            })
+            setKeywordsInput('')
         } catch (err) {
-            console.error('Error adding paper:', err);
-            setMessage({ text: 'Failed to add paper. Please try again.', type: 'error' });
+            console.error('Error adding paper:', err)
+            setMessage({ text: 'Failed to add paper. Please try again.', type: 'error' })
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
     return (
         <div className='bg-gray-900 min-h-screen text-white p-6'>
@@ -179,5 +179,5 @@ export default function ResearchAssistantAdmin() {
                 </div>
             </div>
         </div>
-    );
-} 
+    )
+}

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 interface Dataset {
     id: string;
@@ -21,34 +21,34 @@ interface SimilarDatasetsProps {
 }
 
 export default function SimilarDatasets({ datasetId, className = '' }: SimilarDatasetsProps) {
-    const [similarDatasets, setSimilarDatasets] = useState<Dataset[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [similarDatasets, setSimilarDatasets] = useState<Dataset[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchSimilarDatasets = async () => {
             try {
-                setLoading(true);
-                const response = await fetch(`http://localhost:8000/api/datasets/${datasetId}/`);
+                setLoading(true)
+                const response = await fetch(`http://localhost:8000/api/datasets/${datasetId}/`)
 
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch similar datasets: ${response.status}`);
+                    throw new Error(`Failed to fetch similar datasets: ${response.status}`)
                 }
 
-                const data = await response.json();
-                setSimilarDatasets(data.similarDatasets || []);
+                const data = await response.json()
+                setSimilarDatasets(data.similarDatasets || [])
             } catch (err) {
-                console.error('Error fetching similar datasets:', err);
-                setError(err instanceof Error ? err.message : 'Failed to fetch similar datasets');
+                console.error('Error fetching similar datasets:', err)
+                setError(err instanceof Error ? err.message : 'Failed to fetch similar datasets')
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
-        };
+        }
 
         if (datasetId) {
-            fetchSimilarDatasets();
+            fetchSimilarDatasets()
         }
-    }, [datasetId]);
+    }, [datasetId])
 
     if (loading) {
         return (
@@ -69,7 +69,7 @@ export default function SimilarDatasets({ datasetId, className = '' }: SimilarDa
                     </div>
                 </div>
             </div>
-        );
+        )
     }
 
     if (error) {
@@ -78,7 +78,7 @@ export default function SimilarDatasets({ datasetId, className = '' }: SimilarDa
                 <h2 className='text-2xl font-bold text-blue-900 mb-4'>Similar Datasets</h2>
                 <p className='text-red-500'>Error: {error}</p>
             </div>
-        );
+        )
     }
 
     return (
@@ -108,5 +108,5 @@ export default function SimilarDatasets({ datasetId, className = '' }: SimilarDa
                 <p className='text-gray-600'>No similar datasets found.</p>
             )}
         </div>
-    );
-} 
+    )
+}

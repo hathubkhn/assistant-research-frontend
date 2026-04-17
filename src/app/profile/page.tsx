@@ -1,12 +1,12 @@
-'use client';
+'use client'
 
-import { useState, useEffect, ChangeEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { fetchWithAuth, fetchProfile, hasAuthToken } from '@/utils/auth';
-import { useTranslation } from '@/utils/useTranslation';
+import { useState, useEffect, ChangeEvent } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { fetchWithAuth, fetchProfile, hasAuthToken } from '@/utils/auth'
+import { useTranslation } from '@/utils/useTranslation'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 interface Publication {
   id: number;
@@ -33,104 +33,104 @@ interface ProfileData {
 }
 
 export default function Profile() {
-  const router = useRouter();
-  const { t } = useTranslation('profile');
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState<Partial<ProfileData>>({});
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const router = useRouter()
+  const { t } = useTranslation('profile')
+  const [profile, setProfile] = useState<ProfileData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedProfile, setEditedProfile] = useState<Partial<ProfileData>>({})
+  const [saveLoading, setSaveLoading] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string>('')
 
   // Publication management states
-  const [publications, setPublications] = useState<Publication[]>([]);
+  const [publications, setPublications] = useState<Publication[]>([])
   const [newPublication, setNewPublication] = useState<Partial<Publication>>({
     title: '',
     authors: '',
     journal: '',
     year: new Date().getFullYear(),
     url: '',
-  });
+  })
   const [editingPublication, setEditingPublication] =
-    useState<Publication | null>(null);
-  const [publicationLoading, setPublicationLoading] = useState(false);
-  const [publicationError, setPublicationError] = useState('');
+    useState<Publication | null>(null)
+  const [publicationLoading, setPublicationLoading] = useState(false)
+  const [publicationError, setPublicationError] = useState('')
 
   useEffect(() => {
     const loadProfile = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
         if (!hasAuthToken()) {
-          console.log('No auth token found, redirecting to login');
-          router.push('/login');
-          return;
+          console.log('No auth token found, redirecting to login')
+          router.push('/login')
+          return
         }
 
-        console.log('Fetching profile data...');
-        const profileData = await fetchProfile();
+        console.log('Fetching profile data...')
+        const profileData = await fetchProfile()
 
         if (profileData) {
-          console.log('Profile data received:', profileData);
-          setProfile(profileData);
-          setEditedProfile(profileData);
-          setPublications(profileData.publications || []);
+          console.log('Profile data received:', profileData)
+          setProfile(profileData)
+          setEditedProfile(profileData)
+          setPublications(profileData.publications || [])
         } else {
-          console.error('Failed to load profile - no data returned');
-          setError('Failed to load profile');
+          console.error('Failed to load profile - no data returned')
+          setError('Failed to load profile')
         }
       } catch (err) {
-        console.error('Error fetching profile:', err);
-        setError('An unexpected error occurred');
+        console.error('Error fetching profile:', err)
+        setError('An unexpected error occurred')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadProfile();
-  }, [router]);
+    loadProfile()
+  }, [router])
 
   const handleEdit = () => {
-    setIsEditing(true);
-    setEditedProfile(profile || {});
-  };
+    setIsEditing(true)
+    setEditedProfile(profile || {})
+  }
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setEditedProfile((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
+      const file = e.target.files[0]
+      setSelectedFile(file)
 
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
+      const fileUrl = URL.createObjectURL(file)
+      setPreviewUrl(fileUrl)
     }
-  };
+  }
 
   const handleCancel = () => {
-    setIsEditing(false);
-    setSelectedFile(null);
-    setPreviewUrl('');
-    setSaveSuccess(false);
-  };
+    setIsEditing(false)
+    setSelectedFile(null)
+    setPreviewUrl('')
+    setSaveSuccess(false)
+  }
 
   const handleSave = async () => {
-    setSaveLoading(true);
-    setError('');
+    setSaveLoading(true)
+    setError('')
     try {
       if (!hasAuthToken()) {
-        router.push('/login');
-        return;
+        router.push('/login')
+        return
       }
 
       const response = await fetchWithAuth(`${API_URL}/api/profile/update/`, {
@@ -148,17 +148,17 @@ export default function Profile() {
           additional_keywords: editedProfile.additional_keywords,
           bio: editedProfile.bio,
         }),
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to update profile');
+        const errorData = await response.json()
+        throw new Error(errorData.detail || 'Failed to update profile')
       }
 
       if (selectedFile) {
         try {
-          const formData = new FormData();
-          formData.append('avatar', selectedFile);
+          const formData = new FormData()
+          formData.append('avatar', selectedFile)
 
           const avatarResponse = await fetchWithAuth(
             `${API_URL}/api/profile/avatar/`,
@@ -166,54 +166,54 @@ export default function Profile() {
               method: 'POST',
               body: formData,
             },
-          );
+          )
 
           if (!avatarResponse.ok) {
-            const errorData = await avatarResponse.json();
-            throw new Error(errorData.detail || 'Failed to upload avatar');
+            const errorData = await avatarResponse.json()
+            throw new Error(errorData.detail || 'Failed to upload avatar')
           }
         } catch (avatarError) {
-          console.error('Avatar upload error:', avatarError);
+          console.error('Avatar upload error:', avatarError)
           setError(
             `Profile updated but avatar upload failed: ${avatarError instanceof Error ? avatarError.message : String(avatarError)}`,
-          );
+          )
         }
       }
 
-      const profileData = await fetchProfile();
+      const profileData = await fetchProfile()
 
       if (profileData) {
-        setProfile(profileData);
-        setSaveSuccess(true);
+        setProfile(profileData)
+        setSaveSuccess(true)
         setTimeout(() => {
-          setIsEditing(false);
-          setSaveSuccess(false);
-        }, 2000);
+          setIsEditing(false)
+          setSaveSuccess(false)
+        }, 2000)
       } else {
-        console.warn('Failed to refresh profile after update');
-        setSaveSuccess(true);
+        console.warn('Failed to refresh profile after update')
+        setSaveSuccess(true)
         setTimeout(() => {
-          setIsEditing(false);
-          setSaveSuccess(false);
-          window.location.reload();
-        }, 2000);
+          setIsEditing(false)
+          setSaveSuccess(false)
+          window.location.reload()
+        }, 2000)
       }
     } catch (err) {
-      console.error('Error updating profile:', err);
-      setError(err instanceof Error ? err.message : 'Failed to update profile');
+      console.error('Error updating profile:', err)
+      setError(err instanceof Error ? err.message : 'Failed to update profile')
     } finally {
-      setSaveLoading(false);
+      setSaveLoading(false)
     }
-  };
+  }
 
   const handleAddPublication = async () => {
-    setPublicationLoading(true);
-    setPublicationError('');
+    setPublicationLoading(true)
+    setPublicationError('')
 
     try {
       if (!hasAuthToken()) {
-        router.push('/login');
-        return;
+        router.push('/login')
+        return
       }
 
       if (
@@ -223,9 +223,9 @@ export default function Profile() {
         !newPublication.year ||
         !newPublication.url
       ) {
-        setPublicationError('All fields are required');
-        setPublicationLoading(false);
-        return;
+        setPublicationError('All fields are required')
+        setPublicationLoading(false)
+        return
       }
 
       const response = await fetchWithAuth(`${API_URL}/api/publications/`, {
@@ -234,36 +234,36 @@ export default function Profile() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(newPublication),
-      });
+      })
 
       if (!response.ok) {
-        const contentType = response.headers.get('content-type');
+        const contentType = response.headers.get('content-type')
         if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json();
-          throw new Error(errorData.detail || 'Failed to add publication');
+          const errorData = await response.json()
+          throw new Error(errorData.detail || 'Failed to add publication')
         } else {
           throw new Error(
             `Server error: ${response.status} ${response.statusText}`,
-          );
+          )
         }
       }
 
-      const createdPublication = await response.json();
+      const createdPublication = await response.json()
 
       setPublications((prevPublications) => [
         ...prevPublications,
         createdPublication,
-      ]);
+      ])
 
       if (profile) {
         const updatedPublications = [
           ...(profile.publications || []),
           createdPublication,
-        ];
+        ]
         setProfile({
           ...profile,
           publications: updatedPublications,
-        });
+        })
       }
 
       // Reset form
@@ -273,28 +273,28 @@ export default function Profile() {
         journal: '',
         year: new Date().getFullYear(),
         url: '',
-      });
+      })
     } catch (err) {
-      console.error('Error adding publication:', err);
+      console.error('Error adding publication:', err)
       setPublicationError(
         err instanceof Error ? err.message : 'Failed to add publication',
-      );
+      )
     } finally {
-      setPublicationLoading(false);
+      setPublicationLoading(false)
     }
-  };
+  }
 
   // Update an existing publication
   const handleUpdatePublication = async () => {
-    if (!editingPublication) return;
+    if (!editingPublication) return
 
-    setPublicationLoading(true);
-    setPublicationError('');
+    setPublicationLoading(true)
+    setPublicationError('')
 
     try {
       if (!hasAuthToken()) {
-        router.push('/login');
-        return;
+        router.push('/login')
+        return
       }
 
       const response = await fetchWithAuth(
@@ -306,29 +306,29 @@ export default function Profile() {
           },
           body: JSON.stringify(editingPublication),
         },
-      );
+      )
 
       if (!response.ok) {
         // Check content type to avoid parsing HTML as JSON
-        const contentType = response.headers.get('content-type');
+        const contentType = response.headers.get('content-type')
         if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json();
-          throw new Error(errorData.detail || 'Failed to update publication');
+          const errorData = await response.json()
+          throw new Error(errorData.detail || 'Failed to update publication')
         } else {
           throw new Error(
             `Server error: ${response.status} ${response.statusText}`,
-          );
+          )
         }
       }
 
-      const updatedPublication = await response.json();
+      const updatedPublication = await response.json()
 
       // Update in publications state
       setPublications((prevPublications) =>
         prevPublications.map((pub) =>
           pub.id === updatedPublication.id ? updatedPublication : pub,
         ),
-      );
+      )
 
       // Update in profile state
       if (profile && profile.publications) {
@@ -337,31 +337,31 @@ export default function Profile() {
           publications: profile.publications.map((pub) =>
             pub.id === updatedPublication.id ? updatedPublication : pub,
           ),
-        });
+        })
       }
 
-      setEditingPublication(null);
+      setEditingPublication(null)
     } catch (err) {
-      console.error('Error updating publication:', err);
+      console.error('Error updating publication:', err)
       setPublicationError(
         err instanceof Error ? err.message : 'Failed to update publication',
-      );
+      )
     } finally {
-      setPublicationLoading(false);
+      setPublicationLoading(false)
     }
-  };
+  }
 
   // Delete a publication
   const handleDeletePublication = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this publication?')) return;
+    if (!confirm('Are you sure you want to delete this publication?')) return
 
-    setPublicationLoading(true);
-    setPublicationError('');
+    setPublicationLoading(true)
+    setPublicationError('')
 
     try {
       if (!hasAuthToken()) {
-        router.push('/login');
-        return;
+        router.push('/login')
+        return
       }
 
       const response = await fetchWithAuth(
@@ -369,67 +369,67 @@ export default function Profile() {
         {
           method: 'DELETE',
         },
-      );
+      )
 
       if (!response.ok) {
         // Check content type to avoid parsing HTML as JSON
-        const contentType = response.headers.get('content-type');
+        const contentType = response.headers.get('content-type')
         if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json();
-          throw new Error(errorData.detail || 'Failed to delete publication');
+          const errorData = await response.json()
+          throw new Error(errorData.detail || 'Failed to delete publication')
         } else {
           throw new Error(
             `Server error: ${response.status} ${response.statusText}`,
-          );
+          )
         }
       }
 
       // Update publications state
       setPublications((prevPublications) =>
         prevPublications.filter((pub) => pub.id !== id),
-      );
+      )
 
       // Update profile state
       if (profile && profile.publications) {
         setProfile({
           ...profile,
           publications: profile.publications.filter((pub) => pub.id !== id),
-        });
+        })
       }
     } catch (err) {
-      console.error('Error deleting publication:', err);
+      console.error('Error deleting publication:', err)
       setPublicationError(
         err instanceof Error ? err.message : 'Failed to delete publication',
-      );
+      )
     } finally {
-      setPublicationLoading(false);
+      setPublicationLoading(false)
     }
-  };
+  }
 
   // Publication form change handler
   const handlePublicationChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
 
     if (editingPublication) {
       setEditingPublication({
         ...editingPublication,
         [name]: name === 'year' ? parseInt(value) : value,
-      });
+      })
     } else {
       setNewPublication({
         ...newPublication,
         [name]: name === 'year' ? parseInt(value) : value,
-      });
+      })
     }
-  };
+  }
 
   useEffect(() => {
     if (profile && profile.publications) {
-      setPublications(profile.publications);
+      setPublications(profile.publications)
     }
-  }, [profile]);
+  }, [profile])
 
   // Return loading state
   if (loading) {
@@ -445,7 +445,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   // Return error state
@@ -467,7 +467,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (!profile) {
@@ -490,14 +490,14 @@ export default function Profile() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   // Format keywords as tags
   const keywordTags = (profile.keywords || '')
     .split(',')
     .map((k) => k.trim())
-    .filter((k) => k);
+    .filter((k) => k)
 
   // View mode (not editing)
   if (!isEditing) {
@@ -685,7 +685,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   // Edit mode
@@ -1126,5 +1126,5 @@ export default function Profile() {
         </div>
       </div>
     </div>
-  );
+  )
 }

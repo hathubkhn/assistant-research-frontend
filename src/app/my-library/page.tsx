@@ -1,12 +1,12 @@
-'use client';
-import { useState, useEffect, useMemo, useRef } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { StarIcon } from '@heroicons/react/24/solid';
-import { useTranslation } from '@/utils/useTranslation';
+'use client'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { StarIcon } from '@heroicons/react/24/solid'
+import { useTranslation } from '@/utils/useTranslation'
 
 // API URL configuration
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 // Paper data structure
 interface Paper {
@@ -71,40 +71,40 @@ interface Dataset {
 }
 
 export default function MyLibraryPage() {
-  const { t } = useTranslation('my-library');
+  const { t } = useTranslation('my-library')
 
   const [activeSection, setActiveSection] = useState<
     'interesting' | 'downloaded' | 'datasets' | 'uploaded' | 'recommended'
-  >('interesting');
+  >('interesting')
 
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
 
-  const router = useRouter();
+  const router = useRouter()
 
   const [activeFilters, setActiveFilters] = useState<Filters>({
     years: [],
     conferences: [],
     fields: [],
-  });
+  })
 
   const [datasetFilters, setDatasetFilters] = useState<DatasetFilters>({
     categories: [],
     tasks: [],
     languages: [],
     paperCounts: ['0-100', '101-500', '501-1000', '1000+'],
-  });
+  })
 
-  const [libraryPapers, setLibraryPapers] = useState<Paper[]>([]);
-  const [filteredPapers, setFilteredPapers] = useState<Paper[]>([]);
+  const [libraryPapers, setLibraryPapers] = useState<Paper[]>([])
+  const [filteredPapers, setFilteredPapers] = useState<Paper[]>([])
 
-  const [starredDatasets, setStarredDatasets] = useState<Dataset[]>([]);
+  const [starredDatasets, setStarredDatasets] = useState<Dataset[]>([])
 
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [expandedFilters, setExpandedFilters] = useState<{
     conferences: boolean;
@@ -112,7 +112,7 @@ export default function MyLibraryPage() {
   }>({
     conferences: false,
     fields: false,
-  });
+  })
 
   // Conference and journal data with counts
   const [conferenceData, setConferenceData] = useState<{
@@ -125,16 +125,16 @@ export default function MyLibraryPage() {
     journals: [],
     isLoading: false,
     error: null,
-  });
+  })
 
   // State for recommended papers
-  const [recommendedPapers, setRecommendedPapers] = useState<Paper[]>([]);
+  const [recommendedPapers, setRecommendedPapers] = useState<Paper[]>([])
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
-    useState<boolean>(false);
+    useState<boolean>(false)
 
   // New state for paper detail popup
-  const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
-  const [isPaperDetailOpen, setIsPaperDetailOpen] = useState(false);
+  const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null)
+  const [isPaperDetailOpen, setIsPaperDetailOpen] = useState(false)
 
   // State for conferences and journals data
   const [venues, setVenues] = useState<{
@@ -143,56 +143,56 @@ export default function MyLibraryPage() {
   }>({
     conferences: [],
     journals: [],
-  });
+  })
 
   // Utility function to get authentication headers
   const getAuthHeaders = (includeContentType: boolean = false): HeadersInit => {
     // Prepare headers
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {}
 
     // Add Content-Type if needed
     if (includeContentType) {
-      headers['Content-Type'] = 'application/json';
+      headers['Content-Type'] = 'application/json'
     }
 
     // Get token directly
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('authToken')
 
     // Log token status for debugging
-    console.log('getAuthHeaders - Token status:', !!authToken);
+    console.log('getAuthHeaders - Token status:', !!authToken)
 
     // Add token to headers if available
     if (authToken) {
       // Check if token already has the 'Token ' prefix
       const tokenValue = authToken.startsWith('Token ')
         ? authToken
-        : `Token ${authToken}`;
+        : `Token ${authToken}`
 
-      headers['Authorization'] = tokenValue;
-      console.log('getAuthHeaders - Added Authorization header');
+      headers['Authorization'] = tokenValue
+      console.log('getAuthHeaders - Added Authorization header')
     } else {
-      console.warn('getAuthHeaders - No auth token available');
+      console.warn('getAuthHeaders - No auth token available')
       // We'll handle redirection in the API calls
     }
 
-    return headers;
-  };
+    return headers
+  }
 
   // Helper method to make authenticated API requests
   const makeAuthenticatedRequest = async (
     url: string,
     options: RequestInit = {},
   ) => {
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('authToken')
 
     if (!authToken) {
-      throw new Error('No authentication token available');
+      throw new Error('No authentication token available')
     }
 
     // Check if token already has the 'Token ' prefix
     const tokenValue = authToken.startsWith('Token ')
       ? authToken
-      : `Token ${authToken}`;
+      : `Token ${authToken}`
 
     // Default options
     const defaultOptions: RequestInit = {
@@ -201,7 +201,7 @@ export default function MyLibraryPage() {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-    };
+    }
 
     // Merge with provided options
     const mergedOptions = {
@@ -211,153 +211,153 @@ export default function MyLibraryPage() {
         ...defaultOptions.headers,
         ...(options.headers || {}),
       },
-    };
+    }
 
     // Make the request
-    const response = await fetch(url, mergedOptions);
+    const response = await fetch(url, mergedOptions)
 
     // Handle 401 Unauthorized
     if (response.status === 401) {
-      console.error('Authentication error on request to:', url);
+      console.error('Authentication error on request to:', url)
 
       try {
-        const errorText = await response.text();
-        console.error('Auth error details:', errorText);
+        const errorText = await response.text()
+        console.error('Auth error details:', errorText)
       } catch (e) {
-        console.error('Could not read error response');
+        console.error('Could not read error response')
       }
 
       // Clear invalid token
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('authToken')
 
       // Throw a specific error
-      throw new Error('Authentication failed - token invalid');
+      throw new Error('Authentication failed - token invalid')
     }
 
-    return response;
-  };
+    return response
+  }
 
   // Function to check if we have auth token
   const hasAuthToken = (): boolean => {
-    if (typeof window === 'undefined') return false;
-    const token = localStorage.getItem('authToken');
-    return !!token;
-  };
+    if (typeof window === 'undefined') return false
+    const token = localStorage.getItem('authToken')
+    return !!token
+  }
 
   // Check authentication status on component mount and redirect if not authenticated
   useEffect(() => {
     // Add debug logging
-    console.log('My Library page loaded, checking auth...');
+    console.log('My Library page loaded, checking auth...')
 
     // Get the actual token for debugging
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('authToken')
     // Log token existence and a masked version for debugging (only first 5 chars for security)
-    console.log('Auth token exists:', !!authToken);
+    console.log('Auth token exists:', !!authToken)
     if (authToken) {
       const tokenPreview =
         authToken.substring(0, 5) +
         '...' +
-        authToken.substring(authToken.length - 5);
-      console.log('Token preview:', tokenPreview);
+        authToken.substring(authToken.length - 5)
+      console.log('Token preview:', tokenPreview)
     }
 
     // Check if user is authenticated
     if (!hasAuthToken()) {
-      console.log('No auth token found, redirecting to login');
+      console.log('No auth token found, redirecting to login')
       // Redirect to login page if not authenticated
-      router.push('/login');
-      return;
+      router.push('/login')
+      return
     }
 
     // Verify token validity
     const verifyToken = async () => {
       try {
         // Make an authenticated profile call to verify token
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('authToken')
         const tokenValue = token?.startsWith('Token ')
           ? token
-          : `Token ${token}`;
+          : `Token ${token}`
 
-        console.log('Making profile API call with Authorization header');
+        console.log('Making profile API call with Authorization header')
 
         // Use fetch directly for this test to ensure headers are correct
         const response = await fetch(`${API_URL}/api/profile/`, {
           headers: {
             Authorization: tokenValue,
           },
-        });
+        })
 
         if (response.ok) {
           console.log(
             'Auth token verified, proceeding to load My Library data',
-          );
+          )
 
           // Set logged in state
-          setIsLoggedIn(true);
+          setIsLoggedIn(true)
 
           // Make sure we have an active section before fetching data
           if (!activeSection) {
-            setActiveSection('interesting');
+            setActiveSection('interesting')
           }
 
           // Call fetchDataForActiveSection directly - don't wait for state update
           setTimeout(() => {
-            fetchDataForActiveSection();
-          }, 0);
+            fetchDataForActiveSection()
+          }, 0)
         } else {
           console.warn(
             'Token verification failed with status:',
             response.status,
-          );
+          )
 
           // Try to get response details
           try {
-            const errorText = await response.text();
-            console.error('Auth test error details:', errorText);
+            const errorText = await response.text()
+            console.error('Auth test error details:', errorText)
           } catch (e) {
-            console.error('Could not read error response');
+            console.error('Could not read error response')
           }
 
           // Clear invalid token
-          localStorage.removeItem('authToken');
-          router.push('/login?error=token_invalid');
+          localStorage.removeItem('authToken')
+          router.push('/login?error=token_invalid')
         }
       } catch (error) {
-        console.error('Error verifying token:', error);
+        console.error('Error verifying token:', error)
 
         // Clear token and redirect
-        localStorage.removeItem('authToken');
-        setIsLoggedIn(false);
-        router.push('/login?error=token_verification_failed');
+        localStorage.removeItem('authToken')
+        setIsLoggedIn(false)
+        router.push('/login?error=token_verification_failed')
       }
-    };
+    }
 
-    verifyToken();
-  }, [router, activeSection]);
+    verifyToken()
+  }, [router, activeSection])
 
   // Function to fetch interesting papers
   const fetchInterestingPapers = async () => {
     try {
-      console.log('Fetching interesting papers...');
+      console.log('Fetching interesting papers...')
 
       if (!hasAuthToken()) {
-        console.error('No auth token found!');
-        setIsLoggedIn(false);
-        router.push('/login?error=no_token');
-        return;
+        console.error('No auth token found!')
+        setIsLoggedIn(false)
+        router.push('/login?error=no_token')
+        return
       }
 
       // Use the new helper method for authenticated requests
       const response = await makeAuthenticatedRequest(
         `${API_URL}/api/my-library/?section=interesting`,
-      );
-      console.log('Interesting papers response status:', response.status);
+      )
+      console.log('Interesting papers response status:', response.status)
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         const interestingPaperItems = Array.isArray(data)
           ? data
-          : data.results || data.data || [];
+          : data.results || data.data || []
         // Convert API data format to our Paper format
         const interestingPapers = interestingPaperItems.map((paper: any) => ({
           id: paper.id,
@@ -382,49 +382,49 @@ export default function MyLibraryPage() {
           doi: paper.doi,
           bibtex: paper.bibtex,
           sourceCode: paper.sourceCode,
-        }));
+        }))
 
-        setLibraryPapers(interestingPapers);
-        setFilteredPapers(interestingPapers);
+        setLibraryPapers(interestingPapers)
+        setFilteredPapers(interestingPapers)
       } else {
         // If API call fails, log the issue and use sample data
-        console.log('Using sample interesting papers data');
+        console.log('Using sample interesting papers data')
         // Keep the existing sample data loading logic
       }
     } catch (error) {
-      console.error('Error fetching interesting papers:', error);
+      console.error('Error fetching interesting papers:', error)
 
       // Check for authentication errors
       if (error instanceof Error && error.message.includes('token invalid')) {
-        setIsLoggedIn(false);
-        router.push('/login?error=token_invalid');
-        return;
+        setIsLoggedIn(false)
+        router.push('/login?error=token_invalid')
+        return
       }
 
       // Continue with sample data on error
     }
-  };
+  }
 
   // Function to fetch downloaded papers
   const fetchDownloadedPapers = async () => {
     try {
-      console.log('Fetching downloaded papers...');
+      console.log('Fetching downloaded papers...')
 
       if (!hasAuthToken()) {
-        console.error('No auth token found!');
-        setIsLoggedIn(false);
-        router.push('/login?error=no_token');
-        return;
+        console.error('No auth token found!')
+        setIsLoggedIn(false)
+        router.push('/login?error=no_token')
+        return
       }
 
       // Use the new helper method for authenticated requests
       const response = await makeAuthenticatedRequest(
         `${API_URL}/api/papers/downloaded/`,
-      );
-      console.log('Downloaded papers response status:', response.status);
+      )
+      console.log('Downloaded papers response status:', response.status)
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         // Convert API data format to our Paper format
         const downloadedPapers = data.map((paper: any) => ({
           id: paper.id,
@@ -449,40 +449,40 @@ export default function MyLibraryPage() {
           doi: paper.doi,
           bibtex: paper.bibtex,
           sourceCode: paper.sourceCode,
-        }));
+        }))
 
-        setLibraryPapers(downloadedPapers);
-        setFilteredPapers(downloadedPapers);
+        setLibraryPapers(downloadedPapers)
+        setFilteredPapers(downloadedPapers)
       } else {
         // If API call fails, log the issue and use sample data
-        console.log('Using sample downloaded papers data');
+        console.log('Using sample downloaded papers data')
         // Continue with sample data loading logic
       }
     } catch (error) {
-      console.error('Error fetching downloaded papers:', error);
+      console.error('Error fetching downloaded papers:', error)
 
       // Check for authentication errors
       if (error instanceof Error && error.message.includes('token invalid')) {
-        setIsLoggedIn(false);
-        router.push('/login?error=token_invalid');
-        return;
+        setIsLoggedIn(false)
+        router.push('/login?error=token_invalid')
+        return
       }
 
       // Continue with sample data on error
     }
-  };
+  }
 
   // Function to fetch interesting datasets
   const fetchInterestingDatasets = async () => {
     try {
-      const headers = getAuthHeaders();
+      const headers = getAuthHeaders()
       const response = await fetch(`${API_URL}/api/datasets/interesting/`, {
         headers,
         credentials: 'include',
-      });
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
 
         // Check if data is an array, if not, try to find the array property or convert single item to array
         const dataArray = Array.isArray(data)
@@ -499,7 +499,7 @@ export default function MyLibraryPage() {
                       typeof data === 'object' &&
                       !Array.isArray(data)
                     ? [data]
-                    : [];
+                    : []
 
         // Convert API data format to our Dataset format
         const interestingDatasets = dataArray.map((dataset: any) => ({
@@ -519,65 +519,65 @@ export default function MyLibraryPage() {
           addedDate: dataset.created_at || new Date().toISOString(),
           tasks: dataset.tasks || [],
           language: dataset.language || 'English',
-        }));
+        }))
 
-        setStarredDatasets(interestingDatasets);
+        setStarredDatasets(interestingDatasets)
       } else {
         // Handle authentication errors
         if (response.status === 401) {
-          console.log('Authentication required. Please log in.');
-          setIsLoggedIn(false);
-          router.push('/login');
+          console.log('Authentication required. Please log in.')
+          setIsLoggedIn(false)
+          router.push('/login')
         }
 
         // If API call fails, use sample data
-        console.log('Using sample interesting datasets data');
+        console.log('Using sample interesting datasets data')
         // Continue with sample data loading logic
       }
     } catch (error) {
-      console.error('Error fetching interesting datasets:', error);
+      console.error('Error fetching interesting datasets:', error)
       // Continue with sample data on error
     }
-  };
+  }
 
   // Fetch recommended papers based on user keywords
   const fetchRecommendedPapers = async () => {
-    if (!hasAuthToken()) return;
+    if (!hasAuthToken()) return
 
     console.log(
       'Fetching recommended papers for library page... (Called from ' +
         activeSection +
         ' section)',
-    );
-    setIsLoadingRecommendations(true);
+    )
+    setIsLoadingRecommendations(true)
     try {
       // Use the new API endpoint instead of the manual process
       const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      console.log('Using API URL:', API_URL);
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      console.log('Using API URL:', API_URL)
 
       const response = await makeAuthenticatedRequest(
         `${API_URL}/api/my-library/?section=recommended`,
-      );
+      )
 
       if (!response.ok) {
         console.error(
           'Recommendations fetch failed with status:',
           response.status,
-        );
+        )
         try {
-          const errorText = await response.text();
-          console.error('Recommendations error details:', errorText);
+          const errorText = await response.text()
+          console.error('Recommendations error details:', errorText)
         } catch (e) {
-          console.error('Could not read error response');
+          console.error('Could not read error response')
         }
-        throw new Error('Failed to fetch paper recommendations');
+        throw new Error('Failed to fetch paper recommendations')
       }
 
-      const recommendedPapersData = await response.json();
+      const recommendedPapersData = await response.json()
       console.log(
         `Received ${recommendedPapersData.length} recommended papers from API`,
-      );
+      )
 
       // Convert API data format to our Paper format
       const paperObjects = recommendedPapersData.map((paper: any) => {
@@ -597,24 +597,24 @@ export default function MyLibraryPage() {
           addedDate:
             paper.created_at || paper.addedDate || new Date().toISOString(),
           doi: paper.doi,
-        };
-      });
+        }
+      })
 
       // Sort papers by date (newest first)
       paperObjects.sort(
         (a: Paper, b: Paper) =>
           new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
-      );
+      )
 
-      console.log(`Setting ${paperObjects.length} recommended papers in state`);
-      setRecommendedPapers(paperObjects);
+      console.log(`Setting ${paperObjects.length} recommended papers in state`)
+      setRecommendedPapers(paperObjects)
     } catch (error) {
-      console.error('Error fetching recommended papers:', error);
-      setRecommendedPapers([]);
+      console.error('Error fetching recommended papers:', error)
+      setRecommendedPapers([])
     } finally {
-      setIsLoadingRecommendations(false);
+      setIsLoadingRecommendations(false)
     }
-  };
+  }
 
   // Sample data
   useEffect(() => {
@@ -623,7 +623,7 @@ export default function MyLibraryPage() {
       try {
         // Instead of fetching from an API that's failing, we'll just use sample data
         // This fixes the TypeError: Failed to fetch error
-        console.log('Using sample data instead of API fetch');
+        console.log('Using sample data instead of API fetch')
 
         // Optional: If you want to simulate an API fetch later, uncomment and modify this code:
         /*
@@ -639,10 +639,10 @@ export default function MyLibraryPage() {
                 }
                 */
       } catch (error) {
-        console.error('Error fetching papers:', error);
+        console.error('Error fetching papers:', error)
         // Continue with sample data on error
       }
-    };
+    }
 
     // This would normally be a fetch from an API
     const samplePapers: Paper[] = [
@@ -740,26 +740,26 @@ export default function MyLibraryPage() {
         fileName: 'research_paper.pdf',
         fileSize: 2458000,
       },
-    ];
+    ]
 
-    setLibraryPapers(samplePapers);
+    setLibraryPapers(samplePapers)
 
     // Call the API fetch function
-    fetchUserPapers();
+    fetchUserPapers()
 
     // If user is authenticated and on interesting section, fetch interesting papers
     if (activeSection === 'interesting' && hasAuthToken()) {
-      fetchInterestingPapers();
+      fetchInterestingPapers()
     }
 
     // If user is authenticated and on downloaded section, fetch downloaded papers
     if (activeSection === 'downloaded' && hasAuthToken()) {
-      fetchDownloadedPapers();
+      fetchDownloadedPapers()
     }
 
     // If user is authenticated and on datasets section, fetch interesting datasets
     if (activeSection === 'datasets' && starredDatasets.length === 0) {
-      fetchInterestingDatasets();
+      fetchInterestingDatasets()
     }
 
     // Sample starred datasets
@@ -803,10 +803,10 @@ export default function MyLibraryPage() {
         tasks: ['Image Classification'],
         language: 'English',
       },
-    ];
+    ]
 
-    setStarredDatasets(sampleDatasets);
-  }, [activeSection]);
+    setStarredDatasets(sampleDatasets)
+  }, [activeSection])
 
   // Filter data
   const researchFields = [
@@ -819,7 +819,7 @@ export default function MyLibraryPage() {
     'Databases & Information Systems',
     'Multimedia',
     'Robotics',
-  ];
+  ]
 
   const conferences = {
     'Artificial Intelligence': [
@@ -853,9 +853,9 @@ export default function MyLibraryPage() {
     'Databases & Information Systems': ['WWW', 'SIGIR'],
     Multimedia: ['ACM-MM'],
     Robotics: ['ICRA', 'IROS', 'RSS'],
-  };
+  }
 
-  const years = [2021, 2022, 2023, 2024, 2025];
+  const years = [2021, 2022, 2023, 2024, 2025]
 
   // Toggle section
   const toggleSection = (
@@ -866,94 +866,94 @@ export default function MyLibraryPage() {
       | 'uploaded'
       | 'recommended',
   ) => {
-    setActiveSection(section);
+    setActiveSection(section)
 
     // Update URL without reloading
     if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('section', section);
-      window.history.pushState({}, '', url.toString());
+      const url = new URL(window.location.href)
+      url.searchParams.set('section', section)
+      window.history.pushState({}, '', url.toString())
     }
 
     // Fetch the data for the new section if we haven't already
     if (section === 'interesting' && libraryPapers.length === 0) {
-      fetchInterestingPapers();
+      fetchInterestingPapers()
     } else if (section === 'downloaded' && libraryPapers.length === 0) {
-      fetchDownloadedPapers();
+      fetchDownloadedPapers()
     } else if (section === 'datasets' && starredDatasets.length === 0) {
-      fetchInterestingDatasets();
+      fetchInterestingDatasets()
     } else if (section === 'recommended' && recommendedPapers.length === 0) {
-      fetchRecommendedPapers();
+      fetchRecommendedPapers()
     }
-  };
+  }
 
   // Handle filter changes
   const toggleYearFilter = (year: number) => {
     setActiveFilters((prev) => {
       const newYears = prev.years.includes(year)
         ? prev.years.filter((y) => y !== year)
-        : [...prev.years, year];
-      return { ...prev, years: newYears };
-    });
-  };
+        : [...prev.years, year]
+      return { ...prev, years: newYears }
+    })
+  }
 
   const toggleConferenceFilter = (conference: string) => {
     setActiveFilters((prev) => {
       const newConferences = prev.conferences.includes(conference)
         ? prev.conferences.filter((c) => c !== conference)
-        : [...prev.conferences, conference];
-      return { ...prev, conferences: newConferences };
-    });
-  };
+        : [...prev.conferences, conference]
+      return { ...prev, conferences: newConferences }
+    })
+  }
 
   const toggleFieldFilter = (field: string) => {
     setActiveFilters((prev) => {
       const newFields = prev.fields.includes(field)
         ? prev.fields.filter((f) => f !== field)
-        : [...prev.fields, field];
-      return { ...prev, fields: newFields };
-    });
-  };
+        : [...prev.fields, field]
+      return { ...prev, fields: newFields }
+    })
+  }
 
   // Apply filters
   useEffect(() => {
     // Filter by section first
     const sectionFilteredPapers = libraryPapers.filter((paper) => {
-      if (activeSection === 'interesting') return paper.isInteresting;
-      if (activeSection === 'downloaded') return paper.isDownloaded;
-      if (activeSection === 'uploaded') return paper.isUploaded;
-      return false;
-    });
+      if (activeSection === 'interesting') return paper.isInteresting
+      if (activeSection === 'downloaded') return paper.isDownloaded
+      if (activeSection === 'uploaded') return paper.isUploaded
+      return false
+    })
 
     // Sort by date added (newest first)
     sectionFilteredPapers.sort(
       (a, b) =>
         new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
-    );
+    )
 
     // Apply other filters
-    let result = [...sectionFilteredPapers];
+    let result = [...sectionFilteredPapers]
 
     if (activeFilters.years.length > 0) {
       result = result.filter((paper) =>
         activeFilters.years.includes(paper.year),
-      );
+      )
     }
 
     if (activeFilters.conferences.length > 0) {
       result = result.filter((paper) =>
         activeFilters.conferences.includes(paper.conference),
-      );
+      )
     }
 
     if (activeFilters.fields.length > 0) {
       result = result.filter((paper) =>
         activeFilters.fields.includes(paper.field),
-      );
+      )
     }
 
-    setFilteredPapers(result);
-  }, [activeFilters, libraryPapers, activeSection]);
+    setFilteredPapers(result)
+  }, [activeFilters, libraryPapers, activeSection])
 
   // Clear all filters
   const clearFilters = () => {
@@ -961,8 +961,8 @@ export default function MyLibraryPage() {
       years: [],
       conferences: [],
       fields: [],
-    });
-  };
+    })
+  }
 
   // Dataset categories derived from the datasets
   const datasetCategories = [
@@ -972,35 +972,35 @@ export default function MyLibraryPage() {
     'Medical',
     'Time series',
     'Text',
-  ];
+  ]
 
   // Handle dataset filter changes
   const toggleCategoryFilter = (category: string) => {
     setDatasetFilters((prev) => {
       const newCategories = prev.categories.includes(category)
         ? prev.categories.filter((c) => c !== category)
-        : [...prev.categories, category];
-      return { ...prev, categories: newCategories };
-    });
-  };
+        : [...prev.categories, category]
+      return { ...prev, categories: newCategories }
+    })
+  }
 
   const toggleTaskFilter = (task: string) => {
     setDatasetFilters((prev) => {
       const newTasks = prev.tasks.includes(task)
         ? prev.tasks.filter((t) => t !== task)
-        : [...prev.tasks, task];
-      return { ...prev, tasks: newTasks };
-    });
-  };
+        : [...prev.tasks, task]
+      return { ...prev, tasks: newTasks }
+    })
+  }
 
   const toggleLanguageFilter = (language: string) => {
     setDatasetFilters((prev) => {
       const newLanguages = prev.languages.includes(language)
         ? prev.languages.filter((l) => l !== language)
-        : [...prev.languages, language];
-      return { ...prev, languages: newLanguages };
-    });
-  };
+        : [...prev.languages, language]
+      return { ...prev, languages: newLanguages }
+    })
+  }
 
   // Clear all dataset filters
   const clearDatasetFilters = () => {
@@ -1009,17 +1009,17 @@ export default function MyLibraryPage() {
       categories: [],
       tasks: [],
       languages: [],
-    }));
-  };
+    }))
+  }
 
   // Apply dataset filters
   const filteredDatasets = useMemo(() => {
-    let result = [...starredDatasets];
+    let result = [...starredDatasets]
 
     if (datasetFilters.categories.length > 0) {
       result = result.filter((dataset) =>
         datasetFilters.categories.includes(dataset.category),
-      );
+      )
     }
 
     if (datasetFilters.tasks.length > 0) {
@@ -1027,7 +1027,7 @@ export default function MyLibraryPage() {
         (dataset) =>
           dataset.tasks &&
           dataset.tasks.some((task) => datasetFilters.tasks.includes(task)),
-      );
+      )
     }
 
     if (datasetFilters.languages.length > 0) {
@@ -1035,17 +1035,17 @@ export default function MyLibraryPage() {
         (dataset) =>
           dataset.language &&
           datasetFilters.languages.includes(dataset.language),
-      );
+      )
     }
 
     // Sort by date added (newest first)
     result.sort(
       (a, b) =>
         new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
-    );
+    )
 
-    return result;
-  }, [starredDatasets, datasetFilters]);
+    return result
+  }, [starredDatasets, datasetFilters])
 
   // Get unique dataset tasks
   const datasetTasks = [
@@ -1055,55 +1055,55 @@ export default function MyLibraryPage() {
     'Segmentation',
     'Natural Language Processing',
     'Speech Recognition',
-  ];
+  ]
 
   // Get unique dataset languages
-  const datasetLanguages = ['English', 'Vietnamese', 'Chinese', 'Multilingual'];
+  const datasetLanguages = ['English', 'Vietnamese', 'Chinese', 'Multilingual']
 
   // Handle file upload
   const handleFileSelect = () => {
-    fileInputRef.current?.click();
-  };
+    fileInputRef.current?.click()
+  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    const files = e.target.files
+    if (!files || files.length === 0) return
 
-    console.log('Starting file upload with file:', files[0].name);
+    console.log('Starting file upload with file:', files[0].name)
 
-    setIsUploading(true);
-    setUploadProgress(0);
-    setUploadError(null);
+    setIsUploading(true)
+    setUploadProgress(0)
+    setUploadError(null)
 
     // Create FormData for the file upload
-    const formData = new FormData();
-    formData.append('file', files[0]);
+    const formData = new FormData()
+    formData.append('file', files[0])
 
     try {
       // Upload progress simulation
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
+            clearInterval(progressInterval)
+            return 90
           }
-          return prev + 10;
-        });
-      }, 300);
+          return prev + 10
+        })
+      }, 300)
 
       // Get authentication headers
-      const headers = getAuthHeaders();
-      console.log('Auth headers:', headers);
+      const headers = getAuthHeaders()
+      console.log('Auth headers:', headers)
 
       // Show auth token status
-      const hasToken = hasAuthToken();
-      console.log('Has auth token:', hasToken);
+      const hasToken = hasAuthToken()
+      console.log('Has auth token:', hasToken)
 
       if (!hasToken) {
-        throw new Error('No authentication token found. Please log in first.');
+        throw new Error('No authentication token found. Please log in first.')
       }
 
-      console.log('Making API request to upload paper...');
+      console.log('Making API request to upload paper...')
 
       // Upload the file to the API
       const response = await fetch(`${API_URL}/api/papers/upload/`, {
@@ -1111,22 +1111,22 @@ export default function MyLibraryPage() {
         body: formData,
         headers,
         credentials: 'include',
-      });
+      })
 
-      console.log('Upload response status:', response.status);
+      console.log('Upload response status:', response.status)
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Upload failed:', response.status, errorText);
+        const errorText = await response.text()
+        console.error('Upload failed:', response.status, errorText)
         throw new Error(
           `Upload failed with status: ${response.status}. ${errorText}`,
-        );
+        )
       }
 
       // Get the paper data with extracted metadata
-      const paperData = await response.json();
+      const paperData = await response.json()
 
-      console.log('Received paper data:', paperData);
+      console.log('Received paper data:', paperData)
 
       // Add new paper to library
       const newPaper: Paper = {
@@ -1152,30 +1152,30 @@ export default function MyLibraryPage() {
         doi: paperData.doi,
         bibtex: paperData.bibtex,
         sourceCode: paperData.sourceCode,
-      };
+      }
 
       // Add to library
-      setLibraryPapers((prev) => [...prev, newPaper]);
+      setLibraryPapers((prev) => [...prev, newPaper])
 
       // Complete progress and close modal
-      setUploadProgress(100);
+      setUploadProgress(100)
       setTimeout(() => {
-        setIsUploading(false);
-        setIsUploadModalOpen(false);
-        setActiveSection('uploaded');
+        setIsUploading(false)
+        setIsUploadModalOpen(false)
+        setActiveSection('uploaded')
         // Reset file input
         if (fileInputRef.current) {
-          fileInputRef.current.value = '';
+          fileInputRef.current.value = ''
         }
-      }, 500);
+      }, 500)
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error('Upload failed:', error)
       setUploadError(
         `Failed to upload paper: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      setIsUploading(false);
+      )
+      setIsUploading(false)
     }
-  };
+  }
 
   // Function to toggle paper status (isInteresting, isDownloaded, etc.)
   const togglePaperStatus = async (
@@ -1184,115 +1184,115 @@ export default function MyLibraryPage() {
   ) => {
     try {
       const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       const endpoint =
         statusType === 'isInteresting'
           ? `/api/papers/mark-interesting/${paperId}/`
-          : `/api/papers/mark-downloaded/${paperId}/`;
+          : `/api/papers/mark-downloaded/${paperId}/`
 
-      const headers = getAuthHeaders(true);
+      const headers = getAuthHeaders(true)
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers,
         credentials: 'include',
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`Failed to toggle ${statusType} status for paper`);
+        throw new Error(`Failed to toggle ${statusType} status for paper`)
       }
 
-      return await response.json();
+      return await response.json()
     } catch (error) {
-      console.error(`Error in togglePaperStatus (${statusType}):`, error);
-      throw error;
+      console.error(`Error in togglePaperStatus (${statusType}):`, error)
+      throw error
     }
-  };
+  }
 
   // Function to delete a paper from downloaded papers
   const deleteDownloadedPaper = async (
     paperId: string,
     e: React.MouseEvent,
   ) => {
-    e.preventDefault(); // Prevent navigation to paper detail page
-    e.stopPropagation(); // Prevent event bubbling
+    e.preventDefault() // Prevent navigation to paper detail page
+    e.stopPropagation() // Prevent event bubbling
 
     try {
       const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const endpoint = `/api/papers/${paperId}/unmark-downloaded/`;
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const endpoint = `/api/papers/${paperId}/unmark-downloaded/`
 
-      const headers = getAuthHeaders(true);
+      const headers = getAuthHeaders(true)
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'DELETE',
         headers,
         credentials: 'include',
-      });
+      })
 
       if (!response.ok) {
-        throw new Error('Failed to remove paper from downloaded papers');
+        throw new Error('Failed to remove paper from downloaded papers')
       }
 
       // If we're on the downloaded section, remove the paper from the filtered list
       if (activeSection === 'downloaded') {
-        setFilteredPapers((prev) => prev.filter((p) => p.id !== paperId));
+        setFilteredPapers((prev) => prev.filter((p) => p.id !== paperId))
       }
 
       // Update the paper in the library to show as not downloaded
       setLibraryPapers((prev) =>
         prev.map((p) => (p.id === paperId ? { ...p, isDownloaded: false } : p)),
-      );
+      )
 
-      console.log('Paper successfully removed from downloaded papers');
+      console.log('Paper successfully removed from downloaded papers')
     } catch (error) {
-      console.error('Error removing paper from downloaded papers:', error);
+      console.error('Error removing paper from downloaded papers:', error)
     }
-  };
+  }
 
   // Function to toggle star (mark as interesting) for a paper
   const toggleStar = async (e: React.MouseEvent, paper: Paper) => {
-    e.preventDefault(); // Prevent navigation to paper detail page
-    e.stopPropagation(); // Prevent event bubbling
+    e.preventDefault() // Prevent navigation to paper detail page
+    e.stopPropagation() // Prevent event bubbling
 
     try {
-      const result = await togglePaperStatus(paper.id, 'isInteresting');
+      const result = await togglePaperStatus(paper.id, 'isInteresting')
 
       // If the paper is being starred (marked as interesting)
       if (!paper.isInteresting) {
         // Add to interesting papers list immediately
-        const updatedPaper = { ...paper, isInteresting: true };
+        const updatedPaper = { ...paper, isInteresting: true }
 
         // Add to libraryPapers if not already present
         setLibraryPapers((prev) => {
           // Check if paper already exists
-          const exists = prev.some((p) => p.id === paper.id);
+          const exists = prev.some((p) => p.id === paper.id)
           if (exists) {
             // Update existing paper
-            return prev.map((p) => (p.id === paper.id ? updatedPaper : p));
+            return prev.map((p) => (p.id === paper.id ? updatedPaper : p))
           } else {
             // Add new paper
-            return [...prev, updatedPaper];
+            return [...prev, updatedPaper]
           }
-        });
+        })
 
         // Also update filteredPapers to show in UI immediately
         setFilteredPapers((prev) => {
           // Check if paper already exists
-          const exists = prev.some((p) => p.id === paper.id);
+          const exists = prev.some((p) => p.id === paper.id)
           if (exists) {
             // Update existing paper
-            return prev.map((p) => (p.id === paper.id ? updatedPaper : p));
+            return prev.map((p) => (p.id === paper.id ? updatedPaper : p))
           } else {
             // Only add if we're on the interesting section
             return activeSection === 'interesting'
               ? [updatedPaper, ...prev]
-              : prev;
+              : prev
           }
-        });
+        })
 
         // Remove from recommendations list
-        setRecommendedPapers((prev) => prev.filter((p) => p.id !== paper.id));
+        setRecommendedPapers((prev) => prev.filter((p) => p.id !== paper.id))
       } else {
         // Paper is being unstarred
         // Update paper in library papers to show as not interesting
@@ -1300,11 +1300,11 @@ export default function MyLibraryPage() {
           prev.map((p) =>
             p.id === paper.id ? { ...p, isInteresting: false } : p,
           ),
-        );
+        )
 
         // Remove from filtered papers if we're on interesting section
         if (activeSection === 'interesting') {
-          setFilteredPapers((prev) => prev.filter((p) => p.id !== paper.id));
+          setFilteredPapers((prev) => prev.filter((p) => p.id !== paper.id))
         }
 
         // Add paper back to recommendations when unstarred
@@ -1315,85 +1315,85 @@ export default function MyLibraryPage() {
           // If already in recommendedPapers, update its status
           const paperInRecommendations = recommendedPapers.some(
             (p) => p.id === paper.id,
-          );
+          )
           if (paperInRecommendations) {
             setRecommendedPapers((prev) =>
               prev.map((p) =>
                 p.id === paper.id ? { ...p, isInteresting: false } : p,
               ),
-            );
+            )
           }
         }
       }
     } catch (error) {
-      console.error('Error toggling star status:', error);
+      console.error('Error toggling star status:', error)
     }
-  };
+  }
 
   // Function to open paper detail popup
   const openPaperDetail = (e: React.MouseEvent, paper: Paper) => {
-    e.preventDefault(); // Prevent navigation to paper detail page
-    e.stopPropagation(); // Prevent event bubbling
+    e.preventDefault() // Prevent navigation to paper detail page
+    e.stopPropagation() // Prevent event bubbling
 
-    setSelectedPaper(paper);
-    setIsPaperDetailOpen(true);
-  };
+    setSelectedPaper(paper)
+    setIsPaperDetailOpen(true)
+  }
 
   // Function to close paper detail popup
   const closePaperDetail = () => {
-    setIsPaperDetailOpen(false);
-    setSelectedPaper(null);
-  };
+    setIsPaperDetailOpen(false)
+    setSelectedPaper(null)
+  }
 
   // Function to get conference or journal ID from venue name
   const getVenueId = (
     venueName: string,
     type: 'conference' | 'journal' = 'conference',
   ) => {
-    if (!venueName) return undefined;
+    if (!venueName) return undefined
 
     const venueList =
-      type === 'conference' ? venues.conferences : venues.journals;
+      type === 'conference' ? venues.conferences : venues.journals
     const venue = venueList.find(
       (v) =>
         v.name.toLowerCase() === venueName.toLowerCase() ||
         v.abbreviation?.toLowerCase() === venueName.toLowerCase(),
-    );
-    return venue?.id;
-  };
+    )
+    return venue?.id
+  }
 
   // Function to navigate to conference detail
   const navigateToConference = (
     id: string | undefined,
     e: React.MouseEvent,
   ) => {
-    e.stopPropagation();
-    e.preventDefault();
+    e.stopPropagation()
+    e.preventDefault()
 
-    console.log('Navigating to conference with ID:', id);
+    console.log('Navigating to conference with ID:', id)
 
     if (id) {
-      const url = `/conferences/${id}`;
-      console.log('Conference navigation URL:', url);
-      router.push(url);
+      const url = `/conferences/${id}`
+      console.log('Conference navigation URL:', url)
+      router.push(url)
     } else {
-      console.log('Cannot navigate - conference ID is undefined');
+      console.log('Cannot navigate - conference ID is undefined')
     }
-  };
+  }
 
   // Function to navigate to journal detail
   const navigateToJournal = (id: string | undefined, e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+    e.stopPropagation()
+    e.preventDefault()
 
-    console.log('Navigating to journal with ID:', id);
+    console.log('Navigating to journal with ID:', id)
 
     if (id) {
-      router.push(`/journals/${id}`);
+      router.push(`/journals/${id}`)
     } else {
-      console.log('Cannot navigate - journal ID is undefined');
+      console.log('Cannot navigate - journal ID is undefined')
     }
-  };
+  }
 
   // Fetch conferences and journals
   const fetchVenues = async () => {
@@ -1402,7 +1402,7 @@ export default function MyLibraryPage() {
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-      };
+      }
 
       // Fetch conferences
       const conferencesResponse = await fetch(
@@ -1412,53 +1412,53 @@ export default function MyLibraryPage() {
           headers,
           credentials: 'include',
         },
-      );
+      )
 
       // Fetch journals
       const journalsResponse = await fetch(`${API_URL}/api/journals/filter/`, {
         method: 'GET',
         headers,
         credentials: 'include',
-      });
+      })
 
       if (conferencesResponse.ok) {
-        const conferencesData = await conferencesResponse.json();
-        setVenues((prev) => ({ ...prev, conferences: conferencesData }));
+        const conferencesData = await conferencesResponse.json()
+        setVenues((prev) => ({ ...prev, conferences: conferencesData }))
       }
 
       if (journalsResponse.ok) {
-        const journalsData = await journalsResponse.json();
-        setVenues((prev) => ({ ...prev, journals: journalsData }));
+        const journalsData = await journalsResponse.json()
+        setVenues((prev) => ({ ...prev, journals: journalsData }))
       }
     } catch (error) {
-      console.error('Error fetching venues:', error);
+      console.error('Error fetching venues:', error)
     }
-  };
+  }
 
   // Effect to fetch venues on component mount
   useEffect(() => {
-    fetchVenues();
-  }, []);
+    fetchVenues()
+  }, [])
 
   // Function to fetch data based on active section
   const fetchDataForActiveSection = () => {
-    console.log('Fetching data for section:', activeSection);
+    console.log('Fetching data for section:', activeSection)
 
     if (activeSection === 'interesting') {
-      fetchInterestingPapers();
+      fetchInterestingPapers()
     } else if (activeSection === 'downloaded') {
-      fetchDownloadedPapers();
+      fetchDownloadedPapers()
     } else if (activeSection === 'datasets') {
-      fetchInterestingDatasets();
+      fetchInterestingDatasets()
     } else if (activeSection === 'recommended') {
-      fetchRecommendedPapers();
+      fetchRecommendedPapers()
     }
-  };
+  }
 
   // Function to navigate to login page
   const testLogin = () => {
-    router.push('/login');
-  };
+    router.push('/login')
+  }
 
   return (
     <div className='bg-gray-50 min-h-screen'>
@@ -2217,8 +2217,8 @@ export default function MyLibraryPage() {
                       {t('papers.mustBeLoggedIn')}
                       <button
                         onClick={() => {
-                          setIsUploadModalOpen(false);
-                          router.push('/login');
+                          setIsUploadModalOpen(false)
+                          router.push('/login')
                         }}
                         className='ml-2 font-medium underline text-yellow-700 hover:text-yellow-600'
                       >
@@ -2319,5 +2319,5 @@ export default function MyLibraryPage() {
       {/* Filter Sidebar (Mobile) */}
       {/* ... Keep existing code for the mobile filter sidebar ... */}
     </div>
-  );
+  )
 }

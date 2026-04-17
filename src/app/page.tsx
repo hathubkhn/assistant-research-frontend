@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { HomeStatistics } from './components/HomeStatistics';
-import { useTranslation } from '@/utils/useTranslation';
-import { Row, Col, Card, Typography, Space, Button } from 'antd';
-import { FileTextOutlined, RobotOutlined, CalendarOutlined, ExperimentOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import Link from 'next/link'
+import { HomeStatistics } from './components/HomeStatistics'
+import { useTranslation } from '@/utils/useTranslation'
+import { Row, Col, Card, Typography, Space, Button } from 'antd'
+import { FileTextOutlined, RobotOutlined, CalendarOutlined, ExperimentOutlined, ArrowRightOutlined } from '@ant-design/icons'
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph } = Typography
 
 export default function Home() {
-  const { t } = useTranslation('home');
+  const { t } = useTranslation('home')
 
   return (
     <main style={{ minHeight: '100vh' }}>
@@ -20,7 +20,7 @@ export default function Home() {
           padding: '96px 0',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
         }}
       >
         <Space
@@ -39,7 +39,7 @@ export default function Home() {
               color: 'white',
               fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
               fontWeight: 500,
-              margin: 0
+              margin: 0,
             }}
           >
             {t('hero.title')}
@@ -49,7 +49,7 @@ export default function Home() {
               color: 'rgba(255, 255, 255, 0.8)',
               fontSize: '18px',
               margin: 0,
-              maxWidth: '768px'
+              maxWidth: '768px',
             }}
           >
             {t('hero.subtitle')}
@@ -65,7 +65,7 @@ export default function Home() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          width: '75%'
+          width: '75%',
         }}
       >
         <Row gutter={[24, 24]} style={{ width: '100%' }}>
@@ -152,7 +152,7 @@ export default function Home() {
                       color: '#d9363e',
                       padding: 0,
                       fontWeight: 600,
-                      fontSize: '14px'
+                      fontSize: '14px',
                     }}
                     icon={<ArrowRightOutlined />}
                     iconPosition='end'
@@ -173,7 +173,7 @@ export default function Home() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        width: '100%'
+        width: '100%',
       }}>
         <Space
           direction='vertical'
@@ -189,21 +189,21 @@ export default function Home() {
             style={{
               margin: '0 auto 40px',
               textAlign: 'center',
-              width: '100%'
+              width: '100%',
             }
             }>
             <Title level={2} style={{
               fontSize: 'clamp(1.875rem, 2.5vw, 3rem)',
               fontWeight: 700,
               color: '#1f2937',
-              margin: 0
+              margin: 0,
             }}>
               {t('statistics.title')}
             </Title>
             <Paragraph style={{
               marginTop: '12px',
               color: '#4b5563',
-              fontSize: '16px'
+              fontSize: '16px',
             }}>
               {t('statistics.subtitle')}
             </Paragraph>
@@ -217,7 +217,7 @@ export default function Home() {
         padding: '40px 24px',
         width: '100%',
         border: 'none',
-        borderRadius: 0
+        borderRadius: 0,
       }}>
         <Space
           direction='vertical'
@@ -225,19 +225,19 @@ export default function Home() {
           style={{
             width: '100%',
             margin: '0 auto',
-            textAlign: 'center'
+            textAlign: 'center',
           }}>
           <Space direction='vertical' size='small'>
             <Title level={3} style={{
               color: 'white',
               fontWeight: 600,
-              margin: 0
+              margin: 0,
             }}>
               Research Assistant
             </Title>
             <Paragraph style={{
               color: 'rgba(255, 255, 255, 0.8)',
-              margin: 0
+              margin: 0,
             }}>
               {t('footer.copyright')}
             </Paragraph>
@@ -245,5 +245,5 @@ export default function Home() {
         </Space>
       </Card>
     </main>
-  );
+  )
 }

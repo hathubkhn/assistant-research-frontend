@@ -1,84 +1,84 @@
-'use client';
+'use client'
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 function MicrosoftCallbackContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [error, setError] = useState('');
-  const [status, setStatus] = useState('Processing Microsoft login...');
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [error, setError] = useState('')
+  const [status, setStatus] = useState('Processing Microsoft login...')
 
   useEffect(() => {
-    const code = searchParams.get('code');
+    const code = searchParams.get('code')
 
     if (!code) {
       // No authorization code received
-      router.push('/login?error=no_auth_code');
-      return;
+      router.push('/login?error=no_auth_code')
+      return
     }
 
     // Exchange the code for a token
     const exchangeCodeForToken = async () => {
       try {
-        setStatus('Received code, exchanging for token...');
-        console.log('Sending code to backend:', code);
-        console.log('Using API URL:', API_URL);
+        setStatus('Received code, exchanging for token...')
+        console.log('Sending code to backend:', code)
+        console.log('Using API URL:', API_URL)
 
         // Generate a unique device ID if not already stored
-        let deviceId = localStorage.getItem('deviceId');
+        let deviceId = localStorage.getItem('deviceId')
         if (!deviceId) {
-          deviceId = `web_${Math.random().toString(36).substring(2, 15)}`;
-          localStorage.setItem('deviceId', deviceId);
+          deviceId = `web_${Math.random().toString(36).substring(2, 15)}`
+          localStorage.setItem('deviceId', deviceId)
         }
 
         // Call your backend to exchange the code for a token using XMLHttpRequest
         // instead of fetch to avoid CORS issues and get more detailed errors
-        const deviceName = navigator.userAgent || 'Web Browser';
-        const callbackUrl = `${API_URL}/api/auth/microsoft/callback/`;
-        const xhr = new XMLHttpRequest();
+        const deviceName = navigator.userAgent || 'Web Browser'
+        const callbackUrl = `${API_URL}/api/auth/microsoft/callback/`
+        const xhr = new XMLHttpRequest()
 
-        xhr.open('POST', callbackUrl, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.open('POST', callbackUrl, true)
+        xhr.setRequestHeader('Content-Type', 'application/json')
         xhr.onload = function () {
           if (xhr.status >= 200 && xhr.status < 300) {
-            setStatus('Received token, storing and redirecting...');
+            setStatus('Received token, storing and redirecting...')
             try {
-              const data = JSON.parse(xhr.responseText);
+              const data = JSON.parse(xhr.responseText)
               // Store token in localStorage
-              localStorage.setItem('authToken', data.token);
-              localStorage.setItem('authProvider', 'microsoft');
+              localStorage.setItem('authToken', data.token)
+              localStorage.setItem('authProvider', 'microsoft')
 
               // Redirect to home page
-              router.push('/');
+              router.push('/')
             } catch (parseError) {
-              console.error('Failed to parse response:', parseError);
-              setError('Failed to process Microsoft authentication response');
+              console.error('Failed to parse response:', parseError)
+              setError('Failed to process Microsoft authentication response')
               setTimeout(
                 () => router.push('/login?error=response_parsing_failed'),
                 2000,
-              );
+              )
             }
           } else {
             console.error(
               'Error from callback endpoint:',
               xhr.status,
               xhr.responseText,
-            );
-            setError(`Failed to authenticate with Microsoft (${xhr.status})`);
+            )
+            setError(`Failed to authenticate with Microsoft (${xhr.status})`)
             setTimeout(
               () => router.push('/login?error=authentication_failed'),
               2000,
-            );
+            )
           }
-        };
+        }
         xhr.onerror = function () {
-          console.error('Request failed:', xhr.responseText);
-          setError('Network error during Microsoft authentication');
-          setTimeout(() => router.push('/login?error=network_error'), 2000);
-        };
+          console.error('Request failed:', xhr.responseText)
+          setError('Network error during Microsoft authentication')
+          setTimeout(() => router.push('/login?error=network_error'), 2000)
+        }
 
         xhr.send(
           JSON.stringify({
@@ -87,19 +87,19 @@ function MicrosoftCallbackContent() {
             device_id: deviceId,
             device_name: deviceName,
           }),
-        );
+        )
       } catch (error) {
-        console.error('Microsoft auth error:', error);
-        setError('An error occurred during Microsoft authentication');
+        console.error('Microsoft auth error:', error)
+        setError('An error occurred during Microsoft authentication')
         setTimeout(
           () => router.push('/login?error=authentication_failed'),
           2000,
-        );
+        )
       }
-    };
+    }
 
-    exchangeCodeForToken();
-  }, [router, searchParams]);
+    exchangeCodeForToken()
+  }, [router, searchParams])
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-100'>
@@ -128,7 +128,7 @@ function MicrosoftCallbackContent() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default function MicrosoftCallback() {
@@ -142,5 +142,5 @@ export default function MicrosoftCallback() {
     >
       <MicrosoftCallbackContent />
     </Suspense>
-  );
+  )
 }

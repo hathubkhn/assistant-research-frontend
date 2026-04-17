@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useTranslation } from '@/utils/useTranslation';
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useTranslation } from '@/utils/useTranslation'
 
 interface ResearchIdea {
     id: string;
@@ -18,23 +18,23 @@ interface ExperimentRun {
 }
 
 export default function AiScientistDashboard() {
-    const { t } = useTranslation('ai-scientist');
-    const [recentIdeas, setRecentIdeas] = useState<ResearchIdea[]>([]);
+    const { t } = useTranslation('ai-scientist')
+    const [recentIdeas, setRecentIdeas] = useState<ResearchIdea[]>([])
     const [stats, setStats] = useState({
         totalIdeas: 0,
         totalExperiments: 0,
         completedExperiments: 0,
         failedExperiments: 0,
         runningExperiments: 0,
-    });
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    })
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setLoading(true);
-                setError(null);
+                setLoading(true)
+                setError(null)
 
                 // Mock data for now - will be replaced with actual API calls
                 const ideas = [
@@ -73,9 +73,9 @@ export default function AiScientistDashboard() {
                         status: 'failed',
                         createdAt: '2024-02-20T16:30:00Z',
                     },
-                ];
+                ]
 
-                setRecentIdeas(ideas.slice(0, 5)); // Get most recent 5 ideas
+                setRecentIdeas(ideas.slice(0, 5)) // Get most recent 5 ideas
 
                 // Mock experiment data
                 const experiments = [
@@ -86,12 +86,12 @@ export default function AiScientistDashboard() {
                     { id: 'e5', status: 'running' },
                     { id: 'e6', status: 'running' },
                     { id: 'e7', status: 'completed' },
-                ];
+                ]
 
                 // Calculate stats
-                const completedExperiments = experiments.filter(exp => exp.status === 'completed');
-                const failedExperiments = experiments.filter(exp => exp.status === 'failed');
-                const runningExperiments = experiments.filter(exp => ['pending', 'running'].includes(exp.status));
+                const completedExperiments = experiments.filter(exp => exp.status === 'completed')
+                const failedExperiments = experiments.filter(exp => exp.status === 'failed')
+                const runningExperiments = experiments.filter(exp => ['pending', 'running'].includes(exp.status))
 
                 setStats({
                     totalIdeas: ideas.length,
@@ -99,25 +99,25 @@ export default function AiScientistDashboard() {
                     completedExperiments: completedExperiments.length,
                     failedExperiments: failedExperiments.length,
                     runningExperiments: runningExperiments.length,
-                });
+                })
 
-                setLoading(false);
+                setLoading(false)
             } catch (error) {
-                console.error('Error fetching dashboard data:', error);
-                setError('Failed to load dashboard data. Please try again later.');
-                setLoading(false);
+                console.error('Error fetching dashboard data:', error)
+                setError('Failed to load dashboard data. Please try again later.')
+                setLoading(false)
             }
-        };
+        }
 
-        fetchData();
-    }, []);
+        fetchData()
+    }, [])
 
     if (loading) {
         return (
             <div className='flex justify-center items-center h-80vh'>
                 <div className='animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent'></div>
             </div>
-        );
+        )
     }
 
     if (error) {
@@ -134,7 +134,7 @@ export default function AiScientistDashboard() {
                     Retry
                 </button>
             </div>
-        );
+        )
     }
 
     return (
@@ -248,5 +248,5 @@ export default function AiScientistDashboard() {
                 </div>
             </div>
         </div>
-    );
-} 
+    )
+}

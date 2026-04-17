@@ -1,33 +1,33 @@
-'use client';
+'use client'
 
-import { useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 function SSOCallbackContent() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
+    const router = useRouter()
+    const searchParams = useSearchParams()
 
     useEffect(() => {
         // Get token and provider from URL params
-        const token = searchParams.get('token');
-        const provider = searchParams.get('provider');
+        const token = searchParams.get('token')
+        const provider = searchParams.get('provider')
 
         if (token) {
             // Store token in localStorage
-            localStorage.setItem('authToken', token);
+            localStorage.setItem('authToken', token)
 
             // You might want to store provider info as well
             if (provider) {
-                localStorage.setItem('authProvider', provider);
+                localStorage.setItem('authProvider', provider)
             }
 
             // Redirect to dashboard or appropriate page
-            router.push('/dashboard');
+            router.push('/dashboard')
         } else {
             // If no token was received, redirect to login with error
-            router.push('/login?error=no_token');
+            router.push('/login?error=no_token')
         }
-    }, [router, searchParams]);
+    }, [router, searchParams])
 
     return (
         <div className='min-h-screen flex items-center justify-center bg-gray-100'>
@@ -45,7 +45,7 @@ function SSOCallbackContent() {
                 </div>
             </div>
         </div>
-    );
+    )
 }
 
 export default function SSOCallback() {
@@ -55,5 +55,5 @@ export default function SSOCallback() {
         </div>}>
             <SSOCallbackContent />
         </Suspense>
-    );
-} 
+    )
+}

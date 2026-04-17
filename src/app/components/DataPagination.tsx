@@ -1,7 +1,7 @@
-import React from 'react';
-import { Pagination, Space, Typography } from 'antd';
+import React from 'react'
+import { Pagination, Space, Typography } from 'antd'
 
-const { Text } = Typography;
+const { Text } = Typography
 
 interface DataPaginationProps {
   current: number;
@@ -42,41 +42,41 @@ const DataPagination: React.FC<DataPaginationProps> = ({
   ...rest
 }) => {
   const handleChange = (page: number, size: number) => {
-    onChange(page, size);
-  };
+    onChange(page, size)
+  }
 
   const handleShowSizeChange = (current: number, size: number) => {
     if (onShowSizeChange) {
-      onShowSizeChange(current, size);
+      onShowSizeChange(current, size)
     } else {
-      onChange(1, size);
+      onChange(1, size)
     }
-  };
+  }
 
   const defaultShowTotal = (total: number, range: [number, number]) => {
-    return `${range[0]}-${range[1]} of ${total} ${itemName}`;
-  };
+    return `${range[0]}-${range[1]} of ${total} ${itemName}`
+  }
 
   const getShowTotal = () => {
-    if (showTotal === false) return undefined;
-    if (typeof showTotal === 'function') return showTotal;
-    return defaultShowTotal;
-  };
+    if (showTotal === false) return undefined
+    if (typeof showTotal === 'function') return showTotal
+    return defaultShowTotal
+  }
 
   if (total === 0 || (hideOnSinglePage && total <= pageSize)) {
-    return null;
+    return null
   }
 
   return (
-    <Space 
-      direction='vertical' 
-      size='middle' 
-      style={{ 
-        width: '100%', 
+    <Space
+      direction='vertical'
+      size='middle'
+      style={{
+        width: '100%',
         justifyContent: 'space-between',
         alignItems: 'center',
       }}
-    >      
+    >
       <Pagination
         current={current}
         total={total}
@@ -95,7 +95,7 @@ const DataPagination: React.FC<DataPaginationProps> = ({
         {...rest}
       />
     </Space>
-  );
-};
+  )
+}
 
-export default DataPagination; 
+export default DataPagination

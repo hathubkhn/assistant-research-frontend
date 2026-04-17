@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { getAuthHeaders } from '@/utils/auth';
-import { toast } from 'react-hot-toast';
-import InterestingDatasetButton from '../../components/InterestingDatasetButton';
-import { useTranslation } from '@/utils/useTranslation';
-import DataPagination from '@/app/components/DataPagination';
-import axios from 'axios';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { getAuthHeaders } from '@/utils/auth'
+import { toast } from 'react-hot-toast'
+import InterestingDatasetButton from '../../components/InterestingDatasetButton'
+import { useTranslation } from '@/utils/useTranslation'
+import DataPagination from '@/app/components/DataPagination'
+import axios from 'axios'
 import {
   Layout,
   Card,
@@ -25,22 +25,22 @@ import {
   Segmented,
   Divider,
   Image,
-  Badge
-} from 'antd';
+  Badge,
+} from 'antd'
 import {
   SearchOutlined,
   AppstoreOutlined,
   BarsOutlined,
   DownloadOutlined,
   ClearOutlined,
-  ExportOutlined
-} from '@ant-design/icons';
+  ExportOutlined,
+} from '@ant-design/icons'
 
-const { Title, Text, Paragraph } = Typography;
-const { Search } = Input;
-const { Content } = Layout;
+const { Title, Text, Paragraph } = Typography
+const { Search } = Input
+const { Content } = Layout
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 interface Dataset {
   id: string;
@@ -75,142 +75,142 @@ interface FetchDatasetsParams {
 
 const fetchDatasetsAPI = async (params: FetchDatasetsParams): Promise<DatasetsResponse> => {
   try {
-    const queryParams = new URLSearchParams();
+    const queryParams = new URLSearchParams()
 
-    if (params.page) queryParams.append('page', params.page.toString());
-    if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-    if (params.search) queryParams.append('search', params.search);
-    if (params.task) queryParams.append('task', params.task);
-    if (params.field) queryParams.append('field', params.field);
-    if (params.venue) queryParams.append('venue', params.venue);
-    if (params.venueType) queryParams.append('venueType', params.venueType);
-    if (params.year) queryParams.append('year', params.year);
+    if (params.page) queryParams.append('page', params.page.toString())
+    if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString())
+    if (params.search) queryParams.append('search', params.search)
+    if (params.task) queryParams.append('task', params.task)
+    if (params.field) queryParams.append('field', params.field)
+    if (params.venue) queryParams.append('venue', params.venue)
+    if (params.venueType) queryParams.append('venueType', params.venueType)
+    if (params.year) queryParams.append('year', params.year)
 
-    const response = await axios.get(`${API_URL}/api/datasets/?${queryParams.toString()}`);
-    return response.data;
+    const response = await axios.get(`${API_URL}/api/datasets/?${queryParams.toString()}`)
+    return response.data
   } catch (error) {
-    console.error('Error fetching datasets:', error);
-    throw error;
+    console.error('Error fetching datasets:', error)
+    throw error
   }
-};
+}
 
 const fetchInterestingDatasetsAPI = async (): Promise<Dataset[]> => {
   try {
-    const authHeaders = getAuthHeaders();
+    const authHeaders = getAuthHeaders()
     const response = await axios.get('/api/datasets/interesting/', {
       headers: authHeaders as Record<string, string>,
-      withCredentials: true
-    });
-    return response.data;
+      withCredentials: true,
+    })
+    return response.data
   } catch (error) {
-    console.error('Error fetching interesting datasets:', error);
-    throw error;
+    console.error('Error fetching interesting datasets:', error)
+    throw error
   }
-};
+}
 
 const markDatasetInterestingAPI = async (id: string): Promise<void> => {
   try {
-    const authHeaders = getAuthHeaders(true);
+    const authHeaders = getAuthHeaders(true)
     await axios.post(`/api/datasets/mark-interesting/${id}/`, {}, {
       headers: authHeaders as Record<string, string>,
-      withCredentials: true
-    });
+      withCredentials: true,
+    })
   } catch (error) {
-    console.error('Error marking dataset as interesting:', error);
-    throw error;
+    console.error('Error marking dataset as interesting:', error)
+    throw error
   }
-};
+}
 
 const unmarkDatasetInterestingAPI = async (id: string): Promise<void> => {
   try {
-    const authHeaders = getAuthHeaders(true);
+    const authHeaders = getAuthHeaders(true)
     await axios.delete(`/api/datasets/${id}/unmark-interesting/`, {
       headers: authHeaders as Record<string, string>,
-      withCredentials: true
-    });
+      withCredentials: true,
+    })
   } catch (error) {
-    console.error('Error unmarking dataset as interesting:', error);
-    throw error;
+    console.error('Error unmarking dataset as interesting:', error)
+    throw error
   }
-};
+}
 
 const fetchConferencesFilterAPI = async (): Promise<any[]> => {
   try {
     const response = await axios.get(`${API_URL}/api/conferences/filter/`, {
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
       },
-      withCredentials: true
-    });
-    return response.data;
+      withCredentials: true,
+    })
+    return response.data
   } catch (error) {
-    console.error('Error fetching conferences filter:', error);
-    throw error;
+    console.error('Error fetching conferences filter:', error)
+    throw error
   }
-};
+}
 
 const fetchJournalsFilterAPI = async (): Promise<any[]> => {
   try {
     const response = await axios.get(`${API_URL}/api/journals/filter/`, {
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
       },
-      withCredentials: true
-    });
-    return response.data;
+      withCredentials: true,
+    })
+    return response.data
   } catch (error) {
-    console.error('Error fetching journals filter:', error);
-    throw error;
+    console.error('Error fetching journals filter:', error)
+    throw error
   }
-};
+}
 
 function parseTasksArray(tasks: any): string[] {
-  if (!tasks) return [];
+  if (!tasks) return []
 
   try {
     if (typeof tasks === 'string') {
-      return JSON.parse(tasks);
+      return JSON.parse(tasks)
     }
     if (Array.isArray(tasks)) {
-      return tasks;
+      return tasks
     }
   } catch (e) {
-    console.error('Error parsing tasks:', e);
+    console.error('Error parsing tasks:', e)
   }
-  return [];
+  return []
 }
 
 function getBenchmarkCount(benchmarks: any): number {
-  if (!benchmarks) return 0;
+  if (!benchmarks) return 0
   try {
     if (typeof benchmarks === 'number') {
-      return benchmarks;
+      return benchmarks
     }
 
     if (Array.isArray(benchmarks)) {
-      return benchmarks.length;
+      return benchmarks.length
     }
 
     if (typeof benchmarks === 'string') {
       try {
-        const parsed = JSON.parse(benchmarks);
+        const parsed = JSON.parse(benchmarks)
         if (typeof parsed === 'number') {
-          return parsed;
+          return parsed
         }
-        return Array.isArray(parsed) ? parsed.length : 0;
+        return Array.isArray(parsed) ? parsed.length : 0
       } catch (e) {
-        const num = Number(benchmarks);
+        const num = Number(benchmarks)
         if (!isNaN(num)) {
-          return num;
+          return num
         }
       }
     }
   } catch (e) {
-    console.error('Error parsing benchmarks:', e);
+    console.error('Error parsing benchmarks:', e)
   }
-  return 0;
+  return 0
 }
 
 interface Dataset {
@@ -237,10 +237,10 @@ interface Dataset {
 }
 
 export default function DatasetsPage() {
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentView, setCurrentView] = useState<'grid' | 'list'>('list');
+  const [datasets, setDatasets] = useState<Dataset[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentView, setCurrentView] = useState<'grid' | 'list'>('list')
   const [activeFilters, setActiveFilters] = useState<{
     categories: string[];
     tasks: string[];
@@ -248,104 +248,104 @@ export default function DatasetsPage() {
   }>({
     categories: [],
     tasks: [],
-    languages: []
-  });
-  const [sortOption, setSortOption] = useState<string>('best-match');
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(20);
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const { t } = useTranslation('datasets');
+    languages: [],
+  })
+  const [sortOption, setSortOption] = useState<string>('best-match')
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(20)
+  const [totalPages, setTotalPages] = useState<number>(0)
+  const { t } = useTranslation('datasets')
 
   const fetchDatasets = async (page: number = 1, size: number = pageSize) => {
     try {
-      setLoading(true);
-      let queryParams = `page=${page}&pageSize=${size}`;
+      setLoading(true)
+      let queryParams = `page=${page}&pageSize=${size}`
       if (activeFilters.categories.length > 0) {
-        queryParams += `&category=${encodeURIComponent(activeFilters.categories[0])}`;
+        queryParams += `&category=${encodeURIComponent(activeFilters.categories[0])}`
       }
       if (activeFilters.languages.length > 0) {
-        queryParams += `&language=${encodeURIComponent(activeFilters.languages[0])}`;
+        queryParams += `&language=${encodeURIComponent(activeFilters.languages[0])}`
       }
       if (activeFilters.tasks.length > 0) {
-        queryParams += `&task=${encodeURIComponent(activeFilters.tasks[0])}`;
+        queryParams += `&task=${encodeURIComponent(activeFilters.tasks[0])}`
       }
       if (searchQuery) {
-        queryParams += `&search=${encodeURIComponent(searchQuery)}`;
+        queryParams += `&search=${encodeURIComponent(searchQuery)}`
       }
       const params: FetchDatasetsParams = {
         page,
         pageSize: size,
-      };
+      }
       if (activeFilters.categories.length > 0) {
-        params.field = activeFilters.categories[0];
+        params.field = activeFilters.categories[0]
       }
       if (activeFilters.languages.length > 0) {
-        params.field = params.field ? `${params.field},${activeFilters.languages[0]}` : activeFilters.languages[0];
+        params.field = params.field ? `${params.field},${activeFilters.languages[0]}` : activeFilters.languages[0]
       }
       if (activeFilters.tasks.length > 0) {
-        params.task = activeFilters.tasks[0];
+        params.task = activeFilters.tasks[0]
       }
       if (searchQuery) {
-        params.search = searchQuery;
+        params.search = searchQuery
       }
-      const data = await fetchDatasetsAPI(params);
+      const data = await fetchDatasetsAPI(params)
       if (data.results && data.results.length > 0) {
-        console.log('Sample dataset structure:', data.results[0]);
+        console.log('Sample dataset structure:', data.results[0])
         data.results = data.results.map((dataset: Dataset) => {
 
           if (typeof dataset.benchmarks === 'number' ||
             dataset.benchmarks === null ||
             dataset.benchmarks === undefined) {
-            dataset.benchmarks = [];
+            dataset.benchmarks = []
           }
-          return dataset;
-        });
+          return dataset
+        })
       }
       const hasAuthToken = typeof window !== 'undefined' && (
         localStorage.getItem('authToken') ||
         sessionStorage.getItem('authToken') ||
         localStorage.getItem('token') ||
         sessionStorage.getItem('token')
-      );
+      )
       if (hasAuthToken) {
         try {
-          const interestingData = await fetchInterestingDatasetsAPI();
+          const interestingData = await fetchInterestingDatasetsAPI()
           const interestingIds = Array.isArray(interestingData)
             ? interestingData.map((dataset: any) => dataset.id)
-            : [];
+            : []
           data.results = data.results.map((dataset: Dataset) => ({
             ...dataset,
             starred: interestingIds.includes(dataset.id),
-            isInteresting: interestingIds.includes(dataset.id)
-          }));
+            isInteresting: interestingIds.includes(dataset.id),
+          }))
         } catch (error) {
-          console.error('Error fetching interesting datasets:', error);
+          console.error('Error fetching interesting datasets:', error)
         }
       }
-      setDatasets(data.results);
-      setTotalPages(data.pagination.totalPages);
-      setCurrentPage(data.pagination.page);
+      setDatasets(data.results)
+      setTotalPages(data.pagination.totalPages)
+      setCurrentPage(data.pagination.page)
     } catch (error) {
-      console.error('Error fetching datasets:', error);
+      console.error('Error fetching datasets:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchDatasets(1);
-  }, []);
+    fetchDatasets(1)
+  }, [])
 
   const handlePageChange = (page: number, size: number) => {
-    setCurrentPage(page);
+    setCurrentPage(page)
     if (size !== pageSize) {
-      setPageSize(size);
+      setPageSize(size)
     }
-    fetchDatasets(page, size);
+    fetchDatasets(page, size)
 
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   useEffect(() => {
 
@@ -353,118 +353,118 @@ export default function DatasetsPage() {
       const observer = new PerformanceObserver((list) => {
         list.getEntries().forEach((entry) => {
           if (entry.name.includes('/images/datasets/')) {
-            console.log('Image request:', entry.name, 'Duration:', entry.duration);
+            console.log('Image request:', entry.name, 'Duration:', entry.duration)
           }
-        });
-      });
+        })
+      })
 
 
-      observer.observe({ entryTypes: ['resource'] });
+      observer.observe({ entryTypes: ['resource'] })
 
       return () => {
-        observer.disconnect();
-      };
+        observer.disconnect()
+      }
     }
-  }, []);
+  }, [])
 
   const filteredDatasets = Array.isArray(datasets) ? datasets.filter(dataset => {
     const matchesSearch = searchQuery === '' ||
       dataset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dataset.abbreviation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dataset.description.toLowerCase().includes(searchQuery.toLowerCase());
+      dataset.description.toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesFilter = activeFilters.categories.length === 0 ||
-      activeFilters.categories.includes(dataset.category);
+      activeFilters.categories.includes(dataset.category)
 
     const matchesTaskFilter = activeFilters.tasks.length === 0 ||
       (dataset.tasks && parseTasksArray(dataset.tasks).some(task =>
         activeFilters.tasks.includes(task))
-      );
+      )
 
     const matchesLanguageFilter = activeFilters.languages.length === 0 ||
-      activeFilters.languages.includes(dataset.language);
+      activeFilters.languages.includes(dataset.language)
 
-    return matchesSearch && matchesFilter && matchesTaskFilter && matchesLanguageFilter;
-  }) : [];
+    return matchesSearch && matchesFilter && matchesTaskFilter && matchesLanguageFilter
+  }) : []
 
-  const categories = ['Image', '3D', 'Audio', 'Medical', 'Time series', 'Text'];
+  const categories = ['Image', '3D', 'Audio', 'Medical', 'Time series', 'Text']
 
-  const allTasks = new Set<string>();
+  const allTasks = new Set<string>()
   if (Array.isArray(datasets)) {
     datasets.forEach(dataset => {
       if (dataset.tasks) {
-        const tasksArray = parseTasksArray(dataset.tasks);
-        tasksArray.forEach(task => allTasks.add(task));
+        const tasksArray = parseTasksArray(dataset.tasks)
+        tasksArray.forEach(task => allTasks.add(task))
       }
-    });
+    })
   }
-  const tasks = Array.from(allTasks).sort();
+  const tasks = Array.from(allTasks).sort()
 
 
   const languages = Array.isArray(datasets)
     ? [...new Set(datasets.map(dataset => dataset.language).filter(Boolean))].sort()
-    : [];
+    : []
 
   const sortedDatasets = [...filteredDatasets].sort((a, b) => {
     if (sortOption === 'best-match') {
-      return b.paperCount - a.paperCount;
+      return b.paperCount - a.paperCount
     } else if (sortOption === 'name-asc') {
-      return a.name.localeCompare(b.name);
+      return a.name.localeCompare(b.name)
     } else if (sortOption === 'name-desc') {
-      return b.name.localeCompare(a.name);
+      return b.name.localeCompare(a.name)
     } else if (sortOption === 'papers-desc') {
-      return b.paperCount - a.paperCount;
+      return b.paperCount - a.paperCount
     } else if (sortOption === 'papers-asc') {
-      return a.paperCount - b.paperCount;
+      return a.paperCount - b.paperCount
     }
-    return 0;
-  });
+    return 0
+  })
 
   const toggleCategoryFilter = (category: string) => {
     setActiveFilters(prev => {
       const newCategories = prev.categories.includes(category)
         ? prev.categories.filter(c => c !== category)
-        : [...prev.categories, category];
-      return { ...prev, categories: newCategories };
-    });
+        : [...prev.categories, category]
+      return { ...prev, categories: newCategories }
+    })
 
-    setCurrentPage(1);
-    fetchDatasets(1, pageSize);
-  };
+    setCurrentPage(1)
+    fetchDatasets(1, pageSize)
+  }
 
   const toggleTaskFilter = (task: string) => {
     setActiveFilters(prev => {
       const newTasks = prev.tasks.includes(task)
         ? prev.tasks.filter(t => t !== task)
-        : [...prev.tasks, task];
-      return { ...prev, tasks: newTasks };
-    });
+        : [...prev.tasks, task]
+      return { ...prev, tasks: newTasks }
+    })
 
-    setCurrentPage(1);
-    fetchDatasets(1, pageSize);
-  };
+    setCurrentPage(1)
+    fetchDatasets(1, pageSize)
+  }
 
   const toggleLanguageFilter = (language: string) => {
     setActiveFilters(prev => {
       const newLanguages = prev.languages.includes(language)
         ? prev.languages.filter(l => l !== language)
-        : [...prev.languages, language];
-      return { ...prev, languages: newLanguages };
-    });
+        : [...prev.languages, language]
+      return { ...prev, languages: newLanguages }
+    })
 
-    setCurrentPage(1);
-    fetchDatasets(1, pageSize);
-  };
+    setCurrentPage(1)
+    fetchDatasets(1, pageSize)
+  }
 
   const clearFilters = () => {
     setActiveFilters({
       categories: [],
       tasks: [],
-      languages: []
-    });
-    setCurrentPage(1);
-    fetchDatasets(1, pageSize);
-  };
+      languages: [],
+    })
+    setCurrentPage(1)
+    fetchDatasets(1, pageSize)
+  }
 
   return (
     <Content style={{ padding: '24px', minHeight: '100vh' }}>
@@ -482,16 +482,16 @@ export default function DatasetsPage() {
                 size='large'
                 value={searchQuery}
                 onChange={(e) => {
-                  setSearchQuery(e.target.value);
+                  setSearchQuery(e.target.value)
                   const timer = setTimeout(() => {
-                    setCurrentPage(1);
-                    fetchDatasets(1, pageSize);
-                  }, 300);
-                  return () => clearTimeout(timer);
+                    setCurrentPage(1)
+                    fetchDatasets(1, pageSize)
+                  }, 300)
+                  return () => clearTimeout(timer)
                 }}
                 onSearch={() => {
-                  setCurrentPage(1);
-                  fetchDatasets(1, pageSize);
+                  setCurrentPage(1)
+                  fetchDatasets(1, pageSize)
                 }}
               />
             </Col>
@@ -502,7 +502,7 @@ export default function DatasetsPage() {
                   onChange={(value) => setCurrentView(value as 'grid' | 'list')}
                   options={[
                     { label: <BarsOutlined />, value: 'list' },
-                    { label: <AppstoreOutlined />, value: 'grid' }
+                    { label: <AppstoreOutlined />, value: 'grid' },
                   ]}
                 />
                 <Select
@@ -514,7 +514,7 @@ export default function DatasetsPage() {
                     { value: 'name-asc', label: t('nameAsc') },
                     { value: 'name-desc', label: t('nameDesc') },
                     { value: 'papers-desc', label: t('papersDesc') },
-                    { value: 'papers-asc', label: t('papersAsc') }
+                    { value: 'papers-asc', label: t('papersAsc') },
                   ]}
                 />
               </Space>
@@ -571,8 +571,8 @@ export default function DatasetsPage() {
                           {task}
                           <Badge
                             count={Array.isArray(datasets) ? datasets.filter(d => {
-                              if (!d.tasks) return false;
-                              return parseTasksArray(d.tasks).includes(task);
+                              if (!d.tasks) return false
+                              return parseTasksArray(d.tasks).includes(task)
                             }).length : 0}
                             style={{ marginLeft: 8 }}
                             showZero
@@ -649,8 +649,8 @@ export default function DatasetsPage() {
                                 initialState={dataset.starred || false}
                                 onToggle={(isInteresting) => {
                                   setDatasets(prevDatasets => prevDatasets.map(d =>
-                                    d.id === dataset.id ? { ...d, starred: isInteresting } : d
-                                  ));
+                                    d.id === dataset.id ? { ...d, starred: isInteresting } : d,
+                                  ))
                                 }}
                               />
                             </div>
@@ -721,8 +721,8 @@ export default function DatasetsPage() {
                               initialState={dataset.starred || false}
                               onToggle={(isInteresting) => {
                                 setDatasets(prevDatasets => prevDatasets.map(d =>
-                                  d.id === dataset.id ? { ...d, starred: isInteresting } : d
-                                ));
+                                  d.id === dataset.id ? { ...d, starred: isInteresting } : d,
+                                ))
                               }}
                             />
                           </div>
@@ -766,5 +766,5 @@ export default function DatasetsPage() {
         </Card>
       </div>
     </Content>
-  );
-} 
+  )
+}

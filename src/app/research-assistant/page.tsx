@@ -1,11 +1,11 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useTranslation } from '@/utils/useTranslation';
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useTranslation } from '@/utils/useTranslation'
 
 // The API URL with a fallback to localhost
-const RESEARCH_ASSISTANT_API_URL = process.env.NEXT_PUBLIC_RESEARCH_API_URL || 'http://localhost:8090';
+const RESEARCH_ASSISTANT_API_URL = process.env.NEXT_PUBLIC_RESEARCH_API_URL || 'http://localhost:8090'
 
 // Add function to check if the API is available
 const checkApiAvailability = async () => {
@@ -14,14 +14,14 @@ const checkApiAvailability = async () => {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             // Add a timeout to avoid long waits
-            signal: AbortSignal.timeout(3000)
-        });
-        return response.ok;
+            signal: AbortSignal.timeout(3000),
+        })
+        return response.ok
     } catch (error) {
-        console.error('API health check failed:', error);
-        return false;
+        console.error('API health check failed:', error)
+        return false
     }
-};
+}
 
 interface Paper {
     paper_id: string;
@@ -40,50 +40,50 @@ interface QueryResponse {
 }
 
 export default function ResearchAssistant() {
-    const { t } = useTranslation('research-assistant');
-    const [query, setQuery] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [response, setResponse] = useState<QueryResponse | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'search' | 'sources'>('search');
-    const [apiStatus, setApiStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown');
-    const [isCheckingConnection, setIsCheckingConnection] = useState(false);
+    const { t } = useTranslation('research-assistant')
+    const [query, setQuery] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [response, setResponse] = useState<QueryResponse | null>(null)
+    const [error, setError] = useState<string | null>(null)
+    const [activeTab, setActiveTab] = useState<'search' | 'sources'>('search')
+    const [apiStatus, setApiStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown')
+    const [isCheckingConnection, setIsCheckingConnection] = useState(false)
 
     // Function to check API connection
     const checkConnection = async () => {
-        setIsCheckingConnection(true);
+        setIsCheckingConnection(true)
         try {
-            const isAvailable = await checkApiAvailability();
-            setApiStatus(isAvailable ? 'connected' : 'disconnected');
+            const isAvailable = await checkApiAvailability()
+            setApiStatus(isAvailable ? 'connected' : 'disconnected')
         } catch (err) {
-            setApiStatus('disconnected');
+            setApiStatus('disconnected')
         } finally {
-            setIsCheckingConnection(false);
+            setIsCheckingConnection(false)
         }
-    };
+    }
 
     // Check connection on initial load
     useEffect(() => {
-        checkConnection();
-    }, []);
+        checkConnection()
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!query.trim()) return;
+        e.preventDefault()
+        if (!query.trim()) return
 
-        setIsLoading(true);
-        setError(null);
+        setIsLoading(true)
+        setError(null)
 
         try {
             // Check if the API is available first
-            const isApiAvailable = await checkApiAvailability();
+            const isApiAvailable = await checkApiAvailability()
 
             if (!isApiAvailable) {
-                throw new Error('Research Assistant API is currently unavailable. Please check if the service is running.');
+                throw new Error('Research Assistant API is currently unavailable. Please check if the service is running.')
             }
 
             // Directly connect to the FastAPI backend service
-            console.log('Sending request to:', `${RESEARCH_ASSISTANT_API_URL}/query`);
+            console.log('Sending request to:', `${RESEARCH_ASSISTANT_API_URL}/query`)
             const response = await fetch(`${RESEARCH_ASSISTANT_API_URL}/query`, {
                 method: 'POST',
                 headers: {
@@ -93,48 +93,48 @@ export default function ResearchAssistant() {
                     query,
                     // Optional user_id for filtering (can be added later)
                 }),
-            });
+            })
 
-            console.log('Response status:', response.status);
+            console.log('Response status:', response.status)
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                throw new Error(`Error: ${response.status} - ${errorText}`);
+                const errorText = await response.text()
+                console.error('Error response:', errorText)
+                throw new Error(`Error: ${response.status} - ${errorText}`)
             }
 
-            const data = await response.json();
-            console.log('Research assistant response data:', JSON.stringify(data, null, 2));
+            const data = await response.json()
+            console.log('Research assistant response data:', JSON.stringify(data, null, 2))
 
             // Check that the data has the expected structure
             if (!data.answer) {
-                console.error('Invalid response format:', data);
-                throw new Error('The API response is missing the expected answer field');
+                console.error('Invalid response format:', data)
+                throw new Error('The API response is missing the expected answer field')
             }
 
             if (data.papers && !Array.isArray(data.papers)) {
-                console.error('Invalid papers array:', data.papers);
-                data.papers = []; // Ensure we have an array even if the API returns something unexpected
+                console.error('Invalid papers array:', data.papers)
+                data.papers = [] // Ensure we have an array even if the API returns something unexpected
             }
 
-            setResponse(data);
+            setResponse(data)
         } catch (err) {
-            console.error('Error querying research assistant:', err);
+            console.error('Error querying research assistant:', err)
             // Provide more specific error messages
             if (err instanceof Error) {
-                setError(`Failed to get response: ${err.message}`);
+                setError(`Failed to get response: ${err.message}`)
             } else {
-                setError('Failed to get response. Please try again.');
+                setError('Failed to get response. Please try again.')
             }
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
     // Check if the response appears to be from fallback mode
     const isUsingFallback = response?.using_fallback ||
         (response?.answer && response.answer.includes('This is a summary based on the semantic search results')) ||
-        (response?.answer && response.answer.includes('OpenAI API is currently unavailable'));
+        (response?.answer && response.answer.includes('OpenAI API is currently unavailable'))
 
     return (
         <div className='bg-gray-100 min-h-screen text-gray-900 p-6'>
@@ -378,5 +378,5 @@ export default function ResearchAssistant() {
                 )}
             </div>
         </div>
-    );
-} 
+    )
+}

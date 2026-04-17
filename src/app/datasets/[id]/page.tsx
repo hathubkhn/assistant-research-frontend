@@ -1,12 +1,12 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import InterestingDatasetButton from '../../../components/InterestingDatasetButton';
-import { getAuthHeaders } from '@/utils/auth';
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import InterestingDatasetButton from '../../../components/InterestingDatasetButton'
+import { getAuthHeaders } from '@/utils/auth'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 interface Dataset {
     id: string;
@@ -44,100 +44,100 @@ interface Paper {
 }
 
 export default function DatasetDetailPage() {
-    const params = useParams();
-    const id = params.id as string;
+    const params = useParams()
+    const id = params.id as string
 
-    const [dataset, setDataset] = useState<Dataset | null>(null);
-    const [relatedPapers, setRelatedPapers] = useState<Paper[]>([]);
-    const [similarDatasets, setSimilarDatasets] = useState<Dataset[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [isStarred, setIsStarred] = useState(false);
-    const [tasks, setTasks] = useState<string[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [papersPerPage] = useState(5);
+    const [dataset, setDataset] = useState<Dataset | null>(null)
+    const [relatedPapers, setRelatedPapers] = useState<Paper[]>([])
+    const [similarDatasets, setSimilarDatasets] = useState<Dataset[]>([])
+    const [loading, setLoading] = useState(true)
+    const [isStarred, setIsStarred] = useState(false)
+    const [tasks, setTasks] = useState<string[]>([])
+    const [currentPage, setCurrentPage] = useState(1)
+    const [papersPerPage] = useState(5)
 
     // Fetch dataset details and check if it's already starred
     useEffect(() => {
         const fetchDatasetDetails = async () => {
             try {
-                console.log(`Attempting to fetch dataset with ID: ${id}`);
+                console.log(`Attempting to fetch dataset with ID: ${id}`)
                 const response = await fetch(`${API_URL}/api/datasets/${id}/`, {
-                    headers: getAuthHeaders()
-                });
+                    headers: getAuthHeaders(),
+                })
 
                 if (response.status === 404) {
-                    console.error(`Dataset not found with ID: ${id}`);
-                    console.error('Please check the PostgreSQL database to ensure this dataset exists');
-                    setLoading(false);
-                    return;
+                    console.error(`Dataset not found with ID: ${id}`)
+                    console.error('Please check the PostgreSQL database to ensure this dataset exists')
+                    setLoading(false)
+                    return
                 }
 
                 if (response.ok) {
-                    const data = await response.json();
+                    const data = await response.json()
                     if (data.dataset) {
-                        console.log(`Successfully found dataset: ${data.dataset.name}`);
-                        setDataset(data.dataset);
-                        setRelatedPapers(data.relatedPapers || []);
-                        setSimilarDatasets(data.similarDatasets || []);
+                        console.log(`Successfully found dataset: ${data.dataset.name}`)
+                        setDataset(data.dataset)
+                        setRelatedPapers(data.relatedPapers || [])
+                        setSimilarDatasets(data.similarDatasets || [])
 
                         // Check if this dataset is already starred
                         if (data.dataset.isStarred) {
-                            setIsStarred(true);
+                            setIsStarred(true)
                         }
                     } else {
-                        console.error('Dataset response is missing dataset data');
-                        setLoading(false);
+                        console.error('Dataset response is missing dataset data')
+                        setLoading(false)
                     }
                 } else {
-                    console.error(`Error fetching dataset details: ${response.status} ${response.statusText}`);
+                    console.error(`Error fetching dataset details: ${response.status} ${response.statusText}`)
                 }
             } catch (error) {
-                console.error('Error fetching dataset details:', error);
+                console.error('Error fetching dataset details:', error)
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
-        };
+        }
 
         if (id) {
-            fetchDatasetDetails();
+            fetchDatasetDetails()
         }
-    }, [id]);
+    }, [id])
 
     useEffect(() => {
         // Parse tasks from JSON if it's a string
         if (dataset && dataset.tasks) {
             if (typeof dataset.tasks === 'string') {
                 try {
-                    setTasks(JSON.parse(dataset.tasks));
+                    setTasks(JSON.parse(dataset.tasks))
                 } catch (e) {
-                    console.error('Error parsing tasks string:', e);
-                    setTasks([dataset.tasks]);
+                    console.error('Error parsing tasks string:', e)
+                    setTasks([dataset.tasks])
                 }
             } else if (Array.isArray(dataset.tasks)) {
-                setTasks(dataset.tasks);
+                setTasks(dataset.tasks)
             } else if (typeof dataset.tasks === 'object') {
                 // Handle case where tasks might be an object
                 try {
-                    const taskArray = Object.values(dataset.tasks) as string[];
-                    setTasks(taskArray);
+                    const taskArray = Object.values(dataset.tasks) as string[]
+                    setTasks(taskArray)
                 } catch (e) {
-                    console.error('Error converting tasks object to array:', e);
-                    setTasks([]);
+                    console.error('Error converting tasks object to array:', e)
+                    setTasks([])
                 }
             } else {
-                setTasks([]);
+                setTasks([])
             }
         } else {
-            setTasks([]);
+            setTasks([])
         }
-    }, [dataset]);
+    }, [dataset])
 
     if (loading) {
         return (
             <div className='container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]'>
                 <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600'></div>
             </div>
-        );
+        )
     }
 
     if (!dataset) {
@@ -147,24 +147,24 @@ export default function DatasetDetailPage() {
                     <p>Dataset not found. Please check the URL and try again.</p>
                 </div>
             </div>
-        );
+        )
     }
 
     // Calculate pagination indices for related papers
-    const indexOfLastPaper = currentPage * papersPerPage;
-    const indexOfFirstPaper = indexOfLastPaper - papersPerPage;
-    const currentPapers = relatedPapers.slice(indexOfFirstPaper, indexOfLastPaper);
-    const totalPages = Math.ceil(relatedPapers.length / papersPerPage);
+    const indexOfLastPaper = currentPage * papersPerPage
+    const indexOfFirstPaper = indexOfLastPaper - papersPerPage
+    const currentPapers = relatedPapers.slice(indexOfFirstPaper, indexOfLastPaper)
+    const totalPages = Math.ceil(relatedPapers.length / papersPerPage)
 
     // Function to change page
     const paginate = (pageNumber: number) => {
-        setCurrentPage(pageNumber);
+        setCurrentPage(pageNumber)
         // Scroll to top of the papers section
-        const papersSection = document.getElementById('related-papers');
+        const papersSection = document.getElementById('related-papers')
         if (papersSection) {
-            papersSection.scrollIntoView({ behavior: 'smooth' });
+            papersSection.scrollIntoView({ behavior: 'smooth' })
         }
-    };
+    }
 
     return (
         <div className='container mx-auto px-4 py-8'>
@@ -194,12 +194,12 @@ export default function DatasetDetailPage() {
                                     alt={dataset.abbreviation}
                                     className='max-w-full max-h-full object-contain'
                                     onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.onerror = null;
-                                        target.style.display = 'none';
-                                        const parent = target.parentElement;
+                                        const target = e.target as HTMLImageElement
+                                        target.onerror = null
+                                        target.style.display = 'none'
+                                        const parent = target.parentElement
                                         if (parent) {
-                                            parent.innerHTML = `<div class="text-3xl font-bold text-gray-400">${dataset.abbreviation}</div>`;
+                                            parent.innerHTML = `<div class="text-3xl font-bold text-gray-400">${dataset.abbreviation}</div>`
                                         }
                                     }}
                                 />
@@ -272,36 +272,36 @@ export default function DatasetDetailPage() {
                                     {(() => {
                                         // Handle different benchmark formats
                                         if (!dataset.benchmarks) {
-                                            return '0 benchmarks';
+                                            return '0 benchmarks'
                                         }
 
                                         if (typeof dataset.benchmarks === 'number') {
-                                            return dataset.benchmarks + ' benchmark' + (dataset.benchmarks !== 1 ? 's' : '');
+                                            return dataset.benchmarks + ' benchmark' + (dataset.benchmarks !== 1 ? 's' : '')
                                         }
 
                                         if (Array.isArray(dataset.benchmarks)) {
-                                            return dataset.benchmarks.length + ' benchmark' + (dataset.benchmarks.length !== 1 ? 's' : '');
+                                            return dataset.benchmarks.length + ' benchmark' + (dataset.benchmarks.length !== 1 ? 's' : '')
                                         }
 
                                         if (typeof dataset.benchmarks === 'string') {
                                             try {
-                                                const parsed = JSON.parse(dataset.benchmarks);
+                                                const parsed = JSON.parse(dataset.benchmarks)
                                                 if (typeof parsed === 'number') {
-                                                    return parsed + ' benchmark' + (parsed !== 1 ? 's' : '');
+                                                    return parsed + ' benchmark' + (parsed !== 1 ? 's' : '')
                                                 }
                                                 if (Array.isArray(parsed)) {
-                                                    return parsed.length + ' benchmark' + (parsed.length !== 1 ? 's' : '');
+                                                    return parsed.length + ' benchmark' + (parsed.length !== 1 ? 's' : '')
                                                 }
                                             } catch (e) {
                                                 // Try as a direct number
-                                                const num = Number(dataset.benchmarks);
+                                                const num = Number(dataset.benchmarks)
                                                 if (!isNaN(num)) {
-                                                    return num + ' benchmark' + (num !== 1 ? 's' : '');
+                                                    return num + ' benchmark' + (num !== 1 ? 's' : '')
                                                 }
                                             }
                                         }
 
-                                        return '0 benchmarks';
+                                        return '0 benchmarks'
                                     })()}
                                 </p>
                             </div>
@@ -341,20 +341,20 @@ export default function DatasetDetailPage() {
                         {(() => {
                             // Helper function to parse benchmarks
                             const getBenchmarks = () => {
-                                if (!dataset.benchmarks) return null;
+                                if (!dataset.benchmarks) return null
 
                                 if (Array.isArray(dataset.benchmarks) && dataset.benchmarks.length > 0) {
-                                    return dataset.benchmarks;
+                                    return dataset.benchmarks
                                 }
 
                                 if (typeof dataset.benchmarks === 'string') {
                                     try {
-                                        const parsed = JSON.parse(dataset.benchmarks);
+                                        const parsed = JSON.parse(dataset.benchmarks)
                                         if (Array.isArray(parsed) && parsed.length > 0) {
-                                            return parsed;
+                                            return parsed
                                         }
                                     } catch (e) {
-                                        console.error('Error parsing benchmarks string:', e);
+                                        console.error('Error parsing benchmarks string:', e)
                                     }
                                 }
 
@@ -363,14 +363,14 @@ export default function DatasetDetailPage() {
                                     return Array(dataset.benchmarks).fill({
                                         task: 'Classification',
                                         'dataset variant': 'Standard',
-                                        'best model': 'Unknown'
-                                    });
+                                        'best model': 'Unknown',
+                                    })
                                 }
 
-                                return null;
-                            };
+                                return null
+                            }
 
-                            const benchmarks = getBenchmarks();
+                            const benchmarks = getBenchmarks()
 
                             if (benchmarks) {
                                 return (
@@ -410,10 +410,10 @@ export default function DatasetDetailPage() {
                                             </table>
                                         </div>
                                     </div>
-                                );
+                                )
                             }
 
-                            return null;
+                            return null
                         })()}
                     </div>
                 </div>
@@ -511,15 +511,15 @@ export default function DatasetDetailPage() {
 
                                     {Array.from({ length: Math.max(1, Math.min(5, totalPages)) }, (_, i) => {
                                         // Show pages around current page
-                                        let pageNum;
+                                        let pageNum
                                         if (totalPages <= 5) {
-                                            pageNum = i + 1;
+                                            pageNum = i + 1
                                         } else if (currentPage <= 3) {
-                                            pageNum = i + 1;
+                                            pageNum = i + 1
                                         } else if (currentPage >= totalPages - 2) {
-                                            pageNum = totalPages - 4 + i;
+                                            pageNum = totalPages - 4 + i
                                         } else {
-                                            pageNum = currentPage - 2 + i;
+                                            pageNum = currentPage - 2 + i
                                         }
 
                                         // Ensure we don't show page numbers beyond totalPages
@@ -534,9 +534,9 @@ export default function DatasetDetailPage() {
                                                 >
                                                     {pageNum}
                                                 </button>
-                                            );
+                                            )
                                         }
-                                        return null;
+                                        return null
                                     })}
 
                                     <button
@@ -587,5 +587,5 @@ export default function DatasetDetailPage() {
                 )}
             </div>
         </div>
-    );
+    )
 }

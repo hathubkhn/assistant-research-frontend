@@ -1,5 +1,5 @@
-import React from 'react';
-import Link from 'next/link';
+import React from 'react'
+import Link from 'next/link'
 
 interface Params {
     id: string;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default async function IdeaDetails({ params }: Props) {
-    const { id: ideaId } = await params;
+    const { id: ideaId } = await params
 
     // Mock data for a single idea
     const idea = {
@@ -44,9 +44,9 @@ export default async function IdeaDetails({ params }: Props) {
                 status: 'pending',
                 startDate: null,
                 endDate: null,
-            }
-        ]
-    };
+            },
+        ],
+    }
 
     return (
         <div className='max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto'>
@@ -148,5 +148,5 @@ export default async function IdeaDetails({ params }: Props) {
                 </div>
             </div>
         </div>
-    );
-} 
+    )
+}
