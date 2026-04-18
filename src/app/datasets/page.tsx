@@ -73,12 +73,15 @@ interface FetchDatasetsParams {
   year?: string;
 }
 
-const fetchDatasetsAPI = async (params: FetchDatasetsParams): Promise<DatasetsResponse> => {
+const fetchDatasetsAPI = async (
+  params: FetchDatasetsParams,
+): Promise<DatasetsResponse> => {
   try {
     const queryParams = new URLSearchParams()
 
     if (params.page) queryParams.append('page', params.page.toString())
-    if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString())
+    if (params.pageSize)
+      queryParams.append('pageSize', params.pageSize.toString())
     if (params.search) queryParams.append('search', params.search)
     if (params.task) queryParams.append('task', params.task)
     if (params.field) queryParams.append('field', params.field)
@@ -86,7 +89,9 @@ const fetchDatasetsAPI = async (params: FetchDatasetsParams): Promise<DatasetsRe
     if (params.venueType) queryParams.append('venueType', params.venueType)
     if (params.year) queryParams.append('year', params.year)
 
-    const response = await axios.get(`${API_URL}/api/datasets/?${queryParams.toString()}`)
+    const response = await axios.get(
+      `${API_URL}/api/datasets/?${queryParams.toString()}`,
+    )
     return response.data
   } catch (error) {
     console.error('Error fetching datasets:', error)
@@ -97,7 +102,7 @@ const fetchDatasetsAPI = async (params: FetchDatasetsParams): Promise<DatasetsRe
 const fetchInterestingDatasetsAPI = async (): Promise<Dataset[]> => {
   try {
     const authHeaders = getAuthHeaders()
-    const response = await axios.get('/api/datasets/interesting/', {
+    const response = await axios.get(`${API_URL}/api/datasets/interesting/`, {
       headers: authHeaders as Record<string, string>,
       withCredentials: true,
     })
@@ -111,10 +116,14 @@ const fetchInterestingDatasetsAPI = async (): Promise<Dataset[]> => {
 const markDatasetInterestingAPI = async (id: string): Promise<void> => {
   try {
     const authHeaders = getAuthHeaders(true)
-    await axios.post(`/api/datasets/mark-interesting/${id}/`, {}, {
-      headers: authHeaders as Record<string, string>,
-      withCredentials: true,
-    })
+    await axios.post(
+      `${API_URL}/api/datasets/mark-interesting/${id}/`,
+      {},
+      {
+        headers: authHeaders as Record<string, string>,
+        withCredentials: true,
+      },
+    )
   } catch (error) {
     console.error('Error marking dataset as interesting:', error)
     throw error
@@ -124,7 +133,7 @@ const markDatasetInterestingAPI = async (id: string): Promise<void> => {
 const unmarkDatasetInterestingAPI = async (id: string): Promise<void> => {
   try {
     const authHeaders = getAuthHeaders(true)
-    await axios.delete(`/api/datasets/${id}/unmark-interesting/`, {
+    await axios.delete(`${API_URL}/api/datasets/${id}/unmark-interesting/`, {
       headers: authHeaders as Record<string, string>,
       withCredentials: true,
     })
@@ -139,7 +148,7 @@ const fetchConferencesFilterAPI = async (): Promise<any[]> => {
     const response = await axios.get(`${API_URL}/api/conferences/filter/`, {
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       withCredentials: true,
     })
@@ -155,7 +164,7 @@ const fetchJournalsFilterAPI = async (): Promise<any[]> => {
     const response = await axios.get(`${API_URL}/api/journals/filter/`, {
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       withCredentials: true,
     })
@@ -280,7 +289,9 @@ export default function DatasetsPage() {
         params.field = activeFilters.categories[0]
       }
       if (activeFilters.languages.length > 0) {
-        params.field = params.field ? `${params.field},${activeFilters.languages[0]}` : activeFilters.languages[0]
+        params.field = params.field
+          ? `${params.field},${activeFilters.languages[0]}`
+          : activeFilters.languages[0]
       }
       if (activeFilters.tasks.length > 0) {
         params.task = activeFilters.tasks[0]
@@ -292,21 +303,22 @@ export default function DatasetsPage() {
       if (data.results && data.results.length > 0) {
         console.log('Sample dataset structure:', data.results[0])
         data.results = data.results.map((dataset: Dataset) => {
-
-          if (typeof dataset.benchmarks === 'number' ||
+          if (
+            typeof dataset.benchmarks === 'number' ||
             dataset.benchmarks === null ||
-            dataset.benchmarks === undefined) {
+            dataset.benchmarks === undefined
+          ) {
             dataset.benchmarks = []
           }
           return dataset
         })
       }
-      const hasAuthToken = typeof window !== 'undefined' && (
-        localStorage.getItem('authToken') ||
-        sessionStorage.getItem('authToken') ||
-        localStorage.getItem('token') ||
-        sessionStorage.getItem('token')
-      )
+      const hasAuthToken =
+        typeof window !== 'undefined' &&
+        (localStorage.getItem('authToken') ||
+          sessionStorage.getItem('authToken') ||
+          localStorage.getItem('token') ||
+          sessionStorage.getItem('token'))
       if (hasAuthToken) {
         try {
           const interestingData = await fetchInterestingDatasetsAPI()
@@ -343,21 +355,23 @@ export default function DatasetsPage() {
     }
     fetchDatasets(page, size)
 
-
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   useEffect(() => {
-
     if (typeof window !== 'undefined' && window.PerformanceObserver) {
       const observer = new PerformanceObserver((list) => {
         list.getEntries().forEach((entry) => {
           if (entry.name.includes('/images/datasets/')) {
-            console.log('Image request:', entry.name, 'Duration:', entry.duration)
+            console.log(
+              'Image request:',
+              entry.name,
+              'Duration:',
+              entry.duration,
+            )
           }
         })
       })
-
 
       observer.observe({ entryTypes: ['resource'] })
 
@@ -367,42 +381,57 @@ export default function DatasetsPage() {
     }
   }, [])
 
-  const filteredDatasets = Array.isArray(datasets) ? datasets.filter(dataset => {
-    const matchesSearch = searchQuery === '' ||
-      dataset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dataset.abbreviation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dataset.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredDatasets = Array.isArray(datasets)
+    ? datasets.filter((dataset) => {
+        const matchesSearch =
+          searchQuery === '' ||
+          dataset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          dataset.abbreviation
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          dataset.description.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesFilter = activeFilters.categories.length === 0 ||
-      activeFilters.categories.includes(dataset.category)
+        const matchesFilter =
+          activeFilters.categories.length === 0 ||
+          activeFilters.categories.includes(dataset.category)
 
-    const matchesTaskFilter = activeFilters.tasks.length === 0 ||
-      (dataset.tasks && parseTasksArray(dataset.tasks).some(task =>
-        activeFilters.tasks.includes(task))
-      )
+        const matchesTaskFilter =
+          activeFilters.tasks.length === 0 ||
+          (dataset.tasks &&
+            parseTasksArray(dataset.tasks).some((task) =>
+              activeFilters.tasks.includes(task),
+            ))
 
-    const matchesLanguageFilter = activeFilters.languages.length === 0 ||
-      activeFilters.languages.includes(dataset.language)
+        const matchesLanguageFilter =
+          activeFilters.languages.length === 0 ||
+          activeFilters.languages.includes(dataset.language)
 
-    return matchesSearch && matchesFilter && matchesTaskFilter && matchesLanguageFilter
-  }) : []
+        return (
+          matchesSearch &&
+          matchesFilter &&
+          matchesTaskFilter &&
+          matchesLanguageFilter
+        )
+      })
+    : []
 
   const categories = ['Image', '3D', 'Audio', 'Medical', 'Time series', 'Text']
 
   const allTasks = new Set<string>()
   if (Array.isArray(datasets)) {
-    datasets.forEach(dataset => {
+    datasets.forEach((dataset) => {
       if (dataset.tasks) {
         const tasksArray = parseTasksArray(dataset.tasks)
-        tasksArray.forEach(task => allTasks.add(task))
+        tasksArray.forEach((task) => allTasks.add(task))
       }
     })
   }
   const tasks = Array.from(allTasks).sort()
 
-
   const languages = Array.isArray(datasets)
-    ? [...new Set(datasets.map(dataset => dataset.language).filter(Boolean))].sort()
+    ? [
+        ...new Set(datasets.map((dataset) => dataset.language).filter(Boolean)),
+      ].sort()
     : []
 
   const sortedDatasets = [...filteredDatasets].sort((a, b) => {
@@ -421,9 +450,9 @@ export default function DatasetsPage() {
   })
 
   const toggleCategoryFilter = (category: string) => {
-    setActiveFilters(prev => {
+    setActiveFilters((prev) => {
       const newCategories = prev.categories.includes(category)
-        ? prev.categories.filter(c => c !== category)
+        ? prev.categories.filter((c) => c !== category)
         : [...prev.categories, category]
       return { ...prev, categories: newCategories }
     })
@@ -433,9 +462,9 @@ export default function DatasetsPage() {
   }
 
   const toggleTaskFilter = (task: string) => {
-    setActiveFilters(prev => {
+    setActiveFilters((prev) => {
       const newTasks = prev.tasks.includes(task)
-        ? prev.tasks.filter(t => t !== task)
+        ? prev.tasks.filter((t) => t !== task)
         : [...prev.tasks, task]
       return { ...prev, tasks: newTasks }
     })
@@ -445,9 +474,9 @@ export default function DatasetsPage() {
   }
 
   const toggleLanguageFilter = (language: string) => {
-    setActiveFilters(prev => {
+    setActiveFilters((prev) => {
       const newLanguages = prev.languages.includes(language)
-        ? prev.languages.filter(l => l !== language)
+        ? prev.languages.filter((l) => l !== language)
         : [...prev.languages, language]
       return { ...prev, languages: newLanguages }
     })
@@ -496,7 +525,10 @@ export default function DatasetsPage() {
               />
             </Col>
             <Col xs={24} md={12}>
-              <Space size='middle' style={{ width: '100%', justifyContent: 'flex-end' }}>
+              <Space
+                size='middle'
+                style={{ width: '100%', justifyContent: 'flex-end' }}
+              >
                 <Segmented
                   value={currentView}
                   onChange={(value) => setCurrentView(value as 'grid' | 'list')}
@@ -524,9 +556,20 @@ export default function DatasetsPage() {
           <Row gutter={24}>
             <Col xs={24} md={6}>
               <div style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <Title level={4} style={{ margin: 0 }}>{t('filters')}</Title>
-                  {(activeFilters.categories.length > 0 || activeFilters.tasks.length > 0 || activeFilters.languages.length > 0) && (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 16,
+                  }}
+                >
+                  <Title level={4} style={{ margin: 0 }}>
+                    {t('filters')}
+                  </Title>
+                  {(activeFilters.categories.length > 0 ||
+                    activeFilters.tasks.length > 0 ||
+                    activeFilters.languages.length > 0) && (
                     <Button
                       type='link'
                       size='small'
@@ -539,8 +582,14 @@ export default function DatasetsPage() {
                 </div>
 
                 <div style={{ marginBottom: 24 }}>
-                  <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByModality')}</Text>
-                  <Space direction='vertical' size='small' style={{ width: '100%' }}>
+                  <Text strong style={{ marginBottom: 8, display: 'block' }}>
+                    {t('filterByModality')}
+                  </Text>
+                  <Space
+                    direction='vertical'
+                    size='small'
+                    style={{ width: '100%' }}
+                  >
                     {categories.map((category) => (
                       <Checkbox
                         key={category}
@@ -549,7 +598,12 @@ export default function DatasetsPage() {
                       >
                         {category}
                         <Badge
-                          count={Array.isArray(datasets) ? datasets.filter(d => d.category === category).length : 0}
+                          count={
+                            Array.isArray(datasets)
+                              ? datasets.filter((d) => d.category === category)
+                                  .length
+                              : 0
+                          }
                           style={{ marginLeft: 8 }}
                           showZero
                         />
@@ -559,9 +613,15 @@ export default function DatasetsPage() {
                 </div>
 
                 <div style={{ marginBottom: 24 }}>
-                  <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByTask')}</Text>
+                  <Text strong style={{ marginBottom: 8, display: 'block' }}>
+                    {t('filterByTask')}
+                  </Text>
                   <div style={{ maxHeight: 240, overflowY: 'auto' }}>
-                    <Space direction='vertical' size='small' style={{ width: '100%' }}>
+                    <Space
+                      direction='vertical'
+                      size='small'
+                      style={{ width: '100%' }}
+                    >
                       {tasks.map((task) => (
                         <Checkbox
                           key={task}
@@ -570,10 +630,16 @@ export default function DatasetsPage() {
                         >
                           {task}
                           <Badge
-                            count={Array.isArray(datasets) ? datasets.filter(d => {
-                              if (!d.tasks) return false
-                              return parseTasksArray(d.tasks).includes(task)
-                            }).length : 0}
+                            count={
+                              Array.isArray(datasets)
+                                ? datasets.filter((d) => {
+                                    if (!d.tasks) return false
+                                    return parseTasksArray(d.tasks).includes(
+                                      task,
+                                    )
+                                  }).length
+                                : 0
+                            }
                             style={{ marginLeft: 8 }}
                             showZero
                           />
@@ -584,8 +650,14 @@ export default function DatasetsPage() {
                 </div>
 
                 <div>
-                  <Text strong style={{ marginBottom: 8, display: 'block' }}>{t('filterByLanguage')}</Text>
-                  <Space direction='vertical' size='small' style={{ width: '100%' }}>
+                  <Text strong style={{ marginBottom: 8, display: 'block' }}>
+                    {t('filterByLanguage')}
+                  </Text>
+                  <Space
+                    direction='vertical'
+                    size='small'
+                    style={{ width: '100%' }}
+                  >
                     {languages.map((language) => (
                       <Checkbox
                         key={language}
@@ -594,7 +666,12 @@ export default function DatasetsPage() {
                       >
                         {language}
                         <Badge
-                          count={Array.isArray(datasets) ? datasets.filter(d => d.language === language).length : 0}
+                          count={
+                            Array.isArray(datasets)
+                              ? datasets.filter((d) => d.language === language)
+                                  .length
+                              : 0
+                          }
                           style={{ marginLeft: 8 }}
                           showZero
                         />
@@ -607,65 +684,113 @@ export default function DatasetsPage() {
             <Col xs={24} md={18}>
               <Spin spinning={loading}>
                 {sortedDatasets.length === 0 && !loading ? (
-                  <div style={{ textAlign: 'center', padding: '48px 0', marginBottom: 24, marginTop: 24 }}>
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      padding: '48px 0',
+                      marginBottom: 24,
+                      marginTop: 24,
+                    }}
+                  >
                     <Text type='secondary' style={{ fontSize: 16 }}>
                       {t('noDatasetsFoundMatchingCriteria')}
                     </Text>
                   </div>
                 ) : currentView === 'list' ? (
-                  <Space direction='vertical' size='middle' style={{ width: '100%' }}>
+                  <Space
+                    direction='vertical'
+                    size='middle'
+                    style={{ width: '100%' }}
+                  >
                     {sortedDatasets.map((dataset) => (
                       <Card key={dataset.id} hoverable>
                         <Row gutter={16}>
                           <Col xs={24} sm={6}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 96, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: 96,
+                                backgroundColor: '#f5f5f5',
+                                borderRadius: 8,
+                              }}
+                            >
                               <Link href={`/datasets/${dataset.id}`}>
                                 {dataset.abbreviation ? (
                                   <Image
                                     src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
                                     alt={dataset.abbreviation}
-                                    style={{ maxWidth: '100%', maxHeight: '100%' }}
+                                    style={{
+                                      maxWidth: '100%',
+                                      maxHeight: '100%',
+                                    }}
                                     fallback={`data:image/svg+xml;base64,${btoa(`<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" fill="#f0f0f0"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="24" fill="#999">${dataset.abbreviation}</text></svg>`)}`}
                                     preview={false}
                                   />
                                 ) : (
-                                  <div style={{ fontSize: 24, color: '#999' }}>No Image</div>
+                                  <div style={{ fontSize: 24, color: '#999' }}>
+                                    No Image
+                                  </div>
                                 )}
                               </Link>
                             </div>
                           </Col>
                           <Col xs={24} sm={18}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                              }}
+                            >
                               <div>
                                 <Link href={`/datasets/${dataset.id}`}>
-                                  <Title level={4} style={{ margin: 0, color: '#d32f2f' }}>
+                                  <Title
+                                    level={4}
+                                    style={{ margin: 0, color: '#d32f2f' }}
+                                  >
                                     {dataset.name}
                                   </Title>
-                                  <Text type='secondary'>{dataset.abbreviation}</Text>
+                                  <Text type='secondary'>
+                                    {dataset.abbreviation}
+                                  </Text>
                                 </Link>
                               </div>
                               <InterestingDatasetButton
                                 datasetId={dataset.id}
                                 initialState={dataset.starred || false}
                                 onToggle={(isInteresting) => {
-                                  setDatasets(prevDatasets => prevDatasets.map(d =>
-                                    d.id === dataset.id ? { ...d, starred: isInteresting } : d,
-                                  ))
+                                  setDatasets((prevDatasets) =>
+                                    prevDatasets.map((d) =>
+                                      d.id === dataset.id
+                                        ? { ...d, starred: isInteresting }
+                                        : d,
+                                    ),
+                                  )
                                 }}
                               />
                             </div>
                             <div style={{ margin: '8px 0' }}>
                               <Text type='secondary'>
-                                {dataset.paperCount} papers • {getBenchmarkCount(dataset.benchmarks)} benchmarks • {dataset.language}
+                                {dataset.paperCount} papers •{' '}
+                                {getBenchmarkCount(dataset.benchmarks)}{' '}
+                                benchmarks • {dataset.language}
                               </Text>
                             </div>
-                            <Paragraph ellipsis={{ rows: 2 }}>{dataset.description}</Paragraph>
+                            <Paragraph ellipsis={{ rows: 2 }}>
+                              {dataset.description}
+                            </Paragraph>
                             <div style={{ marginBottom: 12 }}>
                               <Text strong>{t('tasks')}: </Text>
                               <Space wrap>
-                                {parseTasksArray(dataset.tasks).map((task, index) => (
-                                  <Tag key={index} color='red'>{task}</Tag>
-                                ))}
+                                {parseTasksArray(dataset.tasks).map(
+                                  (task, index) => (
+                                    <Tag key={index} color='red'>
+                                      {task}
+                                    </Tag>
+                                  ),
+                                )}
                               </Space>
                             </div>
                             <Button
@@ -689,58 +814,117 @@ export default function DatasetsPage() {
                       <Col xs={24} sm={12} lg={8} key={dataset.id}>
                         <Card
                           hoverable
-                          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-                          bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+                          style={{
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                          }}
+                          bodyStyle={{
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                          }}
                           cover={
-                            <div style={{ height: 128, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
+                            <div
+                              style={{
+                                height: 128,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#f5f5f5',
+                              }}
+                            >
                               {dataset.abbreviation ? (
                                 <Image
                                   src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
                                   alt={dataset.abbreviation}
-                                  style={{ maxWidth: '100%', maxHeight: '100%' }}
+                                  style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '100%',
+                                  }}
                                   fallback={`data:image/svg+xml;base64,${btoa(`<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" fill="#f0f0f0"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="24" fill="#999">${dataset.abbreviation}</text></svg>`)}`}
                                   preview={false}
                                 />
                               ) : (
-                                <div style={{ fontSize: 24, color: '#999' }}>No Image</div>
+                                <div style={{ fontSize: 24, color: '#999' }}>
+                                  No Image
+                                </div>
                               )}
                             </div>
                           }
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                              marginBottom: 8,
+                            }}
+                          >
                             <div style={{ flex: 1 }}>
                               <Link href={`/datasets/${dataset.id}`}>
-                                <Title level={5} style={{ margin: 0, color: '#d32f2f' }}>
+                                <Title
+                                  level={5}
+                                  style={{ margin: 0, color: '#d32f2f' }}
+                                >
                                   {dataset.name}
                                 </Title>
-                                <Text type='secondary' style={{ fontSize: 12 }}>{dataset.abbreviation}</Text>
+                                <Text type='secondary' style={{ fontSize: 12 }}>
+                                  {dataset.abbreviation}
+                                </Text>
                               </Link>
                             </div>
                             <InterestingDatasetButton
                               datasetId={dataset.id}
                               initialState={dataset.starred || false}
                               onToggle={(isInteresting) => {
-                                setDatasets(prevDatasets => prevDatasets.map(d =>
-                                  d.id === dataset.id ? { ...d, starred: isInteresting } : d,
-                                ))
+                                setDatasets((prevDatasets) =>
+                                  prevDatasets.map((d) =>
+                                    d.id === dataset.id
+                                      ? { ...d, starred: isInteresting }
+                                      : d,
+                                  ),
+                                )
                               }}
                             />
                           </div>
-                          <Paragraph ellipsis={{ rows: 2 }} style={{ fontSize: 12, flex: 1 }}>
+                          <Paragraph
+                            ellipsis={{ rows: 2 }}
+                            style={{ fontSize: 12, flex: 1 }}
+                          >
                             {dataset.description}
                           </Paragraph>
-                          <div style={{ fontSize: 11, color: '#666', marginBottom: 8 }}>
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: '#666',
+                              marginBottom: 8,
+                            }}
+                          >
                             <Text type='secondary'>
-                              {t('papers')}: {dataset.paperCount} • {t('benchmarks')}: {getBenchmarkCount(dataset.benchmarks)} • {t('language')}: {dataset.language}
+                              {t('papers')}: {dataset.paperCount} •{' '}
+                              {t('benchmarks')}:{' '}
+                              {getBenchmarkCount(dataset.benchmarks)} •{' '}
+                              {t('language')}: {dataset.language}
                             </Text>
                           </div>
                           <div style={{ marginBottom: 8 }}>
                             <Space wrap size='small'>
-                              {parseTasksArray(dataset.tasks).slice(0, 3).map((task, index) => (
-                                <Tag key={index} color='red' style={{ fontSize: 10 }}>{task}</Tag>
-                              ))}
+                              {parseTasksArray(dataset.tasks)
+                                .slice(0, 3)
+                                .map((task, index) => (
+                                  <Tag
+                                    key={index}
+                                    color='red'
+                                    style={{ fontSize: 10 }}
+                                  >
+                                    {task}
+                                  </Tag>
+                                ))}
                               {parseTasksArray(dataset.tasks).length > 3 && (
-                                <Tag style={{ fontSize: 10 }}>+{parseTasksArray(dataset.tasks).length - 3}</Tag>
+                                <Tag style={{ fontSize: 10 }}>
+                                  +{parseTasksArray(dataset.tasks).length - 3}
+                                </Tag>
                               )}
                             </Space>
                           </div>
@@ -748,8 +932,7 @@ export default function DatasetsPage() {
                       </Col>
                     ))}
                   </Row>
-                )
-                }
+                )}
                 <div style={{ marginTop: 24, marginBottom: 24 }}>
                   <DataPagination
                     current={currentPage}
