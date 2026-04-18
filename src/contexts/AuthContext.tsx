@@ -23,21 +23,65 @@ type User = {
   profile: Profile | null;
 };
 
+type ProfileApiResponse = {
+  id?: number;
+  userId?: number;
+  username?: string;
+  email?: string;
+  full_name?: string;
+  avatar_url?: string | null;
+  profile?: {
+    userId?: number;
+    full_name?: string;
+    avatar_url?: string | null;
+  } | null;
+};
+
 type AuthContextType = {
   user: User | null;
   loading: boolean;
   logout: () => void;
-  checkAuth: () => Promise<void>;
+  checkAuth: () => Promise<User | null>;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   logout: () => {},
-  checkAuth: async () => {},
+  checkAuth: async () => null,
 })
 
 const isBrowser = () => typeof window !== 'undefined'
+
+const normalizeUserPayload = (
+  payload: ProfileApiResponse,
+  apiUrl: string,
+): User | null => {
+  if (!payload || !payload.id || !payload.username || !payload.email) {
+    return null
+  }
+
+  const nestedProfile = payload.profile
+  const rawAvatarUrl =
+    nestedProfile && 'avatar_url' in nestedProfile
+      ? nestedProfile.avatar_url
+      : payload.avatar_url
+
+  const normalizedAvatarUrl = resolveApiAssetUrl(rawAvatarUrl ?? null, apiUrl)
+  const fullName = nestedProfile?.full_name ?? payload.full_name ?? ''
+  const profileUserId = nestedProfile?.userId ?? payload.userId ?? payload.id
+
+  return {
+    id: payload.id,
+    username: payload.username,
+    email: payload.email,
+    profile: {
+      userId: profileUserId,
+      full_name: fullName,
+      avatar_url: normalizedAvatarUrl,
+    },
+  }
+}
 
 export const useAuth = () => useContext(AuthContext)
 
@@ -48,19 +92,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
 
-  const checkAuth = async () => {
+  const checkAuth = async (): Promise<User | null> => {
     setLoading(true)
     try {
       if (!isBrowser()) {
         setLoading(false)
-        return
+        return null
       }
 
       if (!hasAuthToken()) {
         console.log('Auth context - No token found')
         setUser(null)
         setLoading(false)
-        return
+        return null
       }
 
       const userEndpoint = `${API_URL}/api/profile/`
@@ -86,19 +130,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (response.ok) {
           const userData = await response.json()
+          const normalizedUser = normalizeUserPayload(userData, API_URL)
 
-          if (userData?.profile && 'avatar_url' in userData.profile) {
-            userData.profile.avatar_url = resolveApiAssetUrl(
-              userData.profile.avatar_url,
-              API_URL,
+          if (!normalizedUser) {
+            console.error(
+              'Auth context - Invalid user payload shape',
+              userData,
             )
+            setUser(null)
+            return null
           }
 
           console.log(
             'Auth context - User data loaded successfully:',
-            userData,
+            normalizedUser,
           )
-          setUser(userData)
+          setUser(normalizedUser)
+          return normalizedUser
         } else if (response.status === 401) {
           console.warn('Auth context - Token is invalid or expired')
           // Clear invalid token
@@ -108,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           sessionStorage.removeItem('token')
           setUser(null)
           window.location.href = '/login?error=token_invalid'
+          return null
         } else if (response.status === 503) {
           try {
             const errorData = await response.json()
@@ -118,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             )
           }
           setUser(null)
+          return null
         } else {
           // Other API errors
           try {
@@ -134,14 +184,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             )
           }
           setUser(null)
+          return null
         }
       } catch (fetchError) {
         console.error('Auth context - API connection error:', fetchError)
         setUser(null)
+        return null
       }
     } catch (error) {
       console.error('Authentication check error:', error)
       setUser(null)
+      return null
     } finally {
       setLoading(false)
     }
@@ -156,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    checkAuth()
+    void checkAuth()
   }, [])
 
   return (

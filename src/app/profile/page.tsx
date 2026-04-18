@@ -44,6 +44,7 @@ export default function Profile() {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
+  const [avatarLoadError, setAvatarLoadError] = useState(false)
 
   // Publication management states
   const [publications, setPublications] = useState<Publication[]>([])
@@ -91,6 +92,10 @@ export default function Profile() {
 
     loadProfile()
   }, [router])
+
+  useEffect(() => {
+    setAvatarLoadError(false)
+  }, [profile?.avatar_url, previewUrl])
 
   const handleEdit = () => {
     setIsEditing(true)
@@ -515,13 +520,14 @@ export default function Profile() {
                 <div className='md:w-1/3 flex flex-col items-center'>
                   <div className='relative -mt-20 mb-6'>
                     <div className='w-32 h-32 bg-white rounded-full p-1 shadow-lg'>
-                      {profile.avatar_url ? (
+                      {profile.avatar_url && !avatarLoadError ? (
                         <Image
                           src={profile.avatar_url}
                           alt={profile.full_name || 'Profile'}
                           width={128}
                           height={128}
                           className='rounded-full object-cover w-full h-full'
+                          onError={() => setAvatarLoadError(true)}
                         />
                       ) : (
                         <div className='w-full h-full rounded-full bg-gray-200 flex items-center justify-center'>
@@ -722,14 +728,19 @@ export default function Profile() {
                         width={128}
                         height={128}
                         className='rounded-full object-cover w-full h-full'
+                        onError={() => {
+                          setPreviewUrl('')
+                          setAvatarLoadError(true)
+                        }}
                       />
-                    ) : profile.avatar_url ? (
+                    ) : profile.avatar_url && !avatarLoadError ? (
                       <Image
                         src={profile.avatar_url}
                         alt={profile.full_name || 'Profile'}
                         width={128}
                         height={128}
                         className='rounded-full object-cover w-full h-full'
+                        onError={() => setAvatarLoadError(true)}
                       />
                     ) : (
                       <div className='w-full h-full rounded-full bg-gray-200 flex items-center justify-center'>

@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslation } from '@/utils/useTranslation'
+import { useAuth } from '@/contexts/AuthContext'
 import axios from 'axios'
 import {
   Layout,
@@ -104,6 +105,7 @@ const testAuthTokenAPI = async (token: string): Promise<boolean> => {
 
 function LoginForm() {
   const router = useRouter()
+  const { checkAuth } = useAuth()
   const searchParams = useSearchParams()
   const [form] = Form.useForm()
   const [isLoading, setIsLoading] = useState(false)
@@ -230,6 +232,11 @@ function LoginForm() {
         console.log('Test API call successful')
       } else {
         console.warn('Test API call failed')
+      }
+
+      const authenticatedUser = await checkAuth()
+      if (!authenticatedUser) {
+        throw new Error('Authentication state sync failed. Please try again.')
       }
 
       router.push('/profile')

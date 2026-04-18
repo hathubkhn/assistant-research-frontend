@@ -9,7 +9,7 @@ import {
 import { Avatar, Button, Dropdown, Layout, Menu, Space } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import LanguageSwitcher from './LanguageSwitcher'
 import NotificationBell from './NotificationBell'
@@ -22,13 +22,20 @@ export default function Header() {
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [loginDropdownOpen, setLoginDropdownOpen] = useState(false)
+  const [avatarLoadError, setAvatarLoadError] = useState(false)
+
+  useEffect(() => {
+    setAvatarLoadError(false)
+  }, [user?.profile?.avatar_url])
+
+  const avatarSrc = avatarLoadError ? undefined : user?.profile?.avatar_url
 
   const handleLogout = async () => {
     await logout()
     router.push('/login')
   }
 
-  const handleMyLibraryClick = (e: React.MouseEvent) => {
+  const handleMyLibraryClick = async (e: React.MouseEvent) => {
     e.preventDefault()
     console.log('My Library clicked, auth status:', {
       userExists: !!user,
@@ -48,13 +55,12 @@ export default function Header() {
       const token = localStorage.getItem('authToken')
       if (token) {
         console.log('Token exists but user data is missing, forcing recheck')
-        checkAuth().then(() => {
-          if (user) {
-            router.push('/my-library')
-          } else {
-            router.push('/login')
-          }
-        })
+        const refreshedUser = await checkAuth()
+        if (refreshedUser) {
+          router.push('/my-library')
+        } else {
+          router.push('/login')
+        }
       } else {
         console.log('No token found, redirecting to login')
         router.push('/login')
@@ -199,14 +205,17 @@ export default function Header() {
                 <div suppressHydrationWarning={true}>
                   <Avatar
                     size='default'
-                    src={user.profile?.avatar_url}
+                    src={avatarSrc}
+                    onError={() => {
+                      setAvatarLoadError(true)
+                      return false
+                    }}
                     style={{
                       cursor: 'pointer',
                       border: '2px solid white',
                     }}
                   >
-                    {!user.profile?.avatar_url &&
-                      user.username.charAt(0).toUpperCase()}
+                    {!avatarSrc && user.username.charAt(0).toUpperCase()}
                   </Avatar>
                 </div>
               </Dropdown>
