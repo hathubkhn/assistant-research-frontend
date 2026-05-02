@@ -22,21 +22,11 @@ const InterestingButton = ({
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const savedState = localStorage.getItem(`paper-starred-${paperId}`)
-    if (savedState !== null) {
-      const newState = savedState === 'true'
-      setIsInteresting(newState)
-      if (onToggle && newState !== initialState) {
-        onToggle(newState)
-      }
-    } else {
-      setIsInteresting(initialState)
-    }
+    setIsInteresting(initialState)
   }, [paperId, initialState, onToggle])
 
   const updateState = (newState: boolean) => {
     setIsInteresting(newState)
-    localStorage.setItem(`paper-starred-${paperId}`, String(newState))
     onToggle?.(newState)
   }
 
@@ -49,7 +39,8 @@ const InterestingButton = ({
       const newState = !isInteresting
       updateState(newState)
 
-      const hasToken = localStorage.getItem('authToken') ||
+      const hasToken =
+        localStorage.getItem('authToken') ||
         sessionStorage.getItem('authToken') ||
         localStorage.getItem('token') ||
         sessionStorage.getItem('token')
@@ -71,7 +62,11 @@ const InterestingButton = ({
         withCredentials: true,
       })
 
-      toast.success(newState ? 'Paper added to your interests' : 'Paper removed from your interests')
+      toast.success(
+        newState
+          ? 'Paper added to your interests'
+          : 'Paper removed from your interests',
+      )
     } catch (error) {
       updateState(isInteresting)
 
@@ -119,11 +114,13 @@ const InterestingButton = ({
         ) : (
           <StarOutlined style={{ color: '#8c8c8c', fontSize: '16px' }} />
         )}
-        <span style={{
-          color: isInteresting ? '#FFC107' : '#8c8c8c',
-          fontWeight: isInteresting ? 500 : 400,
-          fontSize: '14px',
-        }}>
+        <span
+          style={{
+            color: isInteresting ? '#FFC107' : '#8c8c8c',
+            fontWeight: isInteresting ? 500 : 400,
+            fontSize: '14px',
+          }}
+        >
           {isInteresting ? 'Interested' : 'Mark as Interesting'}
         </span>
       </Space>
