@@ -1143,9 +1143,11 @@ export default function MyLibraryPage() {
         keywords: paperData.keywords || [],
         abstract: paperData.abstract || '',
         downloadUrl: paperData.file, // URL to download the file
-        isInteresting: false,
-        isDownloaded: false,
-        isUploaded: true,
+        isInteresting:
+          paperData.isInteresting ?? paperData.is_interesting ?? false,
+        isDownloaded:
+          paperData.isDownloaded ?? paperData.is_downloaded ?? false,
+        isUploaded: paperData.isUploaded ?? paperData.is_uploaded ?? true,
         addedDate: paperData.added_date,
         fileName: paperData.file_name,
         fileSize: paperData.file_size,
@@ -1674,68 +1676,73 @@ export default function MyLibraryPage() {
                                     {paper.field}
                                   </span>
                                   <div className='flex space-x-2'>
-                                    {paper.isDownloaded && (
-                                      <span className='inline-flex items-center text-xs text-green-600'>
-                                        <svg
-                                          className='w-4 h-4 mr-1'
-                                          fill='none'
-                                          stroke='currentColor'
-                                          viewBox='0 0 24 24'
-                                          xmlns='http://www.w3.org/2000/svg'
-                                        >
-                                          <path
-                                            strokeLinecap='round'
-                                            strokeLinejoin='round'
-                                            strokeWidth='2'
-                                            d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3-3v12'
-                                          ></path>
-                                        </svg>
-                                        {t('papers.downloaded')}
-                                        {activeSection === 'downloaded' && (
-                                          <button
-                                            onClick={(e) =>
-                                              deleteDownloadedPaper(paper.id, e)
-                                            }
-                                            className='ml-1 text-red-500 hover:text-red-700 focus:outline-none'
-                                            title='Remove from downloaded papers'
+                                    {activeSection === 'downloaded' &&
+                                      paper.isDownloaded && (
+                                        <span className='inline-flex items-center text-xs text-green-600'>
+                                          <svg
+                                            className='w-4 h-4 mr-1'
+                                            fill='none'
+                                            stroke='currentColor'
+                                            viewBox='0 0 24 24'
+                                            xmlns='http://www.w3.org/2000/svg'
                                           >
-                                            <svg
-                                              className='w-4 h-4'
-                                              fill='none'
-                                              stroke='currentColor'
-                                              viewBox='0 0 24 24'
-                                              xmlns='http://www.w3.org/2000/svg'
+                                            <path
+                                              strokeLinecap='round'
+                                              strokeLinejoin='round'
+                                              strokeWidth='2'
+                                              d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3-3v12'
+                                            ></path>
+                                          </svg>
+                                          {t('papers.downloaded')}
+                                          {activeSection === 'downloaded' && (
+                                            <button
+                                              onClick={(e) =>
+                                                deleteDownloadedPaper(
+                                                  paper.id,
+                                                  e,
+                                                )
+                                              }
+                                              className='ml-1 text-red-500 hover:text-red-700 focus:outline-none'
+                                              title='Remove from downloaded papers'
                                             >
-                                              <path
-                                                strokeLinecap='round'
-                                                strokeLinejoin='round'
-                                                strokeWidth='2'
-                                                d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
-                                              ></path>
-                                            </svg>
-                                          </button>
-                                        )}
-                                      </span>
-                                    )}
-                                    {paper.isUploaded && (
-                                      <span className='inline-flex items-center text-xs text-purple-600'>
-                                        <svg
-                                          className='w-4 h-4 mr-1'
-                                          fill='none'
-                                          stroke='currentColor'
-                                          viewBox='0 0 24 24'
-                                          xmlns='http://www.w3.org/2000/svg'
-                                        >
-                                          <path
-                                            strokeLinecap='round'
-                                            strokeLinejoin='round'
-                                            strokeWidth='2'
-                                            d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'
-                                          ></path>
-                                        </svg>
-                                        {t('papers.uploaded')}
-                                      </span>
-                                    )}
+                                              <svg
+                                                className='w-4 h-4'
+                                                fill='none'
+                                                stroke='currentColor'
+                                                viewBox='0 0 24 24'
+                                                xmlns='http://www.w3.org/2000/svg'
+                                              >
+                                                <path
+                                                  strokeLinecap='round'
+                                                  strokeLinejoin='round'
+                                                  strokeWidth='2'
+                                                  d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                                                ></path>
+                                              </svg>
+                                            </button>
+                                          )}
+                                        </span>
+                                      )}
+                                    {activeSection === 'uploaded' &&
+                                      paper.isUploaded && (
+                                        <span className='inline-flex items-center text-xs text-purple-600'>
+                                          <svg
+                                            className='w-4 h-4 mr-1'
+                                            fill='none'
+                                            stroke='currentColor'
+                                            viewBox='0 0 24 24'
+                                            xmlns='http://www.w3.org/2000/svg'
+                                          >
+                                            <path
+                                              strokeLinecap='round'
+                                              strokeLinejoin='round'
+                                              strokeWidth='2'
+                                              d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'
+                                            ></path>
+                                          </svg>
+                                          {t('papers.uploaded')}
+                                        </span>
+                                      )}
                                     <span className='text-xs text-gray-500'>
                                       {t('papers.added')}{' '}
                                       {new Date(

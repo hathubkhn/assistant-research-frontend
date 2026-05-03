@@ -26,13 +26,23 @@ import {
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { fetchWithAuth } from '@/utils/auth'
 
 const { Title, Paragraph, Text } = Typography
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 async function fetchPaperDetails(paper_id: string): Promise<Paper> {
-  const response = await fetch(`${API_URL}/api/papers/${paper_id}/`)
+  const response = await fetchWithAuth(`${API_URL}/api/papers/${paper_id}/`)
 
   if (!response.ok) {
     if (response.status === 404) {
@@ -95,6 +105,9 @@ interface Paper {
     downloadUrl?: string;
   }[];
   isInteresting?: boolean;
+  is_interesting?: boolean;
+  isDownloaded?: boolean;
+  isUploaded?: boolean;
 }
 
 const PaperHeader = ({ paper }: { paper: Paper }) => (
@@ -119,31 +132,52 @@ const PaperHeader = ({ paper }: { paper: Paper }) => (
   </Space>
 )
 
-
-const PublicationDetails = ({ paper, onShowBibtex }: { paper: Paper; onShowBibtex: () => void }) => (
+const PublicationDetails = ({
+  paper,
+  onShowBibtex,
+}: {
+  paper: Paper;
+  onShowBibtex: () => void;
+}) => (
   <Descriptions
     title='Publication Details'
     bordered
     column={{ xxl: 3, xl: 3, lg: 3, md: 2, sm: 1, xs: 1 }}
     size='small'
   >
-    <Descriptions.Item label={paper?.venueType === 'journal' ? 'Journal' : 'Conference'}>
-      <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
-        <Paragraph style={{ color: '#6b7280', margin: 0 }}>{paper?.venue || paper?.conference || 'No venue found.'}</Paragraph>
+    <Descriptions.Item
+      label={paper?.venueType === 'journal' ? 'Journal' : 'Conference'}
+    >
+      <div
+        style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}
+      >
+        <Paragraph style={{ color: '#6b7280', margin: 0 }}>
+          {paper?.venue || paper?.conference || 'No venue found.'}
+        </Paragraph>
       </div>
     </Descriptions.Item>
     <Descriptions.Item label='Year'>
-      <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
-        <Paragraph style={{ color: '#6b7280', margin: 0 }}>{paper?.year || 'No year found.'}</Paragraph>
+      <div
+        style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}
+      >
+        <Paragraph style={{ color: '#6b7280', margin: 0 }}>
+          {paper?.year || 'No year found.'}
+        </Paragraph>
       </div>
     </Descriptions.Item>
     <Descriptions.Item label='Field'>
-      <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
-        <Paragraph style={{ color: '#6b7280', margin: 0 }}>{paper?.field || 'No field found.'}</Paragraph>
+      <div
+        style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}
+      >
+        <Paragraph style={{ color: '#6b7280', margin: 0 }}>
+          {paper?.field || 'No field found.'}
+        </Paragraph>
       </div>
     </Descriptions.Item>
     <Descriptions.Item label='DOI'>
-      <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
+      <div
+        style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}
+      >
         {paper?.doi ? (
           <Typography.Link
             href={`https://doi.org/${paper?.doi}`}
@@ -155,28 +189,41 @@ const PublicationDetails = ({ paper, onShowBibtex }: { paper: Paper; onShowBibte
             {paper?.doi}
           </Typography.Link>
         ) : (
-          <Paragraph style={{ color: '#6b7280', margin: 0 }}>No DOI found.</Paragraph>
+          <Paragraph style={{ color: '#6b7280', margin: 0 }}>
+            No DOI found.
+          </Paragraph>
         )}
       </div>
     </Descriptions.Item>
 
     <Descriptions.Item label='BibTeX'>
-      <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
+      <div
+        style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}
+      >
         {paper?.bibtex ? (
           <Typography.Link
             onClick={onShowBibtex}
-            style={{ display: 'flex', alignItems: 'left', gap: '4px', cursor: 'pointer' }}
+            style={{
+              display: 'flex',
+              alignItems: 'left',
+              gap: '4px',
+              cursor: 'pointer',
+            }}
           >
             <CopyOutlined />
             View & Copy Citation
           </Typography.Link>
         ) : (
-          <Paragraph style={{ color: '#6b7280', margin: 0 }}>No bibtex found.</Paragraph>
+          <Paragraph style={{ color: '#6b7280', margin: 0 }}>
+            No bibtex found.
+          </Paragraph>
         )}
       </div>
     </Descriptions.Item>
     <Descriptions.Item label='Source Code'>
-      <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
+      <div
+        style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}
+      >
         {paper?.sourceCode ? (
           <Typography.Link
             href={paper?.sourceCode}
@@ -188,33 +235,65 @@ const PublicationDetails = ({ paper, onShowBibtex }: { paper: Paper; onShowBibte
             GitHub Repository
           </Typography.Link>
         ) : (
-          <Paragraph style={{ color: '#6b7280', margin: 0 }}>No source code found.</Paragraph>
+          <Paragraph style={{ color: '#6b7280', margin: 0 }}>
+            No source code found.
+          </Paragraph>
         )}
       </div>
     </Descriptions.Item>
     {paper?.impactFactor ? (
       <Descriptions.Item label='Impact Factor'>
-        <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
-          <span style={{ color: '#374151', fontWeight: 500 }}>{paper?.impactFactor.toFixed(2)}</span>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'left',
+            alignItems: 'left',
+          }}
+        >
+          <span style={{ color: '#374151', fontWeight: 500 }}>
+            {paper?.impactFactor.toFixed(2)}
+          </span>
         </div>
       </Descriptions.Item>
     ) : (
       <Descriptions.Item label='Impact Factor'>
-        <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
-          <Paragraph style={{ color: '#6b7280', margin: 0 }}>No impact factor found.</Paragraph>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'left',
+            alignItems: 'left',
+          }}
+        >
+          <Paragraph style={{ color: '#6b7280', margin: 0 }}>
+            No impact factor found.
+          </Paragraph>
         </div>
       </Descriptions.Item>
     )}
     {paper?.quartile ? (
       <Descriptions.Item label='Quartile'>
-        <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'left',
+            alignItems: 'left',
+          }}
+        >
           <Tag color='blue'>{paper?.quartile}</Tag>
         </div>
       </Descriptions.Item>
     ) : (
       <Descriptions.Item label='Quartile'>
-        <div style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}>
-          <Paragraph style={{ color: '#6b7280', margin: 0 }}>No quartile found.</Paragraph>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'left',
+            alignItems: 'left',
+          }}
+        >
+          <Paragraph style={{ color: '#6b7280', margin: 0 }}>
+            No quartile found.
+          </Paragraph>
         </div>
       </Descriptions.Item>
     )}
@@ -230,7 +309,13 @@ const PaperAbstract = ({ abstract }: { abstract?: string }) => (
   </>
 )
 
-const PaperDatasets = ({ datasets, router }: { datasets?: Paper['datasets']; router: any }) => (
+const PaperDatasets = ({
+  datasets,
+  router,
+}: {
+  datasets?: Paper['datasets'];
+  router: any;
+}) => (
   <>
     <Title level={2}>Datasets</Title>
     {datasets && datasets.length > 0 ? (
@@ -246,7 +331,8 @@ const PaperDatasets = ({ datasets, router }: { datasets?: Paper['datasets']; rou
                   onClick={() => router.push(`/datasets/${dataset.id}`)}
                   style={{ padding: 0, fontSize: '18px', fontWeight: 500 }}
                 >
-                  {dataset.name} {dataset.abbreviation && `(${dataset.abbreviation})`}
+                  {dataset.name}{' '}
+                  {dataset.abbreviation && `(${dataset.abbreviation})`}
                 </Button>
               }
               style={{ width: '100%' }}
@@ -259,7 +345,9 @@ const PaperDatasets = ({ datasets, router }: { datasets?: Paper['datasets']; rou
 
               <Descriptions size='small' column={3}>
                 {dataset.size && (
-                  <Descriptions.Item label='Size'>{dataset.size}</Descriptions.Item>
+                  <Descriptions.Item label='Size'>
+                    {dataset.size}
+                  </Descriptions.Item>
                 )}
                 {dataset.license && (
                   <Descriptions.Item label='License'>
@@ -267,25 +355,33 @@ const PaperDatasets = ({ datasets, router }: { datasets?: Paper['datasets']; rou
                   </Descriptions.Item>
                 )}
                 {dataset.category && (
-                  <Descriptions.Item label='Category'>{dataset.category}</Descriptions.Item>
+                  <Descriptions.Item label='Category'>
+                    {dataset.category}
+                  </Descriptions.Item>
                 )}
                 {dataset.language && (
-                  <Descriptions.Item label='Language'>{dataset.language}</Descriptions.Item>
+                  <Descriptions.Item label='Language'>
+                    {dataset.language}
+                  </Descriptions.Item>
                 )}
               </Descriptions>
 
-              {dataset.tasks && Array.isArray(dataset.tasks) && dataset.tasks.length > 0 && (
-                <div style={{ marginTop: '16px' }}>
-                  <Text strong style={{ color: '#6b7280', fontSize: '14px' }}>Tasks:</Text>
-                  <div style={{ marginTop: '8px' }}>
-                    {dataset.tasks.map((task, taskIdx) => (
-                      <Tag key={taskIdx} color='blue'>
-                        {task}
-                      </Tag>
-                    ))}
+              {dataset.tasks &&
+                Array.isArray(dataset.tasks) &&
+                dataset.tasks.length > 0 && (
+                  <div style={{ marginTop: '16px' }}>
+                    <Text strong style={{ color: '#6b7280', fontSize: '14px' }}>
+                      Tasks:
+                    </Text>
+                    <div style={{ marginTop: '8px' }}>
+                      {dataset.tasks.map((task, taskIdx) => (
+                        <Tag key={taskIdx} color='blue'>
+                          {task}
+                        </Tag>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {dataset.downloadUrl && (
                 <div style={{ marginTop: '16px' }}>
@@ -306,19 +402,25 @@ const PaperDatasets = ({ datasets, router }: { datasets?: Paper['datasets']; rou
         )}
       />
     ) : (
-      <Paragraph style={{ color: '#6b7280' }}>No datasets associated with this paper.</Paragraph>
+      <Paragraph style={{ color: '#6b7280' }}>
+        No datasets associated with this paper.
+      </Paragraph>
     )}
   </>
 )
 
-const CitationMetrics = ({ citationsByYear }: { citationsByYear?: CitationData[] }) => (
+const CitationMetrics = ({
+  citationsByYear,
+}: {
+  citationsByYear?: CitationData[];
+}) => (
   <>
     <Title level={2}>Citation Metrics</Title>
     {citationsByYear && citationsByYear.length > 0 ? (
       <div style={{ height: '320px' }}>
         <ResponsiveContainer width='100%' height='100%'>
           <BarChart
-            data={citationsByYear.map(item => ({
+            data={citationsByYear.map((item) => ({
               year: item.year.toString(),
               citations: item.count,
             }))}
@@ -334,27 +436,45 @@ const CitationMetrics = ({ citationsByYear }: { citationsByYear?: CitationData[]
         </ResponsiveContainer>
       </div>
     ) : (
-      <Paragraph style={{ color: '#6b7280' }}>No citation data available for this paper.</Paragraph>
+      <Paragraph style={{ color: '#6b7280' }}>
+        No citation data available for this paper.
+      </Paragraph>
     )}
   </>
 )
 
-const PaperSection = ({ title, content }: { title: string; content?: string }) => (
+const PaperSection = ({
+  title,
+  content,
+}: {
+  title: string;
+  content?: string;
+}) => (
   <>
     <Title level={2}>{title}</Title>
     <div style={{ fontSize: '16px', lineHeight: '1.6', color: '#374151' }}>
-      {content ?
+      {content ? (
         content.split('\n\n').map((paragraph, idx) => (
-          <Paragraph key={idx} style={{ marginBottom: '16px' }}>{paragraph}</Paragraph>
+          <Paragraph key={idx} style={{ marginBottom: '16px' }}>
+            {paragraph}
+          </Paragraph>
         ))
-        :
-        <Paragraph style={{ color: '#6b7280' }}>No {title.toLowerCase()} information available.</Paragraph>
-      }
+      ) : (
+        <Paragraph style={{ color: '#6b7280' }}>
+          No {title.toLowerCase()} information available.
+        </Paragraph>
+      )}
     </div>
   </>
 )
 
-const CitingPapers = ({ citingPapers, router }: { citingPapers?: CitingPaper[]; router: any }) => (
+const CitingPapers = ({
+  citingPapers,
+  router,
+}: {
+  citingPapers?: CitingPaper[];
+  router: any;
+}) => (
   <>
     <Title level={2}>Citing Papers</Title>
     {citingPapers && citingPapers.length > 0 ? (
@@ -385,7 +505,9 @@ const CitingPapers = ({ citingPapers, router }: { citingPapers?: CitingPaper[]; 
         )}
       />
     ) : (
-      <Paragraph style={{ color: '#6b7280' }}>No citing papers found.</Paragraph>
+      <Paragraph style={{ color: '#6b7280' }}>
+        No citing papers found.
+      </Paragraph>
     )}
   </>
 )
@@ -443,9 +565,20 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
   }
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', width: '100%', minHeight: '100vh' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%',
+          minHeight: '100vh',
+        }}
+      >
         <Space direction='vertical' style={{ width: '80%' }}>
-          <Row justify='space-between' style={{ paddingTop: '24px' }} align='middle'>
+          <Row
+            justify='space-between'
+            style={{ paddingTop: '24px' }}
+            align='middle'
+          >
             <Col>
               <Card
                 hoverable
@@ -469,15 +602,30 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                 }}
               >
                 <Space align='center' size={8}>
-                  <ArrowLeftOutlined style={{ color: '#ffffff', fontSize: '16px' }} />
-                  <span style={{ color: '#ffffff', fontWeight: 500, fontSize: '14px' }}>
+                  <ArrowLeftOutlined
+                    style={{ color: '#ffffff', fontSize: '16px' }}
+                  />
+                  <span
+                    style={{
+                      color: '#ffffff',
+                      fontWeight: 500,
+                      fontSize: '14px',
+                    }}
+                  >
                     Back to Papers
                   </span>
                 </Space>
               </Card>
             </Col>
           </Row>
-          <Space style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+          <Space
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
             <Space direction='vertical' size='large' align='center'>
               <Spin size='large' tip='Loading paper details...' />
             </Space>
@@ -489,9 +637,20 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
 
   if (error && !loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', width: '100%', minHeight: '100vh' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%',
+          minHeight: '100vh',
+        }}
+      >
         <Space direction='vertical' style={{ width: '80%' }}>
-          <Row justify='space-between' style={{ paddingTop: '24px' }} align='middle'>
+          <Row
+            justify='space-between'
+            style={{ paddingTop: '24px' }}
+            align='middle'
+          >
             <Col>
               <Card
                 hoverable
@@ -515,17 +674,37 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                 }}
               >
                 <Space align='center' size={8}>
-                  <ArrowLeftOutlined style={{ color: '#ffffff', fontSize: '16px' }} />
-                  <span style={{ color: '#ffffff', fontWeight: 500, fontSize: '14px' }}>
+                  <ArrowLeftOutlined
+                    style={{ color: '#ffffff', fontSize: '16px' }}
+                  />
+                  <span
+                    style={{
+                      color: '#ffffff',
+                      fontWeight: 500,
+                      fontSize: '14px',
+                    }}
+                  >
                     Back to Papers
                   </span>
                 </Space>
               </Card>
             </Col>
           </Row>
-          <Space style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+          <Space
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
             <Space direction='vertical' size='large' align='center'>
-              <Alert message='Error' description={error} type='error' showIcon />
+              <Alert
+                message='Error'
+                description={error}
+                type='error'
+                showIcon
+              />
             </Space>
           </Space>
         </Space>
@@ -535,9 +714,20 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
 
   if (!paper && !loading && !error) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', width: '100%', minHeight: '100vh' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%',
+          minHeight: '100vh',
+        }}
+      >
         <Space direction='vertical' style={{ width: '80%' }}>
-          <Row justify='space-between' style={{ paddingTop: '24px' }} align='middle'>
+          <Row
+            justify='space-between'
+            style={{ paddingTop: '24px' }}
+            align='middle'
+          >
             <Col>
               <Card
                 hoverable
@@ -561,21 +751,47 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                 }}
               >
                 <Space align='center' size={8}>
-                  <ArrowLeftOutlined style={{ color: '#ffffff', fontSize: '16px' }} />
-                  <span style={{ color: '#ffffff', fontWeight: 500, fontSize: '14px' }}>
+                  <ArrowLeftOutlined
+                    style={{ color: '#ffffff', fontSize: '16px' }}
+                  />
+                  <span
+                    style={{
+                      color: '#ffffff',
+                      fontWeight: 500,
+                      fontSize: '14px',
+                    }}
+                  >
                     Back to Papers
                   </span>
                 </Space>
               </Card>
             </Col>
           </Row>
-          <Space style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+          <Space
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
             <Space direction='vertical' size='large' align='center'>
-              <Title level={1} style={{ color: '#6b7280', textAlign: 'center', margin: 0 }}>
+              <Title
+                level={1}
+                style={{ color: '#6b7280', textAlign: 'center', margin: 0 }}
+              >
                 Paper not found
               </Title>
-              <Paragraph style={{ color: '#9ca3af', textAlign: 'center', fontSize: '16px', margin: 0 }}>
-                The paper you're looking for doesn't exist or may have been removed.
+              <Paragraph
+                style={{
+                  color: '#9ca3af',
+                  textAlign: 'center',
+                  fontSize: '16px',
+                  margin: 0,
+                }}
+              >
+                The paper you're looking for doesn't exist or may have been
+                removed.
               </Paragraph>
             </Space>
           </Space>
@@ -585,34 +801,52 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', width: '100%', minHeight: '100vh' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        width: '100%',
+        minHeight: '100vh',
+      }}
+    >
       <Space direction='vertical' size='large' style={{ width: '80%' }}>
         <Modal
           title='BibTeX Citation'
           open={showBibtexModal}
           onCancel={() => setShowBibtexModal(false)}
           footer={[
-            <Button key='copy' type='primary' icon={<CopyOutlined />} onClick={copyBibtex}>
+            <Button
+              key='copy'
+              type='primary'
+              icon={<CopyOutlined />}
+              onClick={copyBibtex}
+            >
               Copy to Clipboard
             </Button>,
           ]}
         >
-          <pre style={{
-            background: '#f9fafb',
-            padding: '16px',
-            borderRadius: '8px',
-            overflow: 'auto',
-            fontSize: '14px',
-            fontFamily: 'monospace',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-          }}>
+          <pre
+            style={{
+              background: '#f9fafb',
+              padding: '16px',
+              borderRadius: '8px',
+              overflow: 'auto',
+              fontSize: '14px',
+              fontFamily: 'monospace',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
             {paper?.bibtex}
           </pre>
         </Modal>
 
         <Space direction='vertical' size='large' style={{ width: '100%' }}>
-          <Row justify='space-between' style={{ paddingTop: '24px' }} align='middle'>
+          <Row
+            justify='space-between'
+            style={{ paddingTop: '24px' }}
+            align='middle'
+          >
             <Col>
               <Card
                 hoverable
@@ -636,8 +870,16 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                 }}
               >
                 <Space align='center' size={8}>
-                  <ArrowLeftOutlined style={{ color: '#ffffff', fontSize: '16px' }} />
-                  <span style={{ color: '#ffffff', fontWeight: 500, fontSize: '14px' }}>
+                  <ArrowLeftOutlined
+                    style={{ color: '#ffffff', fontSize: '16px' }}
+                  />
+                  <span
+                    style={{
+                      color: '#ffffff',
+                      fontWeight: 500,
+                      fontSize: '14px',
+                    }}
+                  >
                     Back to Papers
                   </span>
                 </Space>
@@ -648,13 +890,22 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                 {paper && (
                   <InterestingButton
                     paperId={paper.id}
-                    initialState={paper.isInteresting || false}
+                    initialState={
+                      paper.isInteresting ?? paper.is_interesting ?? false
+                    }
                   />
                 )}
 
                 <Card
                   hoverable
-                  onClick={() => paper?.downloadUrl && window.open(paper.downloadUrl, '_blank', 'noopener noreferrer')}
+                  onClick={() =>
+                    paper?.downloadUrl &&
+                    window.open(
+                      paper.downloadUrl,
+                      '_blank',
+                      'noopener noreferrer',
+                    )
+                  }
                   style={{
                     cursor: 'pointer',
                     backgroundColor: '#16a34a',
@@ -674,8 +925,16 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                   }}
                 >
                   <Space align='center' size={8}>
-                    <DownloadOutlined style={{ color: '#ffffff', fontSize: '16px' }} />
-                    <span style={{ color: '#ffffff', fontWeight: 500, fontSize: '14px' }}>
+                    <DownloadOutlined
+                      style={{ color: '#ffffff', fontSize: '16px' }}
+                    />
+                    <span
+                      style={{
+                        color: '#ffffff',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                      }}
+                    >
                       Download Paper
                     </span>
                   </Space>
@@ -689,7 +948,10 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
               <>
                 <PaperHeader paper={paper} />
                 <Divider />
-                <PublicationDetails paper={paper} onShowBibtex={() => setShowBibtexModal(true)} />
+                <PublicationDetails
+                  paper={paper}
+                  onShowBibtex={() => setShowBibtexModal(true)}
+                />
                 <Divider />
                 <PaperAbstract abstract={paper?.abstract} />
                 <Divider />
@@ -701,9 +963,15 @@ export default function PaperDetailsClient({ paper_id }: { paper_id: string }) {
                 <Divider />
                 <PaperSection title='Results' content={paper?.results} />
                 <Divider />
-                <PaperSection title='Conclusions' content={paper?.conclusions} />
+                <PaperSection
+                  title='Conclusions'
+                  content={paper?.conclusions}
+                />
                 <Divider />
-                <CitingPapers citingPapers={paper?.citingPapers} router={router} />
+                <CitingPapers
+                  citingPapers={paper?.citingPapers}
+                  router={router}
+                />
                 <Divider />
                 <PaperReferences references={paper?.references} />
               </>
