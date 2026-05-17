@@ -761,22 +761,23 @@ export default function PapersPage() {
           Publication Year
         </Title>
         <Select
-          mode='multiple'
-          placeholder='Select publication years'
-          value={activeFilters.years}
-          onChange={(selectedYears) => {
-            setActiveFilters((prev) => ({ ...prev, years: selectedYears }))
+          placeholder='Select publication year'
+          value={activeFilters.years[0]}
+          onChange={(selectedYear) => {
+            setActiveFilters((prev) => ({
+              ...prev,
+              years: selectedYear ? [selectedYear] : [],
+            }))
             setCurrentPage(1)
             setTimeout(() => {
               handleFetchPapers(1, pageSize, searchQuery, {
                 ...activeFilters,
-                years: selectedYears,
+                years: selectedYear ? [selectedYear] : [],
               })
             }, 0)
           }}
           style={{ width: '100%' }}
           size='small'
-          maxTagCount='responsive'
           allowClear
           showSearch
           filterOption={(input, option) =>
