@@ -511,7 +511,7 @@ export default function Profile() {
         <div className='container mx-auto px-4'>
           <div className='bg-white rounded-lg shadow-md overflow-hidden max-w-4xl mx-auto'>
             {/* Profile header with cover background */}
-            <div className='h-40 bg-gradient-to-r from-hust-red to-hust-red-light'></div>
+            <div className='h-40 bg-gradient-to-r from-red-700 to-red-500'></div>
 
             {/* Profile content */}
             <div className='px-6 py-8'>
@@ -573,7 +573,7 @@ export default function Profile() {
 
                   <button
                     onClick={handleEdit}
-                    className='mt-2 px-4 py-2 bg-hust-red text-white rounded-md hover:bg-red-700 transition duration-200'
+                    className='mt-2 px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800 transition duration-200'
                   >
                     Edit Profile
                   </button>
@@ -660,7 +660,7 @@ export default function Profile() {
                         {profile.publications.map((pub) => (
                           <li
                             key={pub.id}
-                            className='border-l-4 border-hust-red pl-4 py-1'
+                            className='border-l-4 border-red-700 pl-4 py-1'
                           >
                             <a
                               href={pub.url}
