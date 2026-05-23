@@ -1463,18 +1463,14 @@ export default function MyLibraryPage() {
   }
 
   return (
-    <div className='bg-gray-50 min-h-screen'>
-      {/* Header */}
-      <header className='bg-white shadow'>
-        <div className='max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center'>
-          {/* Header is kept empty but structure maintained */}
+    <div>
+      <div className='max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto'>
+        <div className='mb-8'>
+          <h1 className='text-3xl font-semibold text-gray-800 mb-2'>
+            {t('title')}
+          </h1>
+          <p className='text-gray-600'>{t('description')}</p>
         </div>
-      </header>
-
-      <main className='min-h-screen flex flex-col'>
-        <div className='container mx-auto py-6 px-4 sm:px-6 lg:px-8'>
-          <h1 className='text-3xl font-bold mb-2'>{t('title')}</h1>
-          <p className='text-gray-600 mb-4'>{t('description')}</p>
 
           {/* Section Switch Buttons */}
           <div className='flex border-b border-gray-200 mb-6 overflow-x-auto no-scrollbar'>
@@ -2036,7 +2032,6 @@ export default function MyLibraryPage() {
             )}
           </div>
         </div>
-      </main>
 
       {/* Paper Detail Modal */}
       {selectedPaper && (
