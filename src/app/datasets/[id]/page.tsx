@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import InterestingDatasetButton from '../../../components/InterestingDatasetButton'
+import BackNavigationButton from '@/components/BackNavigationButton'
+import InterestingDatasetButton from '@/components/InterestingDatasetButton'
 import { getAuthHeaders } from '@/utils/auth'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -168,17 +169,11 @@ export default function DatasetDetailPage() {
 
     return (
         <div className='container mx-auto px-4 py-8'>
-            <div className='mb-4 flex justify-between items-center'>
-                <Link href='/datasets' className='text-blue-600 hover:text-blue-800 flex items-center gap-1'>
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
-                    </svg>
-                    Back to Datasets
-                </Link>
+            <div className='mb-6 flex flex-wrap items-center justify-between gap-4'>
+                <BackNavigationButton href='/datasets' label='Back to Datasets' />
                 <InterestingDatasetButton
                     datasetId={dataset.id}
                     initialState={isStarred}
-                    className='p-2 text-yellow-500 hover:text-yellow-600'
                     onToggle={(newState) => setIsStarred(newState)}
                 />
             </div>

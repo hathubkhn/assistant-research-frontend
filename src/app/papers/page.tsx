@@ -20,7 +20,7 @@ import {
 import axios from 'axios'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 const { Title, Text, Paragraph } = Typography
 const { Search } = Input
@@ -72,6 +72,57 @@ interface Journal {
   abbreviation: string;
   impactFactor?: number;
   quartile?: string;
+}
+
+const CONFERENCE_TOP_RANKS = new Set(['A*', 'A'])
+const VENUE_TOP_PAGE_SIZE = 100
+const VENUE_OTHER_PAGE_SIZE = 200
+
+function conferenceDisplayName(conf: Conference): string {
+  return conf.abbreviation || conf.name
+}
+
+function sortConferencesByRank(conferences: Conference[]) {
+  const rankOrder: Record<string, number> = {
+    'A*': 0,
+    A: 1,
+    B: 2,
+    C: 3,
+  }
+  const isTop = (c: Conference) =>
+    Boolean(c.rank) && CONFERENCE_TOP_RANKS.has(c.rank!)
+  const topTier = conferences.filter(isTop)
+  const other = conferences.filter((c) => !isTop(c))
+  const byRankThenName = (a: Conference, b: Conference) => {
+    const ra = rankOrder[a.rank ?? ''] ?? 50
+    const rb = rankOrder[b.rank ?? ''] ?? 50
+    if (ra !== rb) return ra - rb
+    return conferenceDisplayName(a).localeCompare(conferenceDisplayName(b))
+  }
+  topTier.sort(byRankThenName)
+  other.sort((a, b) =>
+    conferenceDisplayName(a).localeCompare(conferenceDisplayName(b)),
+  )
+  return { topTier, other }
+}
+
+function sortJournalsByQuartile(journals: Journal[]) {
+  const quartileOrder: Record<string, number> = {
+    Q1: 0,
+    Q2: 1,
+    Q3: 2,
+    Q4: 3,
+  }
+  const q1Journals = journals.filter((j) => j.quartile === 'Q1')
+  const otherJournals = journals.filter((j) => j.quartile !== 'Q1')
+  q1Journals.sort((a, b) => a.name.localeCompare(b.name))
+  otherJournals.sort((a, b) => {
+    const qa = quartileOrder[a.quartile ?? ''] ?? 50
+    const qb = quartileOrder[b.quartile ?? ''] ?? 50
+    if (qa !== qb) return qa - qb
+    return a.name.localeCompare(b.name)
+  })
+  return { q1Journals, otherJournals }
 }
 
 async function countVenues() {
@@ -139,20 +190,38 @@ async function fetchPapers(
   }
 }
 
-async function fetchConferences() {
+interface VenuesApiResponse {
+  results: Conference[] | Journal[];
+  pagination?: {
+    totalItems: number;
+    totalPages: number;
+    page: number;
+    pageSize: number;
+  };
+}
+
+async function fetchConferences(options?: {
+  tier?: 'top' | 'other';
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<VenuesApiResponse> {
   try {
+    const params: Record<string, string | number> = {
+      page: options?.page ?? 1,
+      pageSize: options?.pageSize ?? VENUE_TOP_PAGE_SIZE,
+    }
+    if (options?.tier) params.tier = options.tier
+    if (options?.search?.trim()) params.search = options.search.trim()
+
     const response = await axios.get(`${API_URL}/api/conferences/`, {
-      params: {
-        page: 1,
-        pageSize: 100,
-      },
+      params,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
       withCredentials: true,
     })
-    console.log('Conferences response:', response.data)
     return response.data
   } catch (error) {
     console.error('Error fetching conferences:', error)
@@ -160,20 +229,28 @@ async function fetchConferences() {
   }
 }
 
-async function fetchJournals() {
+async function fetchJournals(options?: {
+  tier?: 'top' | 'other';
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<VenuesApiResponse> {
   try {
+    const params: Record<string, string | number> = {
+      page: options?.page ?? 1,
+      pageSize: options?.pageSize ?? VENUE_TOP_PAGE_SIZE,
+    }
+    if (options?.tier) params.tier = options.tier
+    if (options?.search?.trim()) params.search = options.search.trim()
+
     const response = await axios.get(`${API_URL}/api/journals/`, {
-      params: {
-        page: 1,
-        pageSize: 100,
-      },
+      params,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
       withCredentials: true,
     })
-    console.log('Journals response:', response.data)
     return response.data
   } catch (error) {
     console.error('Error fetching journals:', error)
@@ -215,125 +292,304 @@ export default function PapersPage() {
   })
 
   const [conferences, setConferences] = useState<Array<Conference>>([])
+  const [otherConferencesList, setOtherConferencesList] = useState<
+    Array<Conference>
+  >([])
+  const [otherConferencesTotal, setOtherConferencesTotal] = useState(0)
+  const [otherConferencesLoaded, setOtherConferencesLoaded] = useState(false)
+  const [otherConferencesPage, setOtherConferencesPage] = useState(0)
+  const [loadingOtherConferences, setLoadingOtherConferences] = useState(false)
+
   const [journals, setJournals] = useState<Array<Journal>>([])
+  const [otherJournalsList, setOtherJournalsList] = useState<Array<Journal>>([])
+  const [otherJournalsTotal, setOtherJournalsTotal] = useState(0)
+  const [otherJournalsLoaded, setOtherJournalsLoaded] = useState(false)
+  const [otherJournalsPage, setOtherJournalsPage] = useState(0)
+  const [loadingOtherJournals, setLoadingOtherJournals] = useState(false)
   const [conferenceSearch, setConferenceSearch] = useState('')
   const [journalSearch, setJournalSearch] = useState('')
-  const [loadingVenues, setLoadingVenues] = useState(false)
+  const [loadingConferences, setLoadingConferences] = useState(false)
+  const [loadingJournals, setLoadingJournals] = useState(false)
   const [conferencesCount, setConferencesCount] = useState(0)
   const [journalsCount, setJournalsCount] = useState(0)
-  const [filteredConferences, setFilteredConferences] = useState<
-    Array<Conference>
-  >([])
-  const [topRankedConferences, setTopRankedConferences] = useState<
-    Array<Conference>
-  >([])
-
   const currentYear = new Date().getFullYear()
   const years = Array.from(
     { length: currentYear - 2000 + 3 },
     (_, i) => 2000 + i,
   ).reverse()
 
-  useEffect(() => {
-    const filtered = conferences.filter(
-      (conf) =>
-        conf.name.toLowerCase().includes(conferenceSearch.toLowerCase()) ||
-        conf.abbreviation
-          ?.toLowerCase()
-          .includes(conferenceSearch.toLowerCase()),
-    )
-    setFilteredConferences(filtered)
-
-    const topRanked = filtered.filter((conf) => conf.rank === 'A*')
-    setTopRankedConferences(topRanked)
-
-    console.log(
-      'Filtered conferences updated:',
-      filtered.length,
-      'with',
-      topRanked.length,
-      'top-ranked conferences',
-    )
-  }, [conferences, conferenceSearch])
-
-  const filteredJournals = journals.filter(
-    (journal) =>
-      journal.name.toLowerCase().includes(journalSearch.toLowerCase()) ||
-      journal.abbreviation?.toLowerCase().includes(journalSearch.toLowerCase()),
+  const filteredConferences = useMemo(
+    () =>
+      conferences.filter(
+        (conf) =>
+          conf.name.toLowerCase().includes(conferenceSearch.toLowerCase()) ||
+          conf.abbreviation
+            ?.toLowerCase()
+            .includes(conferenceSearch.toLowerCase()),
+      ),
+    [conferences, conferenceSearch],
   )
 
-  const sortedJournals = [...filteredJournals].sort(
-    (a, b) => (b.impactFactor || 0) - (a.impactFactor || 0),
+  const { topTier: topTierConferences } = useMemo(
+    () => sortConferencesByRank(filteredConferences),
+    [filteredConferences],
+  )
+
+  const filteredOtherConferences = useMemo(
+    () =>
+      otherConferencesList.filter(
+        (conf) =>
+          conf.name.toLowerCase().includes(conferenceSearch.toLowerCase()) ||
+          conf.abbreviation
+            ?.toLowerCase()
+            .includes(conferenceSearch.toLowerCase()),
+      ),
+    [otherConferencesList, conferenceSearch],
+  )
+
+  const { other: sortedOtherConferences } = useMemo(
+    () => sortConferencesByRank(filteredOtherConferences),
+    [filteredOtherConferences],
+  )
+
+  const conferencesToDisplay = expandedFilters.conferences
+    ? [...topTierConferences, ...sortedOtherConferences]
+    : topTierConferences
+
+  const seeMoreConferencesCount = conferenceSearch.trim()
+    ? otherConferencesTotal
+    : otherConferencesTotal > 0
+      ? otherConferencesTotal
+      : Math.max(conferencesCount - topTierConferences.length, 0)
+
+  const filteredJournals = useMemo(
+    () =>
+      journals.filter(
+        (journal) =>
+          journal.name.toLowerCase().includes(journalSearch.toLowerCase()) ||
+          journal.abbreviation
+            ?.toLowerCase()
+            .includes(journalSearch.toLowerCase()),
+      ),
+    [journals, journalSearch],
+  )
+
+  const { q1Journals } = useMemo(
+    () => sortJournalsByQuartile(filteredJournals),
+    [filteredJournals],
+  )
+
+  const filteredOtherJournals = useMemo(
+    () =>
+      otherJournalsList.filter(
+        (journal) =>
+          journal.name.toLowerCase().includes(journalSearch.toLowerCase()) ||
+          journal.abbreviation
+            ?.toLowerCase()
+            .includes(journalSearch.toLowerCase()),
+      ),
+    [otherJournalsList, journalSearch],
+  )
+
+  const { otherJournals: sortedOtherJournals } = useMemo(
+    () => sortJournalsByQuartile(filteredOtherJournals),
+    [filteredOtherJournals],
   )
 
   const journalsToDisplay = expandedFilters.journals
-    ? sortedJournals
-    : sortedJournals.slice(0, 10)
+    ? [...q1Journals, ...sortedOtherJournals]
+    : q1Journals
 
-  const conferencesToDisplay = expandedFilters.conferences
-    ? filteredConferences
-    : topRankedConferences.length > 0
-      ? topRankedConferences.slice(0, 10)
-      : filteredConferences.length > 0
-        ? filteredConferences.slice(0, 10)
-        : []
+  const seeMoreJournalsCount = journalSearch.trim()
+    ? otherJournalsTotal
+    : otherJournalsTotal > 0
+      ? otherJournalsTotal
+      : Math.max(journalsCount - q1Journals.length, 0)
 
-  useEffect(() => {
-    if (
-      conferences.length > 0 &&
-      filteredConferences.length > 0 &&
-      conferencesToDisplay.length === 0
-    ) {
-      console.log('Conferences loaded but none displayed, forcing update...')
-      setExpandedFilters((prev) => ({
-        ...prev,
-        conferences: true,
-      }))
-
-      setTimeout(() => {
-        setExpandedFilters((prev) => ({
-          ...prev,
-          conferences: false,
-        }))
-      }, 100)
+  const loadOtherConferences = async (search?: string, append = false) => {
+    setLoadingOtherConferences(true)
+    try {
+      const nextPage = append ? otherConferencesPage + 1 : 1
+      const response = await fetchConferences({
+        tier: 'other',
+        search,
+        page: nextPage,
+        pageSize: VENUE_OTHER_PAGE_SIZE,
+      })
+      const results = response.results as Conference[]
+      setOtherConferencesList((prev) =>
+        append ? [...prev, ...results] : results,
+      )
+      setOtherConferencesPage(nextPage)
+      setOtherConferencesTotal(
+        response.pagination?.totalItems ?? results.length,
+      )
+      setOtherConferencesLoaded(true)
+    } finally {
+      setLoadingOtherConferences(false)
     }
-  }, [conferences, filteredConferences, conferencesToDisplay])
+  }
+
+  const loadOtherJournals = async (search?: string, append = false) => {
+    setLoadingOtherJournals(true)
+    try {
+      const nextPage = append ? otherJournalsPage + 1 : 1
+      const response = await fetchJournals({
+        tier: 'other',
+        search,
+        page: nextPage,
+        pageSize: VENUE_OTHER_PAGE_SIZE,
+      })
+      const results = response.results as Journal[]
+      setOtherJournalsList((prev) => (append ? [...prev, ...results] : results))
+      setOtherJournalsPage(nextPage)
+      setOtherJournalsTotal(response.pagination?.totalItems ?? results.length)
+      setOtherJournalsLoaded(true)
+    } finally {
+      setLoadingOtherJournals(false)
+    }
+  }
+
+  const remainingOtherConferences = Math.max(
+    otherConferencesTotal - otherConferencesList.length,
+    0,
+  )
+  const remainingOtherJournals = Math.max(
+    otherJournalsTotal - otherJournalsList.length,
+    0,
+  )
+
+  const reloadConferenceFilters = async (search?: string) => {
+    setLoadingConferences(true)
+    setOtherConferencesLoaded(false)
+    setOtherConferencesPage(0)
+    setOtherConferencesList([])
+    setExpandedFilters((prev) => ({
+      ...prev,
+      conferences: false,
+    }))
+    try {
+      const [topConferencesRes, otherConferencesMeta] = await Promise.all([
+        fetchConferences({ tier: 'top', search, pageSize: VENUE_TOP_PAGE_SIZE }),
+        fetchConferences({ tier: 'other', search, pageSize: 1 }),
+      ])
+      setConferences(topConferencesRes.results as Conference[])
+      setOtherConferencesTotal(otherConferencesMeta.pagination?.totalItems ?? 0)
+    } catch (error) {
+      console.error('Error reloading conference filters:', error)
+      setConferences([])
+      setOtherConferencesTotal(0)
+    } finally {
+      setLoadingConferences(false)
+    }
+  }
+
+  const reloadJournalFilters = async (search?: string) => {
+    setLoadingJournals(true)
+    setOtherJournalsLoaded(false)
+    setOtherJournalsPage(0)
+    setOtherJournalsList([])
+    setExpandedFilters((prev) => ({
+      ...prev,
+      journals: false,
+    }))
+    try {
+      const [topJournalsRes, otherJournalsMeta] = await Promise.all([
+        fetchJournals({ tier: 'top', search, pageSize: VENUE_TOP_PAGE_SIZE }),
+        fetchJournals({ tier: 'other', search, pageSize: 1 }),
+      ])
+      setJournals(topJournalsRes.results as Journal[])
+      setOtherJournalsTotal(otherJournalsMeta.pagination?.totalItems ?? 0)
+    } catch (error) {
+      console.error('Error reloading journal filters:', error)
+      setJournals([])
+      setOtherJournalsTotal(0)
+    } finally {
+      setLoadingJournals(false)
+    }
+  }
+
+  const handleConferenceSeeMore = async () => {
+    if (expandedFilters.conferences) {
+      setExpandedFilters((prev) => ({ ...prev, conferences: false }))
+      return
+    }
+    if (!otherConferencesLoaded) {
+      await loadOtherConferences(conferenceSearch)
+    }
+    setExpandedFilters((prev) => ({ ...prev, conferences: true }))
+  }
+
+  const handleJournalSeeMore = async () => {
+    if (expandedFilters.journals) {
+      setExpandedFilters((prev) => ({ ...prev, journals: false }))
+      return
+    }
+    if (!otherJournalsLoaded) {
+      await loadOtherJournals(journalSearch)
+    }
+    setExpandedFilters((prev) => ({ ...prev, journals: true }))
+  }
 
   const toggleExpandedSection = (
     section: 'conferences' | 'journals' | 'fields',
   ) => {
+    if (section === 'conferences') {
+      void handleConferenceSeeMore()
+      return
+    }
+    if (section === 'journals') {
+      void handleJournalSeeMore()
+      return
+    }
     setExpandedFilters((prev) => ({
       ...prev,
       [section]: !prev[section],
     }))
   }
 
+  const venuesInitialized = useRef(false)
+
   useEffect(() => {
-    const fetchVenues = async () => {
+    if (venuesInitialized.current) return
+    venuesInitialized.current = true
+
+    const loadVenueFilters = async () => {
       try {
-        setLoadingVenues(true)
         const countsResponse = await countVenues()
         setConferencesCount(countsResponse.conferencesCount || 0)
         setJournalsCount(countsResponse.journalsCount || 0)
-
-        const conferencesResponse = await fetchConferences()
-        const conferencesData = conferencesResponse.results
-        setConferences(conferencesData)
-
-        const journalsResponse = await fetchJournals()
-        const journalsData = journalsResponse.results
-        setJournals(journalsData)
       } catch (error) {
-        console.error('Error in fetchVenues:', error)
-        setConferences([])
-        setJournals([])
-      } finally {
-        setLoadingVenues(false)
+        console.error('Error fetching venue counts:', error)
       }
+      await Promise.all([
+        reloadConferenceFilters(),
+        reloadJournalFilters(),
+      ])
     }
 
-    fetchVenues()
+    void loadVenueFilters()
   }, [])
+
+  useEffect(() => {
+    if (!venuesInitialized.current) return
+
+    const timer = setTimeout(() => {
+      void reloadConferenceFilters(conferenceSearch)
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [conferenceSearch])
+
+  useEffect(() => {
+    if (!venuesInitialized.current) return
+
+    const timer = setTimeout(() => {
+      void reloadJournalFilters(journalSearch)
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [journalSearch])
 
   const handleFetchPapers = async (
     page: number = 1,
@@ -386,20 +642,8 @@ export default function PapersPage() {
   }
 
   useEffect(() => {
-    let isMounted = true
-    const safelyFetchPapers = async () => {
-      try {
-        await handleFetchPapers(1, pageSize, searchQuery, activeFilters)
-      } catch (error) {
-        console.error('Error in initial papers fetch:', error)
-        if (!isMounted) return
-      }
-    }
-    safelyFetchPapers()
-    return () => {
-      isMounted = false
-    }
-  }, [])
+    void handleFetchPapers(1, pageSize, searchQuery, activeFilters)
+  }, [activeFilters, pageSize])
 
   const handlePageChange = (page: number, size: number) => {
     setCurrentPage(page)
@@ -411,48 +655,41 @@ export default function PapersPage() {
   }
 
   const toggleVenueFilter = (venue: { id: string; name: string }) => {
-    setActiveFilters((prev) => {
-      const newVenues = prev.venues.includes(venue.id)
-        ? prev.venues.filter((v) => v !== venue.id)
-        : [...prev.venues, venue.id]
-      return { ...prev, venues: newVenues }
-    })
+    setActiveFilters((prev) => ({
+      ...prev,
+      venues: prev.venues.includes(venue.id) ? [] : [venue.id],
+    }))
     setCurrentPage(1)
-    setTimeout(() => {
-      handleFetchPapers(1, pageSize, searchQuery, activeFilters)
-    }, 0)
   }
 
   const toggleVenueTypeFilter = (type: 'conference' | 'journal') => {
-    setActiveFilters((prev) => {
-      const newVenueTypes = prev.venueTypes.includes(type)
+    setActiveFilters((prev) => ({
+      ...prev,
+      venueTypes: prev.venueTypes.includes(type)
         ? prev.venueTypes.filter((t) => t !== type)
-        : [...prev.venueTypes, type]
-      return { ...prev, venueTypes: newVenueTypes }
-    })
+        : [type],
+    }))
     setCurrentPage(1)
-    setTimeout(() => {
-      handleFetchPapers(1, pageSize, searchQuery, activeFilters)
-    }, 0)
   }
 
   const clearFilters = () => {
-    setActiveFilters({
+    const emptyFilters: Filters = {
       years: [],
       venues: [],
       fields: [],
       venueTypes: [],
-    })
+    }
+    setActiveFilters(emptyFilters)
     setSearchQuery('')
     setCurrentPage(1)
-    handleFetchPapers(1, pageSize, searchQuery, activeFilters)
+    void handleFetchPapers(1, pageSize, '', emptyFilters)
   }
 
   const handleSearch = (value?: string) => {
     const query = value !== undefined ? value : searchQuery
     setSearchQuery(query)
     setCurrentPage(1)
-    handleFetchPapers(1, pageSize, searchQuery, activeFilters)
+    void handleFetchPapers(1, pageSize, query, activeFilters)
   }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -461,39 +698,9 @@ export default function PapersPage() {
 
     if (value === '') {
       setCurrentPage(1)
-      handleFetchPapers(1, pageSize, searchQuery, activeFilters)
+      void handleFetchPapers(1, pageSize, '', activeFilters)
     }
   }
-
-  useEffect(() => {
-    let result = [...papers]
-
-    if (activeFilters.years.length > 0) {
-      result = result.filter((paper) =>
-        activeFilters.years.includes(paper.year),
-      )
-    }
-
-    if (activeFilters.venues.length > 0) {
-      result = result.filter((paper) =>
-        activeFilters.venues.includes(paper.venue?.name || ''),
-      )
-    }
-
-    if (activeFilters.fields.length > 0) {
-      result = result.filter((paper) =>
-        activeFilters.fields.includes(paper.field),
-      )
-    }
-
-    if (activeFilters.venueTypes.length > 0) {
-      result = result.filter((paper) =>
-        activeFilters.venueTypes.includes(paper.venueType),
-      )
-    }
-
-    setFilteredPapers(result)
-  }, [activeFilters, papers])
 
   const navigateToConference = (
     id: string | undefined,
@@ -525,10 +732,6 @@ export default function PapersPage() {
       console.log('Cannot navigate - journal ID is undefined')
     }
   }
-
-  useEffect(() => {
-    handleFetchPapers(1, pageSize, searchQuery, activeFilters)
-  }, [activeFilters, pageSize])
 
   const filtersContent = (
     <Space direction='vertical' size='middle' style={{ width: '100%' }}>
@@ -564,7 +767,7 @@ export default function PapersPage() {
             Conferences
           </Title>
           <Text type='secondary' style={{ fontSize: '12px' }}>
-            {loadingVenues ? 'Loading...' : conferencesCount}
+            {loadingConferences ? 'Loading...' : conferencesCount}
           </Text>
         </Space>
         <Space direction='vertical' size='small' style={{ width: '100%' }}>
@@ -574,7 +777,6 @@ export default function PapersPage() {
             onChange={(e) => {
               setConferenceSearch(e.target.value)
               setCurrentPage(1)
-              fetchConferences()
             }}
             size='small'
             prefix={<SearchOutlined />}
@@ -586,7 +788,7 @@ export default function PapersPage() {
               overflowY: 'auto',
             }}
           >
-            {loadingVenues ? (
+            {loadingConferences ? (
               <div style={{ textAlign: 'center', padding: '16px' }}>
                 <Spin size='small' />
               </div>
@@ -606,30 +808,18 @@ export default function PapersPage() {
                         {conf.abbreviation || conf.name}
                       </Text>
                     </Checkbox>
-                    {conf.rank && <Tag color='blue'>{conf.rank}</Tag>}
+                    {conf.rank ? (
+                      <Tag color='blue'>{conf.rank}</Tag>
+                    ) : (
+                      <Tag>Not ranked</Tag>
+                    )}
                   </Space>
                 ))}
               </Space>
-            ) : conferences.length > 0 ? (
-              <Space direction='vertical' size='small'>
-                {conferences.slice(0, 100).map((conf) => (
-                  <Space
-                    key={conf.id}
-                    style={{ width: '100%', justifyContent: 'space-between' }}
-                  >
-                    <Checkbox
-                      checked={activeFilters.venues.includes(conf.id)}
-                      onChange={() => toggleVenueFilter(conf)}
-                      style={{ flex: 1 }}
-                    >
-                      <Text style={{ fontSize: '12px' }}>
-                        {conf.abbreviation || conf.name}
-                      </Text>
-                    </Checkbox>
-                    {conf.rank && <Tag color='blue'>{conf.rank}</Tag>}
-                  </Space>
-                ))}
-              </Space>
+            ) : seeMoreConferencesCount > 0 ? (
+              <Text type='secondary' style={{ fontSize: '12px' }}>
+                No A*/A conferences match your search. Use See More below.
+              </Text>
             ) : (
               <Space direction='vertical' size='small'>
                 <Text type='secondary' style={{ fontSize: '12px' }}>
@@ -642,11 +832,12 @@ export default function PapersPage() {
             )}
           </div>
 
-          {(conferences.length > 0 || filteredConferences.length > 0) && (
+          {seeMoreConferencesCount > 0 && !expandedFilters.conferences && (
             <Button
               type='link'
               size='small'
-              onClick={() => toggleExpandedSection('conferences')}
+              loading={loadingOtherConferences}
+              onClick={() => void handleConferenceSeeMore()}
               style={{
                 width: '100%',
                 marginTop: '8px',
@@ -654,12 +845,33 @@ export default function PapersPage() {
                 height: 'auto',
               }}
             >
-              {expandedFilters.conferences
-                ? topRankedConferences.length > 0
-                  ? 'Show Top 10 A* Only'
-                  : 'Show Less'
-                : `Show All (${filteredConferences.length || conferences.length} conferences)`}
+              {`See More (${seeMoreConferencesCount} more)`}
             </Button>
+          )}
+          {expandedFilters.conferences && (
+            <Space direction='vertical' size='small' style={{ width: '100%' }}>
+              {remainingOtherConferences > 0 && (
+                <Button
+                  type='link'
+                  size='small'
+                  loading={loadingOtherConferences}
+                  onClick={() =>
+                    void loadOtherConferences(conferenceSearch, true)
+                  }
+                  style={{ width: '100%', padding: 0, height: 'auto' }}
+                >
+                  {`Load more (${remainingOtherConferences} more)`}
+                </Button>
+              )}
+              <Button
+                type='link'
+                size='small'
+                onClick={() => void handleConferenceSeeMore()}
+                style={{ width: '100%', padding: 0, height: 'auto' }}
+              >
+                Show A*/A Only
+              </Button>
+            </Space>
           )}
         </Space>
       </>
@@ -676,7 +888,7 @@ export default function PapersPage() {
             Journals
           </Title>
           <Text type='secondary' style={{ fontSize: '12px' }}>
-            {loadingVenues ? 'Loading...' : journalsCount}
+            {loadingJournals ? 'Loading...' : journalsCount}
           </Text>
         </Space>
         <Space direction='vertical' size='small' style={{ width: '100%' }}>
@@ -694,7 +906,7 @@ export default function PapersPage() {
               overflowY: 'auto',
             }}
           >
-            {loadingVenues ? (
+            {loadingJournals ? (
               <div style={{ textAlign: 'center', padding: '16px' }}>
                 <Spin size='small' />
               </div>
@@ -717,17 +929,26 @@ export default function PapersPage() {
                         {journal.name}
                       </Text>
                     </Checkbox>
-                    {journal.impactFactor && (
-                      <Tag color='green'>
-                        IF:{' '}
-                        {Number(journal.impactFactor).toFixed(
-                          journal.impactFactor >= 100 ? 0 : 1,
-                        )}
+                    {journal.quartile ? (
+                      <Tag
+                        color={
+                          journal.quartile === 'Q1'
+                            ? 'green'
+                            : journal.quartile === 'Q2'
+                              ? 'blue'
+                              : 'default'
+                        }
+                      >
+                        {journal.quartile}
                       </Tag>
-                    )}
+                    ) : null}
                   </Space>
                 ))}
               </Space>
+            ) : seeMoreJournalsCount > 0 ? (
+              <Text type='secondary' style={{ fontSize: '12px' }}>
+                No Q1 journals match your search. Use See More below.
+              </Text>
             ) : (
               <Text type='secondary' style={{ fontSize: '12px' }}>
                 No journals found
@@ -735,12 +956,12 @@ export default function PapersPage() {
             )}
           </div>
 
-          {((expandedFilters.journals && sortedJournals.length > 10) ||
-            (!expandedFilters.journals && sortedJournals.length > 10)) && (
+          {seeMoreJournalsCount > 0 && !expandedFilters.journals && (
             <Button
               type='link'
               size='small'
-              onClick={() => toggleExpandedSection('journals')}
+              loading={loadingOtherJournals}
+              onClick={() => void handleJournalSeeMore()}
               style={{
                 width: '100%',
                 marginTop: '8px',
@@ -748,10 +969,31 @@ export default function PapersPage() {
                 height: 'auto',
               }}
             >
-              {expandedFilters.journals
-                ? 'Show Top 10 Only'
-                : `See More (${sortedJournals.length - 10} more)`}
+              {`See More (${seeMoreJournalsCount} more)`}
             </Button>
+          )}
+          {expandedFilters.journals && (
+            <Space direction='vertical' size='small' style={{ width: '100%' }}>
+              {remainingOtherJournals > 0 && (
+                <Button
+                  type='link'
+                  size='small'
+                  loading={loadingOtherJournals}
+                  onClick={() => void loadOtherJournals(journalSearch, true)}
+                  style={{ width: '100%', padding: 0, height: 'auto' }}
+                >
+                  {`Load more (${remainingOtherJournals} more)`}
+                </Button>
+              )}
+              <Button
+                type='link'
+                size='small'
+                onClick={() => void handleJournalSeeMore()}
+                style={{ width: '100%', padding: 0, height: 'auto' }}
+              >
+                Show Q1 Only
+              </Button>
+            </Space>
           )}
         </Space>
       </>
@@ -769,12 +1011,6 @@ export default function PapersPage() {
               years: selectedYear ? [selectedYear] : [],
             }))
             setCurrentPage(1)
-            setTimeout(() => {
-              handleFetchPapers(1, pageSize, searchQuery, {
-                ...activeFilters,
-                years: selectedYear ? [selectedYear] : [],
-              })
-            }, 0)
           }}
           style={{ width: '100%' }}
           size='small'
