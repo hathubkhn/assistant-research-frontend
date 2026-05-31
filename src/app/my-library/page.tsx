@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { useTranslation } from '@/utils/useTranslation'
 
@@ -70,11 +70,20 @@ interface Dataset {
   language?: string;
 }
 
+type LibrarySection =
+  | 'interesting'
+  | 'downloaded'
+  | 'datasets'
+  | 'uploaded'
+  | 'recommended'
+
 export default function MyLibraryPage() {
   const { t } = useTranslation('my-library')
+  const searchParams = useSearchParams()
+  const refreshKey = searchParams.get('t') ?? searchParams.get('refresh')
 
   const [activeSection, setActiveSection] = useState<
-    'interesting' | 'downloaded' | 'datasets' | 'uploaded' | 'recommended'
+    LibrarySection
   >('interesting')
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
@@ -858,14 +867,7 @@ export default function MyLibraryPage() {
   const years = [2021, 2022, 2023, 2024, 2025]
 
   // Toggle section
-  const toggleSection = (
-    section:
-      | 'interesting'
-      | 'downloaded'
-      | 'datasets'
-      | 'uploaded'
-      | 'recommended',
-  ) => {
+  const toggleSection = (section: LibrarySection) => {
     setActiveSection(section)
 
     // Update URL without reloading
@@ -875,14 +877,16 @@ export default function MyLibraryPage() {
       window.history.pushState({}, '', url.toString())
     }
 
-    // Fetch the data for the new section if we haven't already
-    if (section === 'interesting' && libraryPapers.length === 0) {
-      fetchInterestingPapers()
+    if (section === 'interesting') {
+      if (libraryPapers.length === 0) {
+        fetchInterestingPapers()
+      }
+      fetchRecommendedPapers()
     } else if (section === 'downloaded' && libraryPapers.length === 0) {
       fetchDownloadedPapers()
     } else if (section === 'datasets' && starredDatasets.length === 0) {
       fetchInterestingDatasets()
-    } else if (section === 'recommended' && recommendedPapers.length === 0) {
+    } else if (section === 'recommended') {
       fetchRecommendedPapers()
     }
   }
@@ -1442,12 +1446,39 @@ export default function MyLibraryPage() {
     fetchVenues()
   }, [])
 
+  // Sync section from URL (e.g. header / notification links)
+  useEffect(() => {
+    const sectionParam = searchParams.get('section')
+    const validSections: LibrarySection[] = [
+      'interesting',
+      'downloaded',
+      'datasets',
+      'uploaded',
+      'recommended',
+    ]
+    if (
+      sectionParam &&
+      validSections.includes(sectionParam as LibrarySection)
+    ) {
+      setActiveSection(sectionParam as LibrarySection)
+    }
+  }, [searchParams])
+
+  // Reload recommendations when visiting My Library or refresh query changes
+  useEffect(() => {
+    if (!isLoggedIn) return
+    if (activeSection === 'interesting' || activeSection === 'recommended') {
+      fetchRecommendedPapers()
+    }
+  }, [isLoggedIn, activeSection, refreshKey])
+
   // Function to fetch data based on active section
   const fetchDataForActiveSection = () => {
     console.log('Fetching data for section:', activeSection)
 
     if (activeSection === 'interesting') {
       fetchInterestingPapers()
+      fetchRecommendedPapers()
     } else if (activeSection === 'downloaded') {
       fetchDownloadedPapers()
     } else if (activeSection === 'datasets') {
@@ -1929,24 +1960,30 @@ export default function MyLibraryPage() {
                         </svg>
                       </div>
                     ) : (
-                      <div className='space-y-4'>
+                      <div
+                        className='space-y-3 max-h-[min(60vh,520px)] overflow-y-auto pr-1'
+                        style={{ scrollbarGutter: 'stable' }}
+                      >
                         {recommendedPapers.length > 0 ? (
                           recommendedPapers.map((paper) => (
                             <div
                               key={paper.id}
-                              className='bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-100'
+                              className='bg-gray-50 p-4 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50/40 transition-colors'
                             >
-                              <div className='flex justify-between items-start'>
-                                <h3 className='text-md font-semibold text-gray-800 line-clamp-2 pr-2'>
+                              <div className='flex justify-between items-start gap-2'>
+                                <Link
+                                  href={`/papers/${paper.id}`}
+                                  className='text-md font-semibold text-gray-800 line-clamp-2 hover:text-blue-600 flex-1 min-w-0'
+                                >
                                   {paper.title}
-                                </h3>
+                                </Link>
                                 <button
+                                  type='button'
                                   onClick={(e) => toggleStar(e, paper)}
                                   className='flex-shrink-0 focus:outline-none'
+                                  aria-label='Add to interesting papers'
                                 >
-                                  <StarIcon
-                                    className={`h-5 w-5 ${paper.isInteresting ? 'text-yellow-400' : 'text-gray-300'}`}
-                                  />
+                                  <StarIcon className='h-5 w-5 text-gray-300 hover:text-yellow-400' />
                                 </button>
                               </div>
                               <div className='mt-1 text-xs text-gray-500'>
@@ -1955,28 +1992,17 @@ export default function MyLibraryPage() {
                                   'Unknown Venue'}
                               </div>
                               <div className='mt-2 flex justify-between items-center'>
-                                <div className='flex items-center'>
-                                  <span
-                                    onClick={(e) =>
-                                      navigateToConference(
-                                        getVenueId(
-                                          paper.venue || paper.conference,
-                                        ),
-                                        e,
-                                      )
-                                    }
-                                    className='inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 cursor-pointer hover:bg-blue-100 mr-1'
-                                  >
+                                <div className='flex items-center flex-wrap gap-1'>
+                                  <span className='inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'>
                                     {paper.conference}
                                   </span>
                                   <span className='text-xs font-medium text-gray-600'>
                                     {paper.year}
                                   </span>
                                 </div>
-
-                                <button
-                                  onClick={(e) => openPaperDetail(e, paper)}
-                                  className='inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800'
+                                <Link
+                                  href={`/papers/${paper.id}`}
+                                  className='inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 whitespace-nowrap'
                                 >
                                   View Details
                                   <svg
@@ -1984,6 +2010,7 @@ export default function MyLibraryPage() {
                                     fill='none'
                                     stroke='currentColor'
                                     viewBox='0 0 24 24'
+                                    aria-hidden
                                   >
                                     <path
                                       strokeLinecap='round'
@@ -1992,7 +2019,7 @@ export default function MyLibraryPage() {
                                       d='M13 7l5 5m0 0l-5 5m5-5H6'
                                     />
                                   </svg>
-                                </button>
+                                </Link>
                               </div>
                               <div className='mt-1 text-xs text-gray-500'>
                                 Added{' '}

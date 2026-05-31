@@ -1,42 +1,45 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
 import Link from 'next/link'
-import { Badge, Button, Dropdown, List, Spin, Typography } from 'antd'
+import { Badge, Button, Dropdown, Spin, Typography } from 'antd'
 import { BellOutlined } from '@ant-design/icons'
+import {
+  fetchRecommendedPapersFromApi,
+  getRecommendedVenueLabel,
+  type RecommendedPaperApiItem,
+} from '@/utils/recommendations'
 
 const { Text } = Typography
 
-interface RecommendedPaper {
-  id: string;
-  title: string;
-  authors: string[];
-  keywords: string[];
-  addedDate: string;
-  venue_name?: string;
-  conference?: string;
-}
+const DROPDOWN_WIDTH = 360
+const LIST_MAX_HEIGHT = 320
 
 export default function NotificationBell() {
   const { user } = useAuth()
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
-  const [recommendedPapers, setRecommendedPapers] = useState<RecommendedPaper[]>([])
+  const [recommendedPapers, setRecommendedPapers] = useState<
+    RecommendedPaperApiItem[]
+  >([])
   const [loading, setLoading] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
+  const fetchRecommendedPapers = async () => {
+    if (!user) return
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+    setLoading(true)
+    try {
+      const papers = await fetchRecommendedPapersFromApi()
+      setRecommendedPapers(papers.slice(0, 8))
+    } catch (error) {
+      console.error('Error fetching recommended papers:', error)
+      setRecommendedPapers([])
+    } finally {
+      setLoading(false)
     }
-  }, [dropdownRef])
+  }
 
   useEffect(() => {
     if (user) {
@@ -44,126 +47,123 @@ export default function NotificationBell() {
     }
   }, [user])
 
-  const fetchRecommendedPapers = async () => {
-    if (!user) return
-
-    setLoading(true)
-    try {
-      const token = localStorage.getItem('authToken')
-
-      if (!token) {
-        console.error('Authentication token not found')
-        setLoading(false)
-        return
-      }
-
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${API_URL}/api/my-library/?section=recommended`, {
-        headers: {
-          'Authorization': token.startsWith('Token ') ? token : `Token ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error(`Failed to fetch paper recommendations: ${response.status} - ${errorText}`)
-        setLoading(false)
-        return
-      }
-
-      const papersData = await response.json()
-
-      const filteredPapers = papersData.slice(0, 5)
-
-      setRecommendedPapers(filteredPapers.map((paper: any) => ({
-        id: paper.id,
-        title: paper.title,
-        authors: paper.authors || [],
-        keywords: paper.keywords || [],
-        addedDate: paper.created_at || paper.addedDate || new Date().toISOString(),
-        venue_name: paper.venue_name || paper.venue || '',
-        conference: paper.conference || '',
-      })))
-    } catch (error) {
-      console.error('Error fetching recommended papers:', error)
-    } finally {
-      setLoading(false)
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open)
+    if (open && user) {
+      fetchRecommendedPapers()
     }
+  }
+
+  const handlePaperClick = (paperId: string) => {
+    setIsOpen(false)
+    router.push(`/papers/${paperId}`)
   }
 
   const newPapersCount = recommendedPapers.length
 
   const dropdownContent = (
-    <div style={{ width: '288px' }}>
-      <div style={{
-        padding: '12px 16px',
-        borderBottom: '1px solid #f0f0f0',
-        fontWeight: 600,
-        fontSize: '14px',
-      }}>
+    <div
+      style={{
+        width: DROPDOWN_WIDTH,
+        backgroundColor: '#ffffff',
+        borderRadius: 8,
+        boxShadow:
+          '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        border: '1px solid #e5e7eb',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          padding: '12px 16px',
+          borderBottom: '1px solid #f0f0f0',
+          fontWeight: 600,
+          fontSize: '14px',
+          color: '#111827',
+          backgroundColor: '#ffffff',
+        }}
+      >
         Paper Recommendations
       </div>
 
       {loading ? (
-        <div style={{
-          padding: '24px',
-          textAlign: 'center',
-        }}>
+        <div
+          style={{
+            padding: '32px 16px',
+            textAlign: 'center',
+            backgroundColor: '#ffffff',
+          }}
+        >
           <Spin size='default' />
         </div>
       ) : recommendedPapers.length > 0 ? (
-        <div style={{ maxHeight: '384px', overflowY: 'auto' }}>
-          <List
-            dataSource={recommendedPapers}
-            renderItem={(paper) => (
-              <List.Item
+        <>
+          <div
+            style={{
+              maxHeight: LIST_MAX_HEIGHT,
+              overflowY: 'auto',
+              backgroundColor: '#ffffff',
+            }}
+          >
+            {recommendedPapers.map((paper, index) => (
+              <button
+                key={paper.id}
+                type='button'
+                onClick={() => handlePaperClick(paper.id)}
                 style={{
-                  padding: '8px 16px',
-                  borderBottom: '1px solid #f0f0f0',
+                  display: 'block',
+                  width: '100%',
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  border: 'none',
+                  borderBottom:
+                    index < recommendedPapers.length - 1
+                      ? '1px solid #f3f4f6'
+                      : 'none',
+                  backgroundColor: '#ffffff',
                   cursor: 'pointer',
+                  transition: 'background-color 0.15s ease',
                 }}
-                onClick={() => setIsOpen(false)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f9fafb'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff'
+                }}
               >
-                <Link
-                  href={`/papers/${paper.id}`}
+                <Text
                   style={{
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    color: '#111827',
                     display: 'block',
-                    width: '100%',
-                    textDecoration: 'none',
-                    color: 'inherit',
+                    marginBottom: '4px',
+                    lineHeight: 1.4,
                   }}
                 >
-                  <div>
-                    <Text
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        color: '#1f2937',
-                        display: 'block',
-                        marginBottom: '4px',
-                      }}
-                    >
-                      {paper.title}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: '12px',
-                        color: '#6b7280',
-                      }}
-                    >
-                      {paper.venue_name || paper.conference || 'Unknown Venue'}
-                    </Text>
-                  </div>
-                </Link>
-              </List.Item>
-            )}
-          />
-          <div style={{
-            textAlign: 'center',
-            padding: '12px 16px',
-          }}>
+                  {paper.title}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: '12px',
+                    color: '#6b7280',
+                  }}
+                >
+                  {getRecommendedVenueLabel(paper)}
+                </Text>
+              </button>
+            ))}
+          </div>
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '12px 16px',
+              borderTop: '1px solid #f0f0f0',
+              backgroundColor: '#ffffff',
+            }}
+          >
             <Link
-              href={`/my-library?section=recommended&t=${Date.now()}`}
+              href={`/my-library?section=interesting&t=${Date.now()}`}
               onClick={() => setIsOpen(false)}
               style={{
                 color: '#1890ff',
@@ -172,17 +172,20 @@ export default function NotificationBell() {
                 textDecoration: 'none',
               }}
             >
-              View all recommendations
+              View all in My Library
             </Link>
           </div>
-        </div>
+        </>
       ) : (
-        <div style={{
-          padding: '24px 16px',
-          textAlign: 'center',
-          fontSize: '14px',
-          color: '#6b7280',
-        }}>
+        <div
+          style={{
+            padding: '24px 16px',
+            textAlign: 'center',
+            fontSize: '14px',
+            color: '#6b7280',
+            backgroundColor: '#ffffff',
+          }}
+        >
           No new paper recommendations found.
         </div>
       )}
@@ -190,33 +193,31 @@ export default function NotificationBell() {
   )
 
   return (
-    <div ref={dropdownRef}>
-      <Dropdown
-        overlay={dropdownContent}
-        trigger={['click']}
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        placement='bottomRight'
+    <Dropdown
+      popupRender={() => dropdownContent}
+      trigger={['click']}
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      placement='bottomRight'
+    >
+      <Badge
+        count={newPapersCount > 9 ? '9+' : newPapersCount}
+        size='small'
+        style={{
+          backgroundColor: '#ff4d4f',
+        }}
       >
-        <Badge
-          count={newPapersCount > 9 ? '9+' : newPapersCount}
-          size='small'
+        <Button
+          type='text'
+          icon={<BellOutlined />}
           style={{
-            backgroundColor: '#ff4d4f',
+            color: 'white',
+            border: 'none',
+            fontSize: '16px',
           }}
-        >
-          <Button
-            type='text'
-            icon={<BellOutlined />}
-            style={{
-              color: 'white',
-              border: 'none',
-              fontSize: '16px',
-            }}
-            aria-label='Notifications'
-          />
-        </Badge>
-      </Dropdown>
-    </div>
+          aria-label='Notifications'
+        />
+      </Badge>
+    </Dropdown>
   )
 }

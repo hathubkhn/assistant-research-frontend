@@ -45,7 +45,7 @@ export default function Header() {
     })
 
     if (user) {
-      router.push('/my-library')
+      router.push(`/my-library?section=interesting&t=${Date.now()}`)
     } else {
       if (loading) {
         console.log('Auth still loading, please wait...')
@@ -57,7 +57,7 @@ export default function Header() {
         console.log('Token exists but user data is missing, forcing recheck')
         const refreshedUser = await checkAuth()
         if (refreshedUser) {
-          router.push('/my-library')
+          router.push(`/my-library?section=interesting&t=${Date.now()}`)
         } else {
           router.push('/login')
         }
