@@ -37,7 +37,6 @@ const InterestingButton = ({
       setIsLoading(true)
 
       const newState = !isInteresting
-      updateState(newState)
 
       const hasToken =
         localStorage.getItem('authToken') ||
@@ -62,18 +61,20 @@ const InterestingButton = ({
         withCredentials: true,
       })
 
+      updateState(newState)
+
       toast.success(
         newState
           ? 'Paper added to your interests'
           : 'Paper removed from your interests',
       )
     } catch (error) {
-      updateState(isInteresting)
-
       const errorMessage = axios.isAxiosError(error)
         ? error.response?.status === 401
           ? 'Authentication failed. Please log in again.'
-          : error.response?.data?.error || 'Failed to toggle interesting state'
+          : error.response?.data?.message ||
+            error.response?.data?.error ||
+            'Failed to toggle interesting state'
         : error instanceof Error
           ? error.message
           : 'An error occurred'

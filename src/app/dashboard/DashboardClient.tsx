@@ -483,9 +483,7 @@ export default function Dashboard() {
             )}
           </Card>
         </Col>
-      </Row>
 
-      <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
         <Col xs={24} lg={12}>
           <Card title={t('charts.topTasks')}>
             {isLoadingTaskChart ? (
@@ -519,6 +517,7 @@ export default function Dashboard() {
           </Card>
         </Col>
 
+        {/* Top Datasets chart — hidden until FE/BE dataset analytics are aligned
         <Col xs={24} lg={12}>
           <Card title={t('charts.topDatasets')}>
             {isLoadingDatasetChart ? (
@@ -551,6 +550,7 @@ export default function Dashboard() {
             )}
           </Card>
         </Col>
+        */}
       </Row>
 
       {trendingTasks.length > 0 && (

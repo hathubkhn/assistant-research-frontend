@@ -37,6 +37,11 @@ import {
   YAxis,
 } from 'recharts'
 import { fetchWithAuth } from '@/utils/auth'
+import {
+  getPaperVenueLabel,
+  getPaperVenueRank,
+  type PaperVenue,
+} from '@/utils/papers'
 
 const { Title, Paragraph, Text } = Typography
 const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -71,8 +76,10 @@ interface Paper {
   title: string;
   authors: string[];
   conference?: string;
-  venue?: string;
+  venue?: string | PaperVenue | null;
   venueType?: 'conference' | 'journal';
+  conferenceRank?: string;
+  conferenceAbbreviation?: string;
   year: number;
   field: string;
   keywords: string[];
@@ -148,13 +155,16 @@ const PublicationDetails = ({
     <Descriptions.Item
       label={paper?.venueType === 'journal' ? 'Journal' : 'Conference'}
     >
-      <div
-        style={{ display: 'flex', justifyContent: 'left', alignItems: 'left' }}
-      >
+      <Space wrap>
         <Paragraph style={{ color: '#6b7280', margin: 0 }}>
-          {paper?.venue || paper?.conference || 'No venue found.'}
+          {getPaperVenueLabel(paper?.venue, paper?.conference)}
         </Paragraph>
-      </div>
+        {getPaperVenueRank(paper?.venue, paper?.conferenceRank) ? (
+          <Tag color='blue'>
+            {getPaperVenueRank(paper?.venue, paper?.conferenceRank)}
+          </Tag>
+        ) : null}
+      </Space>
     </Descriptions.Item>
     <Descriptions.Item label='Year'>
       <div

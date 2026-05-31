@@ -4,7 +4,11 @@ export const getAuthHeaders = (
   const headers: Record<string, string> = {}
 
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('authToken')
+    const token =
+      localStorage.getItem('authToken') ||
+      sessionStorage.getItem('authToken') ||
+      localStorage.getItem('token') ||
+      sessionStorage.getItem('token')
     if (token) {
       headers['Authorization'] = `Token ${token}`
     }

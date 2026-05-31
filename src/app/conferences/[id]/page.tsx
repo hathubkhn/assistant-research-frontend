@@ -17,11 +17,11 @@ import {
   Tag,
 } from 'antd'
 import {
-  ArrowLeftOutlined,
   ExportOutlined,
   CalendarOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
+import BackNavigationButton from '@/components/BackNavigationButton'
 
 const { Title, Text } = Typography
 const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -153,14 +153,12 @@ export default function ConferenceDetailPage() {
 
   return (
     <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Back button */}
-      <Space style={{ marginBottom: '24px' }}>
-        <Link href='/conferences'>
-          <Button icon={<ArrowLeftOutlined />} type='link'>
-            Back to Conferences
-          </Button>
-        </Link>
-      </Space>
+      <div style={{ marginBottom: '24px' }}>
+        <BackNavigationButton
+          href='/conferences'
+          label='Back to Conferences'
+        />
+      </div>
 
       {/* Conference header */}
       <Card style={{ marginBottom: '32px' }}>

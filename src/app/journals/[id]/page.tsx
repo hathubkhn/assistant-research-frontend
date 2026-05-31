@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import BackNavigationButton from '@/components/BackNavigationButton'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -80,7 +81,10 @@ export default function JournalDetailPage() {
     if (!journal) {
         return (
             <div className='container mx-auto px-4 py-8'>
-                <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md'>
+            <div className='mb-6'>
+                <BackNavigationButton href='/journals' label='Back to Journals' />
+            </div>
+            <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md'>
                     <p>Journal not found. Please check the URL and try again.</p>
                     <Link href='/journals' className='mt-2 inline-block text-blue-600 hover:text-blue-800'>
                         Go back to Journals
@@ -110,14 +114,8 @@ export default function JournalDetailPage() {
 
     return (
         <div className='container mx-auto px-4 py-8'>
-            {/* Back button */}
             <div className='mb-6'>
-                <Link href='/journals' className='text-blue-600 hover:text-blue-800 flex items-center gap-1'>
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M10 19l-7-7m0 0l7-7m-7 7h18' />
-                    </svg>
-                    Back to Journals
-                </Link>
+                <BackNavigationButton href='/journals' label='Back to Journals' />
             </div>
 
             {/* Journal header */}

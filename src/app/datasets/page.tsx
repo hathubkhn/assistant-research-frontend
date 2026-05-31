@@ -91,6 +91,10 @@ const fetchDatasetsAPI = async (
 
     const response = await axios.get(
       `${API_URL}/api/datasets/?${queryParams.toString()}`,
+      {
+        headers: getAuthHeaders() as Record<string, string>,
+        withCredentials: true,
+      },
     )
     return response.data
   } catch (error) {
@@ -103,10 +107,11 @@ const fetchInterestingDatasetsAPI = async (): Promise<Dataset[]> => {
   try {
     const authHeaders = getAuthHeaders()
     const response = await axios.get(`${API_URL}/api/datasets/interesting/`, {
+      params: { page: 1, pageSize: 100 },
       headers: authHeaders as Record<string, string>,
       withCredentials: true,
     })
-    return response.data
+    return response.data?.results ?? []
   } catch (error) {
     console.error('Error fetching interesting datasets:', error)
     throw error
@@ -310,7 +315,11 @@ export default function DatasetsPage() {
           ) {
             dataset.benchmarks = []
           }
-          return dataset
+          return {
+            ...dataset,
+            starred: Boolean(dataset.isStarred ?? dataset.starred),
+            isInteresting: Boolean(dataset.isStarred ?? dataset.isInteresting),
+          }
         })
       }
       const hasAuthToken =
@@ -322,13 +331,17 @@ export default function DatasetsPage() {
       if (hasAuthToken) {
         try {
           const interestingData = await fetchInterestingDatasetsAPI()
-          const interestingIds = Array.isArray(interestingData)
-            ? interestingData.map((dataset: any) => dataset.id)
-            : []
+          const interestingIds = new Set(
+            interestingData.map((dataset) => String(dataset.id)),
+          )
           data.results = data.results.map((dataset: Dataset) => ({
             ...dataset,
-            starred: interestingIds.includes(dataset.id),
-            isInteresting: interestingIds.includes(dataset.id),
+            starred:
+              interestingIds.has(String(dataset.id)) ||
+              Boolean(dataset.isStarred ?? dataset.starred),
+            isInteresting:
+              interestingIds.has(String(dataset.id)) ||
+              Boolean(dataset.isStarred ?? dataset.isInteresting),
           }))
         } catch (error) {
           console.error('Error fetching interesting datasets:', error)
@@ -759,6 +772,7 @@ export default function DatasetsPage() {
                               </div>
                               <InterestingDatasetButton
                                 datasetId={dataset.id}
+                                variant='icon'
                                 initialState={dataset.starred || false}
                                 onToggle={(isInteresting) => {
                                   setDatasets((prevDatasets) =>
@@ -876,6 +890,7 @@ export default function DatasetsPage() {
                             </div>
                             <InterestingDatasetButton
                               datasetId={dataset.id}
+                              variant='icon'
                               initialState={dataset.starred || false}
                               onToggle={(isInteresting) => {
                                 setDatasets((prevDatasets) =>

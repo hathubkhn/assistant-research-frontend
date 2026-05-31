@@ -8,6 +8,7 @@ import { LanguageProvider } from '../contexts/LanguageContext'
 import Header from '../components/Header'
 import { useEffect } from 'react'
 import { ConfigProvider } from 'antd'
+import { Toaster } from 'react-hot-toast'
 
 export function removeBisSkinCheckedAttributes() {
   try {
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: Readonly<{children: React.React
                 {children}
               </main>
               <PrelineScript />
+              <Toaster position='top-right' toastOptions={{ duration: 4000 }} />
             </LanguageProvider>
           </AuthProvider>
         </ConfigProvider>

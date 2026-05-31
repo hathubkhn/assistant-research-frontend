@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { StarIcon } from '@heroicons/react/24/solid'
+import { toast } from 'react-hot-toast'
 import { useTranslation } from '@/utils/useTranslation'
 
 // API URL configuration
@@ -1120,10 +1121,11 @@ export default function MyLibraryPage() {
       console.log('Upload response status:', response.status)
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Upload failed:', response.status, errorText)
+        const errorData = await response.json().catch(() => ({}))
         throw new Error(
-          `Upload failed with status: ${response.status}. ${errorText}`,
+          errorData.message ||
+            errorData.error ||
+            `Upload failed with status: ${response.status}`,
         )
       }
 
@@ -1176,9 +1178,10 @@ export default function MyLibraryPage() {
       }, 500)
     } catch (error) {
       console.error('Upload failed:', error)
-      setUploadError(
-        `Failed to upload paper: ${error instanceof Error ? error.message : String(error)}`,
-      )
+      const message =
+        error instanceof Error ? error.message : 'Không thể upload bài báo'
+      setUploadError(message)
+      toast.error(message)
       setIsUploading(false)
     }
   }
@@ -1205,7 +1208,12 @@ export default function MyLibraryPage() {
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to toggle ${statusType} status for paper`)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(
+          errorData.message ||
+            errorData.error ||
+            `Failed to toggle ${statusType} status for paper`,
+        )
       }
 
       return await response.json()
@@ -1333,6 +1341,11 @@ export default function MyLibraryPage() {
       }
     } catch (error) {
       console.error('Error toggling star status:', error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Không thể cập nhật trạng thái yêu thích',
+      )
     }
   }
 
