@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useTranslation } from '@/utils/useTranslation'
 import axios from 'axios'
 import {
@@ -204,7 +205,13 @@ export default function JournalsPage() {
       dataIndex: 'name',
       key: 'name',
       sorter: (a: Journal, b: Journal) => a.name.localeCompare(b.name),
-      render: (text: string) => <Text strong>{text}</Text>,
+      render: (text: string, record: Journal) => (
+        <Link href={`/journals/${record.id}`}>
+          <Text strong style={{ color: '#1890ff', cursor: 'pointer' }}>
+            {text}
+          </Text>
+        </Link>
+      ),
     },
     {
       title: t('table.abbreviation'),
