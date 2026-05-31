@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { Suspense, useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { StarIcon } from '@heroicons/react/24/solid'
@@ -78,7 +78,7 @@ type LibrarySection =
   | 'uploaded'
   | 'recommended'
 
-export default function MyLibraryPage() {
+function MyLibraryPage() {
   const { t } = useTranslation('my-library')
   const searchParams = useSearchParams()
   const refreshKey = searchParams.get('t') ?? searchParams.get('refresh')
@@ -2361,5 +2361,13 @@ export default function MyLibraryPage() {
       {/* Filter Sidebar (Mobile) */}
       {/* ... Keep existing code for the mobile filter sidebar ... */}
     </div>
+  )
+}
+
+export default function MyLibraryPageWrapper() {
+  return (
+    <Suspense fallback={<div className='p-8'>Loading...</div>}>
+      <MyLibraryPage />
+    </Suspense>
   )
 }
