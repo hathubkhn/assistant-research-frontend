@@ -23,6 +23,8 @@ const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').re
 )
 
 const INITIAL_MESSAGE_LIMIT = 6
+/** Set on F5/reload while a chat is open; cleared when leaving via header/nav (SPA). */
+const RESTORE_SESSION_ON_RELOAD_KEY = 'ra_restore_session_on_reload'
 
 const checkApiAvailability = async () => {
   try {
@@ -85,8 +87,13 @@ export default function ResearchAssistantPage() {
   const [apiStatus, setApiStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown')
   const [isCheckingConnection, setIsCheckingConnection] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const activeSessionIdRef = useRef<string | null>(null)
 
   const isAuthenticated = !!user && hasAuthToken()
+
+  useEffect(() => {
+    activeSessionIdRef.current = activeSessionId
+  }, [activeSessionId])
 
   const checkConnection = async () => {
     setIsCheckingConnection(true)
@@ -100,14 +107,16 @@ export default function ResearchAssistantPage() {
     }
   }
 
-  const refreshSessions = useCallback(async () => {
-    if (!isAuthenticated) return
+  const refreshSessions = useCallback(async (): Promise<ChatSessionSummary[]> => {
+    if (!isAuthenticated) return []
     setSessionsLoading(true)
     try {
       const list = await listChatSessions()
       setSessions(list)
+      return list
     } catch (e) {
       console.error(e)
+      return []
     } finally {
       setSessionsLoading(false)
     }
@@ -131,6 +140,7 @@ export default function ResearchAssistantPage() {
       } catch (e) {
         console.error(e)
         setError('Failed to load chat history.')
+        throw e
       } finally {
         setMessagesLoading(false)
         setIsLoadingOlder(false)
@@ -139,20 +149,7 @@ export default function ResearchAssistantPage() {
     [],
   )
 
-  const selectSession = useCallback(
-    async (sessionId: string) => {
-      setActiveSessionId(sessionId)
-      setError(null)
-      setExpandedSourcesId(null)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, sessionId)
-      }
-      await loadSessionMessages(sessionId)
-    },
-    [loadSessionMessages],
-  )
-
-  const startNewChat = () => {
+  const startNewChat = useCallback(() => {
     setActiveSessionId(null)
     setMessages([])
     setHasMore(false)
@@ -162,26 +159,71 @@ export default function ResearchAssistantPage() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY)
     }
-  }
+  }, [])
+
+  const selectSession = useCallback(
+    async (sessionId: string) => {
+      setActiveSessionId(sessionId)
+      setError(null)
+      setExpandedSourcesId(null)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, sessionId)
+      }
+      try {
+        await loadSessionMessages(sessionId)
+      } catch {
+        startNewChat()
+      }
+    },
+    [loadSessionMessages, startNewChat],
+  )
 
   useEffect(() => {
     checkConnection()
+  }, [])
+
+  // F5 / browser reload on this page → allow restoring the open chat on next mount.
+  useEffect(() => {
+    const markReloadRestore = () => {
+      if (activeSessionIdRef.current) {
+        sessionStorage.setItem(RESTORE_SESSION_ON_RELOAD_KEY, '1')
+      }
+    }
+    window.addEventListener('beforeunload', markReloadRestore)
+    return () => {
+      window.removeEventListener('beforeunload', markReloadRestore)
+      sessionStorage.removeItem(RESTORE_SESSION_ON_RELOAD_KEY)
+    }
   }, [])
 
   useEffect(() => {
     if (authLoading) return
     if (!isAuthenticated) return
 
-    refreshSessions().then(async () => {
-      const stored =
-        typeof window !== 'undefined'
-          ? localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY)
-          : null
-      if (stored) {
-        await selectSession(stored)
-      }
-    })
-  }, [authLoading, isAuthenticated, refreshSessions, selectSession])
+    const shouldRestore =
+      typeof window !== 'undefined' &&
+      sessionStorage.getItem(RESTORE_SESSION_ON_RELOAD_KEY) === '1'
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(RESTORE_SESSION_ON_RELOAD_KEY)
+    }
+
+    if (shouldRestore) {
+      refreshSessions().then(async (list) => {
+        const stored =
+          typeof window !== 'undefined'
+            ? localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY)
+            : null
+        if (stored && list.some((s) => s.id === stored)) {
+          await selectSession(stored)
+        } else {
+          startNewChat()
+        }
+      })
+    } else {
+      startNewChat()
+      refreshSessions()
+    }
+  }, [authLoading, isAuthenticated, refreshSessions, selectSession, startNewChat])
 
   const handleLoadOlder = () => {
     if (!activeSessionId || !messages.length || isLoadingOlder) return
@@ -218,7 +260,11 @@ export default function ResearchAssistantPage() {
     setMessages((prev) => [...prev, optimisticUser])
 
     try {
-      const data = await sendChatQuery(text, activeSessionId)
+      const sessionForQuery =
+        activeSessionId && sessions.some((s) => s.id === activeSessionId)
+          ? activeSessionId
+          : null
+      const data = await sendChatQuery(text, sessionForQuery)
       const sid = data.session_id
 
       if (!activeSessionId) {
