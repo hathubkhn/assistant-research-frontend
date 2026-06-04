@@ -29,7 +29,8 @@ export default function SimilarDatasets({ datasetId, className = '' }: SimilarDa
         const fetchSimilarDatasets = async () => {
             try {
                 setLoading(true)
-                const response = await fetch(`http://localhost:8000/api/datasets/${datasetId}/`)
+                const apiBase = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '')
+                const response = await fetch(`${apiBase}/api/datasets/${datasetId}/`)
 
                 if (!response.ok) {
                     throw new Error(`Failed to fetch similar datasets: ${response.status}`)
