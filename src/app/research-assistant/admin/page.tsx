@@ -50,7 +50,8 @@ export default function ResearchAssistantAdmin() {
 
         try {
             // Connect directly to the FastAPI backend
-            const res = await fetch('http://localhost:8090/papers', {
+            const apiBase = (process.env.NEXT_PUBLIC_RESEARCH_API_URL || 'http://localhost:8001').replace(/\/$/, '')
+            const res = await fetch(`${apiBase}/papers`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
