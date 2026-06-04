@@ -17,20 +17,23 @@ import {
   type ChatSessionSummary,
 } from '@/utils/researchAssistantChat'
 
-const RESEARCH_ASSISTANT_DIRECT_URL = (
-  process.env.NEXT_PUBLIC_RESEARCH_API_URL || 'http://localhost:8001'
-).replace(/\/$/, '')
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(
+  /\/$/,
+  '',
+)
 
 const INITIAL_MESSAGE_LIMIT = 6
 
 const checkApiAvailability = async () => {
   try {
-    const response = await fetch(`${RESEARCH_ASSISTANT_DIRECT_URL}/health`, {
+    const response = await fetch(`${API_BASE}/api/research-assistant/health/`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(3000),
+      signal: AbortSignal.timeout(5000),
     })
-    return response.ok
+    if (!response.ok) return false
+    const data = await response.json()
+    return data.vector_db === 'available'
   } catch {
     return false
   }
