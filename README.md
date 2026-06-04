@@ -6,7 +6,9 @@ This is the frontend for the Research Assistant application, which integrates wi
 
 The frontend communicates with the backend through API routes that proxy requests to the backend server. The main API routes are:
 
-- `/api/research-assistant/query` - For querying the research assistant
+- `/api/research-assistant/chat/query/` - Chat query (authenticated, saves history)
+- `/api/research-assistant/chat/sessions/` - List chat sessions
+- `/api/research-assistant/chat/sessions/{id}/messages/` - Paginated messages
 - `/api/research-assistant/papers` - For adding or deleting papers
 
 ## Configuration

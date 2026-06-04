@@ -1,382 +1,401 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/utils/useTranslation'
+import { useAuth } from '@/contexts/AuthContext'
+import { hasAuthToken } from '@/utils/auth'
+import ChatSidebar from '@/components/research-assistant/ChatSidebar'
+import ChatThread from '@/components/research-assistant/ChatThread'
+import {
+  ACTIVE_SESSION_STORAGE_KEY,
+  listChatSessions,
+  loadChatMessages,
+  sendChatQuery,
+  type ChatMessageRecord,
+  type ChatSessionSummary,
+} from '@/utils/researchAssistantChat'
 
-// The API URL with a fallback to localhost
-const RESEARCH_ASSISTANT_API_URL = process.env.NEXT_PUBLIC_RESEARCH_API_URL || 'http://localhost:8090'
+const RESEARCH_ASSISTANT_DIRECT_URL = (
+  process.env.NEXT_PUBLIC_RESEARCH_API_URL || 'http://localhost:8001'
+).replace(/\/$/, '')
 
-// Add function to check if the API is available
+const INITIAL_MESSAGE_LIMIT = 6
+
 const checkApiAvailability = async () => {
+  try {
+    const response = await fetch(`${RESEARCH_ASSISTANT_DIRECT_URL}/health`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(3000),
+    })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+function FeaturesIntro({ description }: { description: string }) {
+  return (
+    <div className='max-w-2xl mx-auto text-center px-4'>
+      <p className='text-lg text-gray-600 mb-8'>{description}</p>
+      <h2 className='text-xl font-bold mb-6 text-gray-900'>Features</h2>
+      <ul className='space-y-5 text-left text-gray-700'>
+        <li>
+          <h3 className='font-semibold text-gray-900'>Semantic Search</h3>
+          <p className='text-sm'>Vector search finds the most relevant papers for your question.</p>
+        </li>
+        <li>
+          <h3 className='font-semibold text-gray-900'>AI-Generated Answers</h3>
+          <p className='text-sm'>Answers synthesized from multiple research papers.</p>
+        </li>
+        <li>
+          <h3 className='font-semibold text-gray-900'>Source Attribution</h3>
+          <p className='text-sm'>
+            <span className='font-medium'>Paper</span> badges link to paper details with previews.
+          </p>
+        </li>
+      </ul>
+    </div>
+  )
+}
+
+export default function ResearchAssistantPage() {
+  const { t } = useTranslation('research-assistant')
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
+
+  const [sessions, setSessions] = useState<ChatSessionSummary[]>([])
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
+  const [messages, setMessages] = useState<ChatMessageRecord[]>([])
+  const [hasMore, setHasMore] = useState(false)
+  const [isLoadingOlder, setIsLoadingOlder] = useState(false)
+  const [sessionsLoading, setSessionsLoading] = useState(false)
+  const [messagesLoading, setMessagesLoading] = useState(false)
+
+  const [query, setQuery] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [expandedSourcesId, setExpandedSourcesId] = useState<string | null>(null)
+
+  const [apiStatus, setApiStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown')
+  const [isCheckingConnection, setIsCheckingConnection] = useState(false)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+  const isAuthenticated = !!user && hasAuthToken()
+
+  const checkConnection = async () => {
+    setIsCheckingConnection(true)
     try {
-        const response = await fetch(`${RESEARCH_ASSISTANT_API_URL}/health`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            // Add a timeout to avoid long waits
-            signal: AbortSignal.timeout(3000),
+      const ok = await checkApiAvailability()
+      setApiStatus(ok ? 'connected' : 'disconnected')
+    } catch {
+      setApiStatus('disconnected')
+    } finally {
+      setIsCheckingConnection(false)
+    }
+  }
+
+  const refreshSessions = useCallback(async () => {
+    if (!isAuthenticated) return
+    setSessionsLoading(true)
+    try {
+      const list = await listChatSessions()
+      setSessions(list)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setSessionsLoading(false)
+    }
+  }, [isAuthenticated])
+
+  const loadSessionMessages = useCallback(
+    async (sessionId: string, before?: string) => {
+      setMessagesLoading(!before)
+      setIsLoadingOlder(!!before)
+      try {
+        const data = await loadChatMessages(sessionId, {
+          limit: INITIAL_MESSAGE_LIMIT,
+          before,
         })
-        return response.ok
-    } catch (error) {
-        console.error('API health check failed:', error)
-        return false
-    }
-}
-
-interface Paper {
-    paper_id: string;
-    title: string;
-    abstract: string;
-    keywords: string[];
-    score: number;
-    user_id: string;
-}
-
-interface QueryResponse {
-    query: string;
-    answer: string;
-    papers: Paper[];
-    using_fallback?: boolean;
-}
-
-export default function ResearchAssistant() {
-    const { t } = useTranslation('research-assistant')
-    const [query, setQuery] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
-    const [response, setResponse] = useState<QueryResponse | null>(null)
-    const [error, setError] = useState<string | null>(null)
-    const [activeTab, setActiveTab] = useState<'search' | 'sources'>('search')
-    const [apiStatus, setApiStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown')
-    const [isCheckingConnection, setIsCheckingConnection] = useState(false)
-
-    // Function to check API connection
-    const checkConnection = async () => {
-        setIsCheckingConnection(true)
-        try {
-            const isAvailable = await checkApiAvailability()
-            setApiStatus(isAvailable ? 'connected' : 'disconnected')
-        } catch (err) {
-            setApiStatus('disconnected')
-        } finally {
-            setIsCheckingConnection(false)
+        if (before) {
+          setMessages((prev) => [...data.messages, ...prev])
+        } else {
+          setMessages(data.messages)
         }
+        setHasMore(data.has_more)
+      } catch (e) {
+        console.error(e)
+        setError('Failed to load chat history.')
+      } finally {
+        setMessagesLoading(false)
+        setIsLoadingOlder(false)
+      }
+    },
+    [],
+  )
+
+  const selectSession = useCallback(
+    async (sessionId: string) => {
+      setActiveSessionId(sessionId)
+      setError(null)
+      setExpandedSourcesId(null)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, sessionId)
+      }
+      await loadSessionMessages(sessionId)
+    },
+    [loadSessionMessages],
+  )
+
+  const startNewChat = () => {
+    setActiveSessionId(null)
+    setMessages([])
+    setHasMore(false)
+    setError(null)
+    setExpandedSourcesId(null)
+    setQuery('')
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY)
+    }
+  }
+
+  useEffect(() => {
+    checkConnection()
+  }, [])
+
+  useEffect(() => {
+    if (authLoading) return
+    if (!isAuthenticated) return
+
+    refreshSessions().then(async () => {
+      const stored =
+        typeof window !== 'undefined'
+          ? localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY)
+          : null
+      if (stored) {
+        await selectSession(stored)
+      }
+    })
+  }, [authLoading, isAuthenticated, refreshSessions, selectSession])
+
+  const handleLoadOlder = () => {
+    if (!activeSessionId || !messages.length || isLoadingOlder) return
+    loadSessionMessages(activeSessionId, messages[0].id)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!query.trim() || isLoading) return
+
+    if (!isAuthenticated) {
+      router.push('/login')
+      return
     }
 
-    // Check connection on initial load
-    useEffect(() => {
-        checkConnection()
-    }, [])
+    const isApiAvailable = await checkApiAvailability()
+    if (!isApiAvailable) {
+      setError('Research Assistant API is unavailable. Check Docker / research-assistant service.')
+      setApiStatus('disconnected')
+      return
+    }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!query.trim()) return
+    setIsLoading(true)
+    setError(null)
+    const text = query.trim()
+    setQuery('')
 
-        setIsLoading(true)
-        setError(null)
+    const optimisticUser: ChatMessageRecord = {
+      id: `temp-user-${Date.now()}`,
+      role: 'user',
+      content: text,
+      created_at: new Date().toISOString(),
+    }
+    setMessages((prev) => [...prev, optimisticUser])
 
-        try {
-            // Check if the API is available first
-            const isApiAvailable = await checkApiAvailability()
+    try {
+      const data = await sendChatQuery(text, activeSessionId)
+      const sid = data.session_id
 
-            if (!isApiAvailable) {
-                throw new Error('Research Assistant API is currently unavailable. Please check if the service is running.')
-            }
-
-            // Directly connect to the FastAPI backend service
-            console.log('Sending request to:', `${RESEARCH_ASSISTANT_API_URL}/query`)
-            const response = await fetch(`${RESEARCH_ASSISTANT_API_URL}/query`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query,
-                    // Optional user_id for filtering (can be added later)
-                }),
-            })
-
-            console.log('Response status:', response.status)
-
-            if (!response.ok) {
-                const errorText = await response.text()
-                console.error('Error response:', errorText)
-                throw new Error(`Error: ${response.status} - ${errorText}`)
-            }
-
-            const data = await response.json()
-            console.log('Research assistant response data:', JSON.stringify(data, null, 2))
-
-            // Check that the data has the expected structure
-            if (!data.answer) {
-                console.error('Invalid response format:', data)
-                throw new Error('The API response is missing the expected answer field')
-            }
-
-            if (data.papers && !Array.isArray(data.papers)) {
-                console.error('Invalid papers array:', data.papers)
-                data.papers = [] // Ensure we have an array even if the API returns something unexpected
-            }
-
-            setResponse(data)
-        } catch (err) {
-            console.error('Error querying research assistant:', err)
-            // Provide more specific error messages
-            if (err instanceof Error) {
-                setError(`Failed to get response: ${err.message}`)
-            } else {
-                setError('Failed to get response. Please try again.')
-            }
-        } finally {
-            setIsLoading(false)
+      if (!activeSessionId) {
+        setActiveSessionId(sid)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, sid)
         }
+      }
+
+      setMessages((prev) => {
+        const withoutTemp = prev.filter((m) => m.id !== optimisticUser.id)
+        const hasUser = withoutTemp.some((m) => m.id === data.user_message.id)
+        const hasAssistant = withoutTemp.some((m) => m.id === data.assistant_message.id)
+        let next = withoutTemp
+        if (!hasUser) next = [...next, data.user_message]
+        if (!hasAssistant) next = [...next, data.assistant_message]
+        return next
+      })
+
+      await refreshSessions()
+      setApiStatus('connected')
+    } catch (err) {
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticUser.id))
+      setQuery(text)
+      setError(err instanceof Error ? err.message : 'Failed to get response.')
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    // Check if the response appears to be from fallback mode
-    const isUsingFallback = response?.using_fallback ||
-        (response?.answer && response.answer.includes('This is a summary based on the semantic search results')) ||
-        (response?.answer && response.answer.includes('OpenAI API is currently unavailable'))
+  const showIntro = messages.length === 0 && !messagesLoading
 
+  if (authLoading) {
     return (
-        <div className='bg-gray-100 min-h-screen text-gray-900 p-6'>
-            <div className='max-w-4xl mx-auto'>
-                <div className='flex justify-between items-center mb-8'>
-                    <h1 className='text-4xl font-bold text-[#d9363e]'>{t('title')}</h1>
-                    <div className='flex items-center gap-4'>
-                        <div className='flex items-center text-sm'>
-                            <span className='mr-2'>API:</span>
-                            {apiStatus === 'unknown' && (
-                                <span className='flex items-center'>
-                                    <span className='h-2 w-2 rounded-full bg-gray-400 mr-1'></span>
-                                    <span className='text-gray-600'>Checking...</span>
-                                </span>
-                            )}
-                            {apiStatus === 'connected' && (
-                                <span className='flex items-center'>
-                                    <span className='h-2 w-2 rounded-full bg-green-500 mr-1'></span>
-                                    <span className='text-green-700'>Connected</span>
-                                </span>
-                            )}
-                            {apiStatus === 'disconnected' && (
-                                <span className='flex items-center'>
-                                    <span className='h-2 w-2 rounded-full bg-red-500 mr-1'></span>
-                                    <span className='text-red-700'>Disconnected</span>
-                                    <button
-                                        onClick={checkConnection}
-                                        className='ml-2 text-xs text-red-700 hover:text-red-900 underline'
-                                        disabled={isCheckingConnection}
-                                    >
-                                        {isCheckingConnection ? 'Checking...' : 'Retry'}
-                                    </button>
-                                </span>
-                            )}
-                        </div>
-                        <Link href='/research-assistant/admin' className='bg-[#d9363e] hover:bg-red-700 text-white px-4 py-2 rounded'>
-                            Admin
-                        </Link>
-                    </div>
-                </div>
-
-                {/* Fallback Mode Notice */}
-                {isUsingFallback && (
-                    <div className='mb-6 p-3 bg-red-100 border border-red-300 rounded-lg'>
-                        <p className='text-red-700 flex items-center'>
-                            <svg className='w-5 h-5 mr-2' fill='currentColor' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>
-                                <path fillRule='evenodd' d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z' clipRule='evenodd'></path>
-                            </svg>
-                            Running with enhanced summaries: AI-generated answers based on relevant research papers
-                        </p>
-                    </div>
-                )}
-
-                {/* Search Tabs */}
-                <div className='mb-8 border-b border-gray-300'>
-                    <div className='flex gap-6 mb-2'>
-                        <button
-                            className={`flex items-center gap-2 py-2 border-b-2 ${activeTab === 'search' ? 'border-[#d9363e] text-[#d9363e]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                            onClick={() => setActiveTab('search')}
-                        >
-                            <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>
-                                <path fillRule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clipRule='evenodd'></path>
-                            </svg>
-                            Search
-                        </button>
-                        {response && response.papers && (
-                            <button
-                                className={`flex items-center gap-2 py-2 ${activeTab === 'sources' ? 'border-b-2 border-[#d9363e] text-[#d9363e]' : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700'}`}
-                                onClick={() => setActiveTab('sources')}
-                            >
-                                <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>
-                                    <path d='M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z'></path>
-                                </svg>
-                                Sources <span className='ml-1 px-1.5 py-0.5 bg-gray-200 rounded-full text-xs'>{response.papers.length}</span>
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Search Bar */}
-                <form onSubmit={handleSubmit} className='relative bg-white border border-gray-300 rounded-lg p-2 flex items-center mb-8 shadow-sm'>
-                    <button type='submit' className='p-2 text-gray-400'>
-                        <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>
-                            <path fillRule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clipRule='evenodd'></path>
-                        </svg>
-                    </button>
-                    <input
-                        type='text'
-                        placeholder='Ask anything about research papers...'
-                        className='bg-transparent border-none outline-none flex-1 px-2 text-gray-900'
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        disabled={isLoading}
-                    />
-                    <div className='flex items-center gap-2'>
-                        {isLoading ? (
-                            <div className='p-2'>
-                                <div className='animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#d9363e]'></div>
-                            </div>
-                        ) : (
-                            <button type='submit' className='bg-[#d9363e] hover:bg-red-700 rounded-full p-2 ml-1 text-white' disabled={!query.trim()}>
-                                <svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>
-                                    <path d='M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z'></path>
-                                </svg>
-                            </button>
-                        )}
-                    </div>
-                </form>
-
-                {/* Error Message */}
-                {error && (
-                    <div className='mb-8 p-4 bg-red-100 rounded-lg border border-red-300'>
-                        <p className='text-red-700'>{error}</p>
-                        {error.includes('API is currently unavailable') && (
-                            <div className='mt-3 flex flex-col gap-2'>
-                                <p className='text-red-700 text-sm'>Possible solutions:</p>
-                                <ul className='list-disc pl-5 text-sm text-red-700'>
-                                    <li>Make sure the research assistant service is running</li>
-                                    <li>Check that the environment variable NEXT_PUBLIC_RESEARCH_API_URL is set correctly</li>
-                                    <li>If using Docker, make sure the research-assistant container is running</li>
-                                </ul>
-                                <div className='mt-2 flex items-center gap-3'>
-                                    <button
-                                        onClick={checkConnection}
-                                        disabled={isCheckingConnection}
-                                        className='flex items-center px-3 py-1 bg-red-700 text-white text-sm rounded hover:bg-red-800'
-                                    >
-                                        {isCheckingConnection ? (
-                                            <>
-                                                <span className='mr-2 inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></span>
-                                                Checking...
-                                            </>
-                                        ) : (
-                                            'Check Connection'
-                                        )}
-                                    </button>
-                                    <div className='flex items-center'>
-                                        <span className='text-sm mr-2'>Status:</span>
-                                        {apiStatus === 'unknown' && <span className='h-2 w-2 rounded-full bg-gray-400'></span>}
-                                        {apiStatus === 'connected' && <span className='h-2 w-2 rounded-full bg-green-500'></span>}
-                                        {apiStatus === 'disconnected' && <span className='h-2 w-2 rounded-full bg-red-500'></span>}
-                                        <span className='ml-1 text-sm'>{apiStatus === 'unknown' ? 'Checking...' : apiStatus === 'connected' ? 'Connected' : 'Disconnected'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Response Content Based on Active Tab */}
-                {response && (
-                    <>
-                        {/* Answer Tab Content */}
-                        {activeTab === 'search' && (
-                            <div className='mb-8'>
-                                <div className='bg-white p-6 rounded-lg shadow-sm border border-gray-300'>
-                                    <h2 className='text-xl font-semibold mb-4 text-[#d9363e]'>Answer</h2>
-                                    <div className='prose max-w-none'>
-                                        {response.answer.split('\n').map((paragraph, index) => (
-                                            <p key={index} className='mb-4'>{paragraph}</p>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Sources Tab Content */}
-                        {activeTab === 'sources' && response.papers && response.papers.length > 0 && (
-                            <div className='mb-8'>
-                                <h2 className='text-xl font-semibold mb-4 text-[#d9363e]'>Sources</h2>
-                                <div className='grid grid-cols-1 gap-4'>
-                                    {response.papers.map((paper, index) => (
-                                        <div key={`paper-${index}-${paper.paper_id || 'unknown'}`} className='bg-white p-4 rounded-lg shadow-sm border border-gray-300'>
-                                            <div className='flex items-center gap-2 mb-2'>
-                                                <span className='w-8 h-8 bg-[#d9363e] rounded-full flex items-center justify-center text-white'>
-                                                    {index + 1}
-                                                </span>
-                                                <span className='text-sm text-gray-500'>Relevance: {(paper.score ? (paper.score * 100).toFixed(1) : 0)}%</span>
-                                            </div>
-                                            <h3 className='font-medium mb-2'>{paper.title || 'Untitled Paper'}</h3>
-
-                                            {paper.abstract && (
-                                                <div className='mt-2'>
-                                                    <h4 className='text-sm text-gray-500'>Abstract</h4>
-                                                    <p className='text-sm mt-1'>{paper.abstract}</p>
-                                                </div>
-                                            )}
-
-                                            {paper.keywords && Array.isArray(paper.keywords) && paper.keywords.length > 0 && (
-                                                <div className='mt-2'>
-                                                    <h4 className='text-sm text-gray-500'>Keywords</h4>
-                                                    <div className='flex flex-wrap gap-2 mt-1'>
-                                                        {paper.keywords.map((keyword, idx) => (
-                                                            <span key={idx} className='px-2 py-1 bg-gray-200 rounded-full text-xs'>
-                                                                {keyword}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </>
-                )}
-
-                {/* Information About Research Assistant (Only shown when no results) */}
-                {!response && (
-                    <div className='mb-8'>
-                        <p className='text-xl mb-4'>
-                            {t('description')}
-                        </p>
-
-                        <h2 className='text-2xl font-bold mb-4'>Features</h2>
-                        <ul className='space-y-6'>
-                            <li className='flex gap-4'>
-                                <span className='text-gray-500'>•</span>
-                                <div>
-                                    <h3 className='font-semibold mb-1'>Semantic Search:</h3>
-                                    <p>Advanced vector search finds the most relevant papers to your query.</p>
-                                </div>
-                            </li>
-                            <li className='flex gap-4'>
-                                <span className='text-gray-500'>•</span>
-                                <div>
-                                    <h3 className='font-semibold mb-1'>AI-Generated Answers:</h3>
-                                    <p>Get comprehensive answers synthesized from multiple research papers.</p>
-                                </div>
-                            </li>
-                            <li className='flex gap-4'>
-                                <span className='text-gray-500'>•</span>
-                                <div>
-                                    <h3 className='font-semibold mb-1'>Source Attribution:</h3>
-                                    <p>See which papers were used to generate each answer.</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                )}
-            </div>
-        </div>
+      <div className='flex h-[calc(100vh-64px)] items-center justify-center bg-gray-100'>
+        <p className='text-gray-600'>Loading...</p>
+      </div>
     )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className='bg-gray-100 min-h-[calc(100vh-64px)] flex flex-col items-center justify-center p-6'>
+        <h1 className='text-3xl font-bold text-[#d9363e] mb-4'>{t('title')}</h1>
+        <p className='text-gray-700 mb-6 text-center max-w-md'>
+          Sign in to save chat history and continue conversations across visits.
+        </p>
+        <Link
+          href='/login'
+          className='bg-[#d9363e] hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium'
+        >
+          Sign in
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className='flex h-[calc(100vh-64px)] bg-gray-100 text-gray-900'>
+      <ChatSidebar
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onSelectSession={selectSession}
+        onNewChat={startNewChat}
+        isLoading={sessionsLoading}
+      />
+
+      <div className='relative flex flex-1 flex-col min-w-0 min-h-0 bg-gray-100'>
+        <div
+          role='toolbar'
+          className='flex shrink-0 items-center justify-between border-b border-gray-200 bg-gray-100 px-4 py-2.5'
+        >
+          <h1 className='text-sm font-semibold text-gray-800 truncate max-w-[60%]'>
+            {activeSessionId
+              ? sessions.find((s) => s.id === activeSessionId)?.title || 'New chat'
+              : 'New chat'}
+          </h1>
+          <div className='flex items-center gap-2 text-xs text-gray-600'>
+            <span className='flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2 py-1'>
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  apiStatus === 'connected'
+                    ? 'bg-green-500'
+                    : apiStatus === 'disconnected'
+                      ? 'bg-red-500'
+                      : 'bg-gray-400'
+                }`}
+              />
+              <span>RAG {apiStatus === 'connected' ? 'online' : apiStatus}</span>
+              {apiStatus === 'disconnected' && (
+                <button
+                  type='button'
+                  onClick={checkConnection}
+                  disabled={isCheckingConnection}
+                  className='text-[#d9363e] hover:underline'
+                >
+                  Retry
+                </button>
+              )}
+            </span>
+            <Link
+              href='/research-assistant/admin'
+              className='rounded-md border border-gray-200 bg-white px-2 py-1 text-gray-700 hover:bg-gray-100'
+            >
+              Admin
+            </Link>
+          </div>
+        </div>
+
+        {error && (
+          <div className='mx-4 mt-3 rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700'>
+            {error}
+          </div>
+        )}
+
+        <div ref={scrollAreaRef} className='flex-1 min-h-0 overflow-y-auto'>
+          {messagesLoading && messages.length === 0 ? (
+            <div className='flex min-h-full items-center justify-center text-gray-500'>
+              Loading conversation...
+            </div>
+          ) : showIntro ? (
+            <div className='flex min-h-full items-center justify-center px-4 py-16 pb-36'>
+              <FeaturesIntro description={t('description')} />
+            </div>
+          ) : messages.length > 0 ? (
+            <ChatThread
+              messages={messages}
+              hasMore={hasMore}
+              isLoadingOlder={isLoadingOlder}
+              onLoadOlder={handleLoadOlder}
+              scrollContainerRef={scrollAreaRef}
+              expandedSourcesId={expandedSourcesId}
+              onToggleSources={(id) =>
+                setExpandedSourcesId((cur) => (cur === id ? null : id))
+              }
+            />
+          ) : null}
+        </div>
+
+        {/* Floating composer + scroll fade (ChatGPT-style) */}
+        <div className='pointer-events-none absolute inset-x-0 bottom-0 z-20'>
+          <div className='mx-auto w-full max-w-3xl px-4'>
+            <div
+              className='h-[5.5rem] bg-gradient-to-t from-gray-100 from-[12%] via-gray-100/75 via-[40%] to-transparent'
+              aria-hidden
+            />
+            <form
+              onSubmit={handleSubmit}
+              className='pointer-events-auto -mt-[4.25rem] pb-3'
+            >
+              <div className='flex items-center gap-2 rounded-full border border-gray-200/90 bg-white/95 backdrop-blur-sm px-3 py-2 shadow-[0_2px_16px_rgba(0,0,0,0.08)] transition-shadow focus-within:shadow-[0_4px_24px_rgba(0,0,0,0.1)] focus-within:border-gray-300'>
+                <input
+                  type='text'
+                  placeholder='Ask anything about research papers...'
+                  className='flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-gray-900 placeholder:text-gray-400 py-1'
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  disabled={isLoading}
+                />
+                {isLoading ? (
+                  <div className='h-8 w-8 shrink-0 flex items-center justify-center'>
+                    <div className='h-4 w-4 animate-spin rounded-full border-2 border-[#d9363e] border-t-transparent' />
+                  </div>
+                ) : (
+                  <button
+                    type='submit'
+                    disabled={!query.trim()}
+                    className='h-8 w-8 shrink-0 rounded-full bg-[#d9363e] text-white flex items-center justify-center hover:bg-red-700 disabled:opacity-40 transition-colors'
+                    aria-label='Send'
+                  >
+                    <svg className='h-3.5 w-3.5' fill='currentColor' viewBox='0 0 20 20'>
+                      <path d='M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z' />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }

@@ -108,6 +108,7 @@ export default function Header() {
 
   return (
     <AntHeader
+      className='site-header'
       style={{
         backgroundColor: '#d9363e',
         padding: '0 24px',
