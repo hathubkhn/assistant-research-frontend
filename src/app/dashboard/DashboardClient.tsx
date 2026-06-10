@@ -130,7 +130,7 @@ const fetchFilteredPapers = async (params: FetchFilteredPapersParams): Promise<P
     const queryParams = new URLSearchParams({
       startDate,
       endDate,
-      ...(taskIds.length > 0 && { tasks: taskIds.join(',') }),
+      ...(taskIds.length > 0 && { taskIds: taskIds.join(',') }),
     })
 
     const response = await axios.get(`${API_URL}/api/papers/?${queryParams}`)
@@ -335,20 +335,8 @@ export default function Dashboard() {
     debouncedTaskFilter(selectedTasks)
   }, [selectedTasks, debouncedTaskFilter])
 
-  const createSlug = (title: string): string => {
-    return title
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-')     // Replace spaces with hyphens
-      .replace(/--+/g, '-')     // Replace multiple hyphens with single hyphen
-      .trim()                  // Trim whitespace
-  }
-
   const viewPaperDetails = (paperId: string) => {
-    const paper = filteredPapers.find(p => p.id === paperId)
-    if (paper) {
-      router.push(`/papers/${createSlug(paper.title)}`)
-    }
+    router.push(`/papers/${paperId}`)
   }
 
   const taskChartData = papersPerTask.slice(0, 5).map((item, index) => ({
