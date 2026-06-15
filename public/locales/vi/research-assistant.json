@@ -41,6 +41,19 @@
         "deleteAll": "Xóa Tất cả Lịch sử",
         "loadMore": "Tải thêm"
     },
+    "sidebar": {
+        "recent": "Gần đây",
+        "loading": "Đang tải...",
+        "noChats": "Chưa có cuộc trò chuyện",
+        "rename": "Đổi tên",
+        "delete": "Xóa",
+        "deleteConfirm": "Bạn có chắc chắn muốn xoá?",
+        "deleteCancel": "Hủy bỏ",
+        "renamePlaceholder": "Tên cuộc trò chuyện",
+        "save": "Lưu",
+        "cancel": "Hủy",
+        "sessionActions": "Thao tác phiên chat"
+    },
     "settings": {
         "title": "Cài đặt",
         "language": "Ngôn ngữ",

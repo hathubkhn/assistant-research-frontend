@@ -41,6 +41,19 @@
         "deleteAll": "Delete All History",
         "loadMore": "Load More"
     },
+    "sidebar": {
+        "recent": "Recent",
+        "loading": "Loading...",
+        "noChats": "No chats yet",
+        "rename": "Rename",
+        "delete": "Delete",
+        "deleteConfirm": "Are you sure you want to delete this chat?",
+        "deleteCancel": "Cancel",
+        "renamePlaceholder": "Chat title",
+        "save": "Save",
+        "cancel": "Cancel",
+        "sessionActions": "Session actions"
+    },
     "settings": {
         "title": "Settings",
         "language": "Language",

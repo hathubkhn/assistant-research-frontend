@@ -72,12 +72,33 @@ interface Journal {
   id: string;
   name: string;
   abbreviation: string;
-  impactFactor: number;
+  impactFactor: number | null;
   quartile: string;
   publisher: string;
   url: string;
   papersCount: number;
 }
+
+function formatImpactFactor(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) {
+    return 'N/A'
+  }
+  return value.toFixed(2)
+}
+
+function compareImpactFactor(
+  a: number | null | undefined,
+  b: number | null | undefined,
+): number {
+  return (a ?? -1) - (b ?? -1)
+}
+
+const QUARTILE_COLORS = {
+  Q1: 'green',
+  Q2: 'blue',
+  Q3: 'orange',
+  Q4: 'red',
+} as const
 
 
 interface ImpactRange {
@@ -224,8 +245,9 @@ export default function JournalsPage() {
       dataIndex: 'impactFactor',
       key: 'impactFactor',
       width: 120,
-      sorter: (a: Journal, b: Journal) => a.impactFactor - b.impactFactor,
-      render: (value: number) => value.toFixed(2),
+      sorter: (a: Journal, b: Journal) =>
+        compareImpactFactor(a.impactFactor, b.impactFactor),
+      render: (value: number | null) => formatImpactFactor(value),
     },
     {
       title: t('table.quartile'),
@@ -233,13 +255,14 @@ export default function JournalsPage() {
       key: 'quartile',
       width: 100,
       render: (quartile: string) => {
-        const colors = {
-          Q1: 'green',
-          Q2: 'blue',
-          Q3: 'orange',
-          Q4: 'red',
+        if (!quartile || !(quartile in QUARTILE_COLORS)) {
+          return <Text type='secondary'>N/A</Text>
         }
-        return <Tag color={colors[quartile as keyof typeof colors]}>{quartile}</Tag>
+        return (
+          <Tag color={QUARTILE_COLORS[quartile as keyof typeof QUARTILE_COLORS]}>
+            {quartile}
+          </Tag>
+        )
       },
     },
     {

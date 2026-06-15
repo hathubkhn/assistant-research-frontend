@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BackNavigationButton from '@/components/BackNavigationButton'
+import DataPagination from '@/app/components/DataPagination'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -11,7 +12,7 @@ interface Journal {
     id: string;
     name: string;
     abbreviation: string;
-    impactFactor: number;
+    impactFactor: number | null;
     quartile: string;
     publisher: string;
     url: string;
@@ -26,6 +27,16 @@ interface Paper {
     authors: string[] | string;
 }
 
+interface PapersResponse {
+    results: Paper[];
+    pagination: {
+        page: number;
+        pageSize: number;
+        totalItems: number;
+        totalPages: number;
+    };
+}
+
 export default function JournalDetailPage() {
     const params = useParams()
     const router = useRouter()
@@ -34,6 +45,10 @@ export default function JournalDetailPage() {
     const [journal, setJournal] = useState<Journal | null>(null)
     const [papers, setPapers] = useState<Paper[]>([])
     const [loading, setLoading] = useState(true)
+    const [papersLoading, setPapersLoading] = useState(true)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [pageSize, setPageSize] = useState(20)
+    const [totalItems, setTotalItems] = useState(0)
 
     useEffect(() => {
         const fetchJournalDetails = async () => {
@@ -50,7 +65,6 @@ export default function JournalDetailPage() {
                 if (response.ok) {
                     const data = await response.json()
                     setJournal(data)
-                    setPapers(data.papers || [])
                 } else {
                     console.error(`Error fetching journal details: ${response.status} ${response.statusText}`)
                 }
@@ -65,6 +79,44 @@ export default function JournalDetailPage() {
             fetchJournalDetails()
         }
     }, [id])
+
+    const fetchPapers = useCallback(async () => {
+        if (!id) return
+
+        try {
+            setPapersLoading(true)
+            const params = new URLSearchParams({
+                page: String(currentPage),
+                pageSize: String(pageSize),
+            })
+            const response = await fetch(`${API_URL}/api/journals/${id}/papers/?${params}`)
+
+            if (response.ok) {
+                const data: PapersResponse = await response.json()
+                setPapers(data.results || [])
+                setTotalItems(data.pagination?.totalItems ?? 0)
+            } else {
+                console.error(`Error fetching journal papers: ${response.status}`)
+                setPapers([])
+                setTotalItems(0)
+            }
+        } catch (error) {
+            console.error('Error fetching journal papers:', error)
+            setPapers([])
+            setTotalItems(0)
+        } finally {
+            setPapersLoading(false)
+        }
+    }, [id, currentPage, pageSize])
+
+    useEffect(() => {
+        fetchPapers()
+    }, [fetchPapers])
+
+    const handlePageChange = (page: number, size: number) => {
+        setCurrentPage(page)
+        setPageSize(size)
+    }
 
     const handleViewMorePapers = () => {
         router.push(`/papers?venueType=journal&venue_id=${id}`)
@@ -94,7 +146,6 @@ export default function JournalDetailPage() {
         )
     }
 
-    // Format authors for display
     const formatAuthors = (authors: string[] | string): string => {
         if (typeof authors === 'string') {
             try {
@@ -118,7 +169,6 @@ export default function JournalDetailPage() {
                 <BackNavigationButton href='/journals' label='Back to Journals' />
             </div>
 
-            {/* Journal header */}
             <div className='bg-white shadow-md rounded-lg overflow-hidden mb-8'>
                 <div className='p-6'>
                     <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6'>
@@ -173,11 +223,10 @@ export default function JournalDetailPage() {
                 </div>
             </div>
 
-            {/* Recent papers */}
             <div className='bg-white shadow-md rounded-lg overflow-hidden'>
                 <div className='p-6'>
                     <div className='flex justify-between items-center mb-4'>
-                        <h2 className='text-xl font-bold text-gray-800'>Recent Papers</h2>
+                        <h2 className='text-xl font-bold text-gray-800'>Papers</h2>
                         <button
                             onClick={handleViewMorePapers}
                             className='text-blue-600 hover:text-blue-800'
@@ -186,23 +235,39 @@ export default function JournalDetailPage() {
                         </button>
                     </div>
 
-                    {papers.length === 0 ? (
+                    {papersLoading ? (
+                        <div className='flex justify-center py-8'>
+                            <div className='animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600'></div>
+                        </div>
+                    ) : papers.length === 0 ? (
                         <p className='text-gray-600'>No papers found for this journal.</p>
                     ) : (
-                        <div className='space-y-4'>
-                            {papers.map((paper) => (
-                                <div key={paper.id} className='border-b border-gray-200 pb-4 last:border-b-0 last:pb-0'>
-                                    <Link href={`/papers/${paper.id}`} className='text-blue-600 hover:text-blue-800 hover:underline'>
-                                        <h3 className='font-medium'>{paper.title}</h3>
-                                    </Link>
-                                    <div className='text-sm text-gray-500 mt-1 flex flex-wrap gap-x-2'>
-                                        <span>{formatAuthors(paper.authors)}</span>
-                                        <span>•</span>
-                                        <span>{paper.year}</span>
+                        <>
+                            <div className='space-y-4'>
+                                {papers.map((paper) => (
+                                    <div key={paper.id} className='border-b border-gray-200 pb-4 last:border-b-0 last:pb-0'>
+                                        <Link href={`/papers/${paper.id}`} className='text-blue-600 hover:text-blue-800 hover:underline'>
+                                            <h3 className='font-medium'>{paper.title}</h3>
+                                        </Link>
+                                        <div className='text-sm text-gray-500 mt-1 flex flex-wrap gap-x-2'>
+                                            <span>{formatAuthors(paper.authors)}</span>
+                                            <span>•</span>
+                                            <span>{paper.year}</span>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                            <div className='mt-6'>
+                                <DataPagination
+                                    current={currentPage}
+                                    total={totalItems}
+                                    pageSize={pageSize}
+                                    onChange={handlePageChange}
+                                    itemName='papers'
+                                    loading={papersLoading}
+                                />
+                            </div>
+                        </>
                     )}
                 </div>
             </div>

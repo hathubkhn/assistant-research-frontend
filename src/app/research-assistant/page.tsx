@@ -10,8 +10,10 @@ import ChatSidebar from '@/components/research-assistant/ChatSidebar'
 import ChatThread from '@/components/research-assistant/ChatThread'
 import {
   ACTIVE_SESSION_STORAGE_KEY,
+  deleteChatSession,
   listChatSessions,
   loadChatMessages,
+  renameChatSession,
   sendChatQuery,
   type ChatMessageRecord,
   type ChatSessionSummary,
@@ -230,6 +232,37 @@ export default function ResearchAssistantPage() {
     loadSessionMessages(activeSessionId, messages[0].id)
   }
 
+  const handleRenameSession = useCallback(
+    async (sessionId: string, title: string) => {
+      try {
+        await renameChatSession(sessionId, title)
+        await refreshSessions()
+      } catch (e) {
+        console.error(e)
+        setError('Failed to rename chat.')
+        throw e
+      }
+    },
+    [refreshSessions],
+  )
+
+  const handleDeleteSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        await deleteChatSession(sessionId)
+        if (activeSessionId === sessionId) {
+          startNewChat()
+        }
+        await refreshSessions()
+      } catch (e) {
+        console.error(e)
+        setError('Failed to delete chat.')
+        throw e
+      }
+    },
+    [activeSessionId, refreshSessions, startNewChat],
+  )
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!query.trim() || isLoading) return
@@ -329,7 +362,23 @@ export default function ResearchAssistantPage() {
         activeSessionId={activeSessionId}
         onSelectSession={selectSession}
         onNewChat={startNewChat}
+        onRenameSession={handleRenameSession}
+        onDeleteSession={handleDeleteSession}
         isLoading={sessionsLoading}
+        labels={{
+          newChat: '+ New chat',
+          recent: t('sidebar.recent'),
+          loading: t('sidebar.loading'),
+          noChats: t('sidebar.noChats'),
+          rename: t('sidebar.rename'),
+          delete: t('sidebar.delete'),
+          deleteConfirm: t('sidebar.deleteConfirm'),
+          deleteCancel: t('sidebar.deleteCancel'),
+          renamePlaceholder: t('sidebar.renamePlaceholder'),
+          save: t('sidebar.save'),
+          cancel: t('sidebar.cancel'),
+          sessionActions: t('sidebar.sessionActions'),
+        }}
       />
 
       <div className='relative flex flex-1 flex-col min-w-0 min-h-0 bg-gray-100'>
