@@ -178,7 +178,7 @@ export default function ConferencesPage() {
       key: 'rank',
       render: (rank: string) => (
         <Tag color={getRankColor(rank)}>
-          {rank || 'N/A'}
+          {rank || 'Not ranked'}
         </Tag>
       ),
     },

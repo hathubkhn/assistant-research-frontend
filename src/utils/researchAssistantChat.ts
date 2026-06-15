@@ -64,6 +64,34 @@ export async function loadChatMessages(
   return res.json()
 }
 
+export async function renameChatSession(
+  sessionId: string,
+  title: string,
+): Promise<ChatSessionSummary> {
+  const res = await fetchWithAuth(
+    `${API_BASE}/api/research-assistant/chat/sessions/${sessionId}/`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title }),
+    },
+  )
+  if (!res.ok) {
+    throw new Error(`Failed to rename session (${res.status})`)
+  }
+  return res.json()
+}
+
+export async function deleteChatSession(sessionId: string): Promise<void> {
+  const res = await fetchWithAuth(
+    `${API_BASE}/api/research-assistant/chat/sessions/${sessionId}/`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) {
+    throw new Error(`Failed to delete session (${res.status})`)
+  }
+}
+
 export async function sendChatQuery(
   query: string,
   sessionId?: string | null,
