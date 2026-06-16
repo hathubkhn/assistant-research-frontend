@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getAuthHeaders } from '@/utils/auth'
+import {
+  getDatasetThumbnailFallback,
+  getDatasetThumbnailSrc,
+} from '@/utils/datasetThumbnail'
 import { toast } from 'react-hot-toast'
 import InterestingDatasetButton from '../../components/InterestingDatasetButton'
 import { useTranslation } from '@/utils/useTranslation'
@@ -715,7 +719,9 @@ export default function DatasetsPage() {
                     size='middle'
                     style={{ width: '100%' }}
                   >
-                    {sortedDatasets.map((dataset) => (
+                    {sortedDatasets.map((dataset) => {
+                      const thumbnailSrc = getDatasetThumbnailSrc(dataset)
+                      return (
                       <Card key={dataset.id} hoverable>
                         <Row gutter={16}>
                           <Col xs={24} sm={6}>
@@ -730,15 +736,17 @@ export default function DatasetsPage() {
                               }}
                             >
                               <Link href={`/datasets/${dataset.id}`}>
-                                {dataset.abbreviation ? (
+                                {thumbnailSrc ? (
                                   <Image
-                                    src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
-                                    alt={dataset.abbreviation}
+                                    src={thumbnailSrc}
+                                    alt={dataset.abbreviation || dataset.name}
                                     style={{
                                       maxWidth: '100%',
                                       maxHeight: '100%',
                                     }}
-                                    fallback={`data:image/svg+xml;base64,${btoa(`<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" fill="#f0f0f0"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="24" fill="#999">${dataset.abbreviation}</text></svg>`)}`}
+                                    fallback={getDatasetThumbnailFallback(
+                                      dataset.abbreviation,
+                                    )}
                                     preview={false}
                                   />
                                 ) : (
@@ -820,11 +828,13 @@ export default function DatasetsPage() {
                           </Col>
                         </Row>
                       </Card>
-                    ))}
+                    )})}
                   </Space>
                 ) : (
                   <Row gutter={[16, 16]}>
-                    {sortedDatasets.map((dataset) => (
+                    {sortedDatasets.map((dataset) => {
+                      const thumbnailSrc = getDatasetThumbnailSrc(dataset)
+                      return (
                       <Col xs={24} sm={12} lg={8} key={dataset.id}>
                         <Card
                           hoverable
@@ -848,15 +858,17 @@ export default function DatasetsPage() {
                                 backgroundColor: '#f5f5f5',
                               }}
                             >
-                              {dataset.abbreviation ? (
+                              {thumbnailSrc ? (
                                 <Image
-                                  src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
-                                  alt={dataset.abbreviation}
+                                  src={thumbnailSrc}
+                                  alt={dataset.abbreviation || dataset.name}
                                   style={{
                                     maxWidth: '100%',
                                     maxHeight: '100%',
                                   }}
-                                  fallback={`data:image/svg+xml;base64,${btoa(`<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" fill="#f0f0f0"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="24" fill="#999">${dataset.abbreviation}</text></svg>`)}`}
+                                  fallback={getDatasetThumbnailFallback(
+                                    dataset.abbreviation,
+                                  )}
                                   preview={false}
                                 />
                               ) : (
@@ -945,7 +957,7 @@ export default function DatasetsPage() {
                           </div>
                         </Card>
                       </Col>
-                    ))}
+                    )})}
                   </Row>
                 )}
                 <div style={{ marginTop: 24, marginBottom: 24 }}>

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import BackNavigationButton from '@/components/BackNavigationButton'
 import InterestingDatasetButton from '@/components/InterestingDatasetButton'
 import { getAuthHeaders } from '@/utils/auth'
+import { getDatasetThumbnailSrc } from '@/utils/datasetThumbnail'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -151,6 +152,8 @@ export default function DatasetDetailPage() {
         )
     }
 
+    const thumbnailSrc = getDatasetThumbnailSrc(dataset)
+
     // Calculate pagination indices for related papers
     const indexOfLastPaper = currentPage * papersPerPage
     const indexOfFirstPaper = indexOfLastPaper - papersPerPage
@@ -183,10 +186,10 @@ export default function DatasetDetailPage() {
                     {/* Dataset image/logo */}
                     <div className='md:w-1/4 bg-gray-100 p-6 flex items-center justify-center'>
                         <div className='w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center'>
-                            {dataset.abbreviation && (
+                            {thumbnailSrc ? (
                                 <img
-                                    src={`/images/datasets/${dataset.abbreviation.toLowerCase().replace(/-/g, '')}.png`}
-                                    alt={dataset.abbreviation}
+                                    src={thumbnailSrc}
+                                    alt={dataset.abbreviation || dataset.name}
                                     className='max-w-full max-h-full object-contain'
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement
@@ -194,10 +197,14 @@ export default function DatasetDetailPage() {
                                         target.style.display = 'none'
                                         const parent = target.parentElement
                                         if (parent) {
-                                            parent.innerHTML = `<div class="text-3xl font-bold text-gray-400">${dataset.abbreviation}</div>`
+                                            parent.innerHTML = `<div class="text-3xl font-bold text-gray-400">${dataset.abbreviation || dataset.name}</div>`
                                         }
                                     }}
                                 />
+                            ) : (
+                                <div className='text-3xl font-bold text-gray-400'>
+                                    {dataset.abbreviation || 'No Image'}
+                                </div>
                             )}
                         </div>
                     </div>
