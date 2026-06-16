@@ -5,11 +5,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getAuthHeaders } from '@/utils/auth'
 import {
-  getDatasetThumbnailFallback,
   getDatasetThumbnailSrc,
 } from '@/utils/datasetThumbnail'
 import { toast } from 'react-hot-toast'
 import InterestingDatasetButton from '../../components/InterestingDatasetButton'
+import DatasetThumbnail from '../../components/DatasetThumbnail'
 import { useTranslation } from '@/utils/useTranslation'
 import DataPagination from '@/app/components/DataPagination'
 import axios from 'axios'
@@ -28,7 +28,6 @@ import {
   Tag,
   Segmented,
   Divider,
-  Image,
   Badge,
 } from 'antd'
 import {
@@ -725,37 +724,31 @@ export default function DatasetsPage() {
                       <Card key={dataset.id} hoverable>
                         <Row gutter={16}>
                           <Col xs={24} sm={6}>
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: 96,
-                                backgroundColor: '#f5f5f5',
-                                borderRadius: 8,
-                              }}
-                            >
-                              <Link href={`/datasets/${dataset.id}`}>
-                                {thumbnailSrc ? (
-                                  <Image
-                                    src={thumbnailSrc}
-                                    alt={dataset.abbreviation || dataset.name}
-                                    style={{
-                                      maxWidth: '100%',
-                                      maxHeight: '100%',
-                                    }}
-                                    fallback={getDatasetThumbnailFallback(
-                                      dataset.abbreviation,
-                                    )}
-                                    preview={false}
-                                  />
-                                ) : (
-                                  <div style={{ fontSize: 24, color: '#999' }}>
-                                    No Image
-                                  </div>
-                                )}
-                              </Link>
-                            </div>
+                            <Link href={`/datasets/${dataset.id}`} style={{ display: 'block' }}>
+                              {thumbnailSrc ? (
+                                <DatasetThumbnail
+                                  src={thumbnailSrc}
+                                  alt={dataset.abbreviation || dataset.name}
+                                  abbreviation={dataset.abbreviation}
+                                  variant='list'
+                                />
+                              ) : (
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: 96,
+                                    backgroundColor: '#f5f5f5',
+                                    borderRadius: 8,
+                                    fontSize: 24,
+                                    color: '#999',
+                                  }}
+                                >
+                                  No Image
+                                </div>
+                              )}
+                            </Link>
                           </Col>
                           <Col xs={24} sm={18}>
                             <div
@@ -849,34 +842,28 @@ export default function DatasetsPage() {
                             flexDirection: 'column',
                           }}
                           cover={
-                            <div
-                              style={{
-                                height: 128,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: '#f5f5f5',
-                              }}
-                            >
-                              {thumbnailSrc ? (
-                                <Image
-                                  src={thumbnailSrc}
-                                  alt={dataset.abbreviation || dataset.name}
-                                  style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '100%',
-                                  }}
-                                  fallback={getDatasetThumbnailFallback(
-                                    dataset.abbreviation,
-                                  )}
-                                  preview={false}
-                                />
-                              ) : (
-                                <div style={{ fontSize: 24, color: '#999' }}>
-                                  No Image
-                                </div>
-                              )}
-                            </div>
+                            thumbnailSrc ? (
+                              <DatasetThumbnail
+                                src={thumbnailSrc}
+                                alt={dataset.abbreviation || dataset.name}
+                                abbreviation={dataset.abbreviation}
+                                variant='grid'
+                              />
+                            ) : (
+                              <div
+                                style={{
+                                  height: 128,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  backgroundColor: '#f5f5f5',
+                                  fontSize: 24,
+                                  color: '#999',
+                                }}
+                              >
+                                No Image
+                              </div>
+                            )
                           }
                         >
                           <div

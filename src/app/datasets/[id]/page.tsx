@@ -7,6 +7,7 @@ import BackNavigationButton from '@/components/BackNavigationButton'
 import InterestingDatasetButton from '@/components/InterestingDatasetButton'
 import { getAuthHeaders } from '@/utils/auth'
 import { getDatasetThumbnailSrc } from '@/utils/datasetThumbnail'
+import DatasetThumbnail from '@/components/DatasetThumbnail'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -185,28 +186,18 @@ export default function DatasetDetailPage() {
                 <div className='flex flex-col md:flex-row'>
                     {/* Dataset image/logo */}
                     <div className='md:w-1/4 bg-gray-100 p-6 flex items-center justify-center'>
-                        <div className='w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center'>
-                            {thumbnailSrc ? (
-                                <img
-                                    src={thumbnailSrc}
-                                    alt={dataset.abbreviation || dataset.name}
-                                    className='max-w-full max-h-full object-contain'
-                                    onError={(e) => {
-                                        const target = e.target as HTMLImageElement
-                                        target.onerror = null
-                                        target.style.display = 'none'
-                                        const parent = target.parentElement
-                                        if (parent) {
-                                            parent.innerHTML = `<div class="text-3xl font-bold text-gray-400">${dataset.abbreviation || dataset.name}</div>`
-                                        }
-                                    }}
-                                />
-                            ) : (
-                                <div className='text-3xl font-bold text-gray-400'>
-                                    {dataset.abbreviation || 'No Image'}
-                                </div>
-                            )}
-                        </div>
+                        {thumbnailSrc ? (
+                            <DatasetThumbnail
+                                src={thumbnailSrc}
+                                alt={dataset.abbreviation || dataset.name}
+                                abbreviation={dataset.abbreviation}
+                                variant='detail'
+                            />
+                        ) : (
+                            <div className='w-full h-40 bg-gray-200 rounded-lg flex items-center justify-center text-3xl font-bold text-gray-400'>
+                                {dataset.abbreviation || 'No Image'}
+                            </div>
+                        )}
                     </div>
 
                     {/* Dataset info */}
