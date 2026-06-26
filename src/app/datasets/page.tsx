@@ -151,38 +151,6 @@ const unmarkDatasetInterestingAPI = async (id: string): Promise<void> => {
   }
 }
 
-const fetchConferencesFilterAPI = async (): Promise<any[]> => {
-  try {
-    const response = await axios.get(`${API_URL}/api/conferences/filter/`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      withCredentials: true,
-    })
-    return response.data
-  } catch (error) {
-    console.error('Error fetching conferences filter:', error)
-    throw error
-  }
-}
-
-const fetchJournalsFilterAPI = async (): Promise<any[]> => {
-  try {
-    const response = await axios.get(`${API_URL}/api/journals/filter/`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      withCredentials: true,
-    })
-    return response.data
-  } catch (error) {
-    console.error('Error fetching journals filter:', error)
-    throw error
-  }
-}
-
 function parseTasksArray(tasks: any): string[] {
   if (!tasks) return []
 

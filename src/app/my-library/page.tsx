@@ -146,15 +146,6 @@ function MyLibraryPage() {
   const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null)
   const [isPaperDetailOpen, setIsPaperDetailOpen] = useState(false)
 
-  // State for conferences and journals data
-  const [venues, setVenues] = useState<{
-    conferences: Array<{ id: string; name: string; abbreviation: string }>;
-    journals: Array<{ id: string; name: string; abbreviation: string }>;
-  }>({
-    conferences: [],
-    journals: [],
-  })
-
   // Utility function to get authentication headers
   const getAuthHeaders = (includeContentType: boolean = false): HeadersInit => {
     // Prepare headers
@@ -1364,101 +1355,6 @@ function MyLibraryPage() {
     setSelectedPaper(null)
   }
 
-  // Function to get conference or journal ID from venue name
-  const getVenueId = (
-    venueName: string,
-    type: 'conference' | 'journal' = 'conference',
-  ) => {
-    if (!venueName) return undefined
-
-    const venueList =
-      type === 'conference' ? venues.conferences : venues.journals
-    const venue = venueList.find(
-      (v) =>
-        v.name.toLowerCase() === venueName.toLowerCase() ||
-        v.abbreviation?.toLowerCase() === venueName.toLowerCase(),
-    )
-    return venue?.id
-  }
-
-  // Function to navigate to conference detail
-  const navigateToConference = (
-    id: string | undefined,
-    e: React.MouseEvent,
-  ) => {
-    e.stopPropagation()
-    e.preventDefault()
-
-    console.log('Navigating to conference with ID:', id)
-
-    if (id) {
-      const url = `/conferences/${id}`
-      console.log('Conference navigation URL:', url)
-      router.push(url)
-    } else {
-      console.log('Cannot navigate - conference ID is undefined')
-    }
-  }
-
-  // Function to navigate to journal detail
-  const navigateToJournal = (id: string | undefined, e: React.MouseEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
-
-    console.log('Navigating to journal with ID:', id)
-
-    if (id) {
-      router.push(`/journals/${id}`)
-    } else {
-      console.log('Cannot navigate - journal ID is undefined')
-    }
-  }
-
-  // Fetch conferences and journals
-  const fetchVenues = async () => {
-    try {
-      // Prepare headers
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      }
-
-      // Fetch conferences
-      const conferencesResponse = await fetch(
-        `${API_URL}/api/conferences/filter/`,
-        {
-          method: 'GET',
-          headers,
-          credentials: 'include',
-        },
-      )
-
-      // Fetch journals
-      const journalsResponse = await fetch(`${API_URL}/api/journals/filter/`, {
-        method: 'GET',
-        headers,
-        credentials: 'include',
-      })
-
-      if (conferencesResponse.ok) {
-        const conferencesData = await conferencesResponse.json()
-        setVenues((prev) => ({ ...prev, conferences: conferencesData }))
-      }
-
-      if (journalsResponse.ok) {
-        const journalsData = await journalsResponse.json()
-        setVenues((prev) => ({ ...prev, journals: journalsData }))
-      }
-    } catch (error) {
-      console.error('Error fetching venues:', error)
-    }
-  }
-
-  // Effect to fetch venues on component mount
-  useEffect(() => {
-    fetchVenues()
-  }, [])
-
   // Sync section from URL (e.g. header / notification links)
   useEffect(() => {
     const sectionParam = searchParams.get('section')
@@ -1667,17 +1563,7 @@ function MyLibraryPage() {
                                     {paper.title}
                                   </h2>
                                   <div className='flex items-center space-x-1'>
-                                    <span
-                                      onClick={(e) =>
-                                        navigateToConference(
-                                          getVenueId(
-                                            paper.venue || paper.conference,
-                                          ),
-                                          e,
-                                        )
-                                      }
-                                      className='inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 cursor-pointer hover:bg-blue-100'
-                                    >
+                                    <span className='inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'>
                                       {paper.conference}
                                     </span>
                                     <span className='text-xs font-medium text-gray-600'>
