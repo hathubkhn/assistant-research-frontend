@@ -46,7 +46,6 @@ interface DashboardData {
 interface Task {
   id: string;
   name: string;
-  title?: string;
 }
 
 interface Paper {
@@ -114,15 +113,6 @@ const fetchDashboardData = async (params: FetchDashboardParams): Promise<Dashboa
   }
 }
 
-const fetchTasksList = async (): Promise<Task[]> => {
-  try {
-    const response = await axios.get(`${API_URL}/api/tasks/`)
-    return response.data.results || response.data || []
-  } catch (error: any) {
-    throw new Error(`Error fetching tasks: ${error.response?.status} ${error.response?.statusText || error.message}`)
-  }
-}
-
 const fetchFilteredPapers = async (params: FetchFilteredPapersParams): Promise<Paper[]> => {
   const { startDate, endDate, taskIds = [] } = params
 
@@ -148,7 +138,6 @@ export default function Dashboard() {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
   const [papers, setPapers] = useState<any[]>([])
   const [filteredPapers, setFilteredPapers] = useState<any[]>([])
-  const [tasks, setTasks] = useState<any[]>([])
 
   const [startDate, setStartDate] = useState(getDefaultStartDate())
   const [endDate, setEndDate] = useState(getDefaultEndDate())
@@ -165,7 +154,6 @@ export default function Dashboard() {
   const [isLoadingTrendingTasks, setIsLoadingTrendingTasks] = useState(true)
   const [isLoadingSummaryStats, setIsLoadingSummaryStats] = useState(true)
   const [isLoadingPapersList, setIsLoadingPapersList] = useState(true)
-  const [isLoadingTasksList, setIsLoadingTasksList] = useState(true)
 
   const [summaryStats, setSummaryStats] = useState({
     paperCount: 0,
@@ -287,21 +275,7 @@ export default function Dashboard() {
     loadDashboardData()
   }, [startDate, endDate, period])
 
-  const loadTasksList = async () => {
-    try {
-      setIsLoadingTasksList(true)
-      const tasksData = await fetchTasksList()
-      setTasks(tasksData)
-    } catch (error: any) {
-      console.error(error.message)
-      setTasks([])
-    } finally {
-      setIsLoadingTasksList(false)
-    }
-  }
-
   useEffect(() => {
-    loadTasksList()
     loadFilteredPapers([])
   }, [])
 
@@ -344,6 +318,11 @@ export default function Dashboard() {
     name: item.name,
     count: item.filtered_paper_count || 0,
     fill: COLORS[index % COLORS.length],
+  }))
+
+  const filterTaskOptions = papersPerTask.slice(0, 20).map((item) => ({
+    value: String(item.id),
+    label: item.name,
   }))
 
   const datasetChartData = papersPerDataset.slice(0, 5).map((item, index) => ({
@@ -565,21 +544,20 @@ export default function Dashboard() {
                 mode='multiple'
                 allowClear
                 showSearch
-                placeholder={t('papers.selectTasks') || 'Select tasks to filter...'}
+                placeholder={t('papers.selectTasks')}
                 value={selectedTasks}
                 onChange={setSelectedTasks}
                 style={{ width: '100%' }}
                 maxTagCount={3}
                 maxTagTextLength={20}
-                loading={isLoadingTasksList}
+                loading={isLoadingTaskChart}
                 filterOption={(input, option) =>
                   (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                 }
-                options={tasks.map(task => ({
-                  value: task.id,
-                  label: task.name || task.title,
-                }))}
-                notFoundContent={isLoadingTasksList ? 'Loading...' : 'No tasks found'}
+                options={filterTaskOptions}
+                notFoundContent={
+                  isLoadingTaskChart ? t('charts.loading') : t('papers.noTasks')
+                }
               />
 
               {selectedTasks.length > 0 && (

@@ -29,6 +29,8 @@
     },
     "papers": {
         "filterByKeywords": "Lọc theo từ khóa",
+        "filterByTasks": "Lọc theo task",
+        "selectTasks": "Chọn task để lọc...",
         "researchPapers": "Bài báo nghiên cứu",
         "noPapers": "Không có bài báo cho phạm vi ngày đã chọn.",
         "noMatch": "Không có bài báo phù hợp với từ khóa đã chọn. Hãy thử chọn từ khóa khác hoặc xóa bộ lọc.",

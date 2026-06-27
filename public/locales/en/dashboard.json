@@ -30,6 +30,7 @@
     },
     "papers": {
         "filterByTasks": "Filter by Tasks",
+        "selectTasks": "Select tasks to filter...",
         "researchPapers": "Research Papers",
         "noPapers": "No papers available for the selected date range.",
         "noMatch": "No papers match the selected tasks. Try selecting different tasks or clear filters.",
