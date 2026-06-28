@@ -33,6 +33,11 @@ const { Title, Text, Paragraph } = Typography
 const { Content } = Layout
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
+const MICROSOFT_TENANT_ID =
+  process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID?.trim() || 'common'
+
+const microsoftOAuthAuthorizeUrl = () =>
+  `https://login.microsoftonline.com/${MICROSOFT_TENANT_ID}/oauth2/v2.0/authorize`
 
 interface LoginLinks {
   google_login: string;
@@ -143,8 +148,7 @@ function LoginForm() {
         )
         setLoginLinks({
           google_login: 'https://accounts.google.com/o/oauth2/auth',
-          microsoft_login:
-            'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+          microsoft_login: microsoftOAuthAuthorizeUrl(),
           token_login: `${API_URL}/api/token-login/`,
         })
       } finally {
@@ -174,8 +178,7 @@ function LoginForm() {
       console.log('Google redirect URI:', redirectUri)
       window.location.href = `${googleOAuthUrl}?${params.toString()}`
     } else if (provider === 'microsoft') {
-      const msOAuthUrl =
-        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+      const msOAuthUrl = microsoftOAuthAuthorizeUrl()
       const redirectUri = `${window.location.origin}/sso-callback/microsoft`
       const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || ''
 
