@@ -1,95 +1,82 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
+import { storeSsoAuthToken, syncAuthContextAfterSso } from '@/utils/ssoLogin'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 function MicrosoftCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { checkAuth } = useAuth()
   const [error, setError] = useState('')
   const [status, setStatus] = useState('Processing Microsoft login...')
+  const exchangedRef = useRef(false)
 
   useEffect(() => {
     const code = searchParams.get('code')
 
     if (!code) {
-      // No authorization code received
       router.push('/login?error=no_auth_code')
       return
     }
 
-    // Exchange the code for a token
+    if (exchangedRef.current) {
+      return
+    }
+    exchangedRef.current = true
+
     const exchangeCodeForToken = async () => {
       try {
         setStatus('Received code, exchanging for token...')
-        console.log('Sending code to backend:', code)
-        console.log('Using API URL:', API_URL)
 
-        // Generate a unique device ID if not already stored
         let deviceId = localStorage.getItem('deviceId')
         if (!deviceId) {
           deviceId = `web_${Math.random().toString(36).substring(2, 15)}`
           localStorage.setItem('deviceId', deviceId)
         }
 
-        // Call your backend to exchange the code for a token using XMLHttpRequest
-        // instead of fetch to avoid CORS issues and get more detailed errors
-        const deviceName = navigator.userAgent || 'Web Browser'
-        const callbackUrl = `${API_URL}/api/auth/microsoft/callback/`
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('POST', callbackUrl, true)
-        xhr.setRequestHeader('Content-Type', 'application/json')
-        xhr.onload = function () {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            setStatus('Received token, storing and redirecting...')
-            try {
-              const data = JSON.parse(xhr.responseText)
-              // Store token in localStorage
-              localStorage.setItem('authToken', data.token)
-              localStorage.setItem('authProvider', 'microsoft')
-
-              // Redirect to home page
-              router.push('/')
-            } catch (parseError) {
-              console.error('Failed to parse response:', parseError)
-              setError('Failed to process Microsoft authentication response')
-              setTimeout(
-                () => router.push('/login?error=response_parsing_failed'),
-                2000,
-              )
-            }
-          } else {
-            console.error(
-              'Error from callback endpoint:',
-              xhr.status,
-              xhr.responseText,
-            )
-            setError(`Failed to authenticate with Microsoft (${xhr.status})`)
-            setTimeout(
-              () => router.push('/login?error=authentication_failed'),
-              2000,
-            )
-          }
-        }
-        xhr.onerror = function () {
-          console.error('Request failed:', xhr.responseText)
-          setError('Network error during Microsoft authentication')
-          setTimeout(() => router.push('/login?error=network_error'), 2000)
-        }
-
-        xhr.send(
-          JSON.stringify({
+        const res = await fetch(`${API_URL}/api/auth/microsoft/callback/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             code,
             redirect_uri: `${window.location.origin}/sso-callback/microsoft`,
             device_id: deviceId,
-            device_name: deviceName,
+            device_name: navigator.userAgent || 'Web Browser',
           }),
-        )
-      } catch (error) {
-        console.error('Microsoft auth error:', error)
+        })
+
+        if (!res.ok) {
+          const text = await res.text()
+          console.error('Microsoft callback error:', res.status, text)
+          setError(`Failed to authenticate with Microsoft (${res.status})`)
+          setTimeout(
+            () => router.push('/login?error=authentication_failed'),
+            2000,
+          )
+          return
+        }
+
+        const data = await res.json()
+        storeSsoAuthToken(data.token, 'microsoft')
+
+        setStatus('Syncing session...')
+        const synced = await syncAuthContextAfterSso(checkAuth)
+        if (!synced) {
+          setError('Authentication state sync failed')
+          setTimeout(
+            () => router.push('/login?error=authentication_failed'),
+            2000,
+          )
+          return
+        }
+
+        router.push('/profile')
+      } catch (err) {
+        console.error('Microsoft auth error:', err)
         setError('An error occurred during Microsoft authentication')
         setTimeout(
           () => router.push('/login?error=authentication_failed'),
@@ -98,8 +85,8 @@ function MicrosoftCallbackContent() {
       }
     }
 
-    exchangeCodeForToken()
-  }, [router, searchParams])
+    void exchangeCodeForToken()
+  }, [checkAuth, router, searchParams])
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-100'>
