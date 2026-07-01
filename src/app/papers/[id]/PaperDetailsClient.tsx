@@ -114,7 +114,6 @@ interface Paper {
   isInteresting?: boolean;
   is_interesting?: boolean;
   isDownloaded?: boolean;
-  isUploaded?: boolean;
 }
 
 const PaperHeader = ({ paper }: { paper: Paper }) => (
