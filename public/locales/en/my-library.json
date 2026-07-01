@@ -53,6 +53,7 @@
         "addedDate": "Added Date",
         "viewFullDetails": "View Full Details",
         "downloadPaper": "Download Paper",
+        "uploadSuccess": "Upload successful. View your paper in Interesting Papers or Downloaded Papers.",
         "removeFromDownloaded": "Remove from Downloaded",
         "close": "Close",
         "mustBeLoggedIn": "You must be logged in to upload papers.",

@@ -29,7 +29,6 @@ interface Paper {
   bibtex?: string;
   sourceCode?: string;
   datasets?: string[];
-  isUploaded?: boolean;
   fileName?: string;
   fileSize?: number;
 }
@@ -77,6 +76,70 @@ type LibrarySection =
   | 'datasets'
   | 'uploaded'
   | 'recommended'
+
+const UPLOADED_PAPER_EXAMPLE: Paper = {
+  id: 'uploaded-mock-example',
+  title: 'Uploaded Research Paper Example',
+  authors: ['John Smith', 'Jane Doe'],
+  conference: 'CVPR',
+  year: 2023,
+  field: 'Computer Vision & Pattern Recognition',
+  keywords: ['computer vision', 'uploaded paper'],
+  abstract:
+    'This is an example of an uploaded paper with metadata automatically extracted...',
+  downloadUrl: '#',
+  isInteresting: false,
+  isDownloaded: false,
+  addedDate: '2024-06-01T10:15:25Z',
+  fileName: 'research_paper.pdf',
+  fileSize: 2458000,
+}
+
+function resolveDownloadUrl(paper: Record<string, unknown>): string {
+  const raw = paper.downloadUrl ?? paper.pdf_url
+  if (typeof raw !== 'string' || raw.length === 0) {
+    return '#'
+  }
+  if (raw.startsWith('/')) {
+    const base = (API_URL || 'http://localhost:8000').replace(/\/$/, '')
+    return `${base}${raw}`
+  }
+  return raw
+}
+
+function mapApiLibraryPaper(
+  paper: Record<string, unknown>,
+  defaults: { isInteresting?: boolean; isDownloaded?: boolean } = {},
+): Paper {
+  return {
+    id: String(paper.id),
+    title: String(paper.title ?? ''),
+    authors: Array.isArray(paper.authors)
+      ? (paper.authors as string[])
+      : paper.authors
+        ? [String(paper.authors)]
+        : [],
+    conference: String(paper.conference ?? ''),
+    year:
+      typeof paper.year === 'number'
+        ? paper.year
+        : new Date().getFullYear(),
+    field: String(paper.field ?? ''),
+    keywords: Array.isArray(paper.keywords) ? (paper.keywords as string[]) : [],
+    abstract: String(paper.abstract ?? ''),
+    downloadUrl: resolveDownloadUrl(paper),
+    isInteresting:
+      defaults.isInteresting ?? Boolean(paper.is_interesting),
+    isDownloaded: defaults.isDownloaded ?? Boolean(paper.is_downloaded),
+    addedDate: String(paper.added_date ?? new Date().toISOString()),
+    fileName: paper.file_name ? String(paper.file_name) : undefined,
+    fileSize:
+      typeof paper.file_size === 'number' ? paper.file_size : undefined,
+    doi: paper.doi ? String(paper.doi) : undefined,
+    bibtex: paper.bibtex ? String(paper.bibtex) : undefined,
+    sourceCode: paper.sourceCode ? String(paper.sourceCode) : undefined,
+  }
+}
 
 function MyLibraryPage() {
   const { t } = useTranslation('my-library')
@@ -360,30 +423,9 @@ function MyLibraryPage() {
           ? data
           : data.results || data.data || []
         // Convert API data format to our Paper format
-        const interestingPapers = interestingPaperItems.map((paper: any) => ({
-          id: paper.id,
-          title: paper.title,
-          authors: Array.isArray(paper.authors)
-            ? paper.authors
-            : paper.authors
-              ? [paper.authors]
-              : [],
-          conference: paper.conference || '',
-          year: paper.year || new Date().getFullYear(),
-          field: paper.field || '',
-          keywords: paper.keywords || [],
-          abstract: paper.abstract || '',
-          downloadUrl: paper.file || '#',
-          isInteresting: true, // These are interesting papers
-          isDownloaded: paper.is_downloaded || false,
-          isUploaded: paper.is_uploaded || false,
-          addedDate: paper.added_date || new Date().toISOString(),
-          fileName: paper.file_name,
-          fileSize: paper.file_size,
-          doi: paper.doi,
-          bibtex: paper.bibtex,
-          sourceCode: paper.sourceCode,
-        }))
+        const interestingPapers = interestingPaperItems.map((paper: any) =>
+          mapApiLibraryPaper(paper, { isInteresting: true }),
+        )
 
         setLibraryPapers(interestingPapers)
         setFilteredPapers(interestingPapers)
@@ -427,30 +469,9 @@ function MyLibraryPage() {
       if (response.ok) {
         const data = await response.json()
         // Convert API data format to our Paper format
-        const downloadedPapers = data.map((paper: any) => ({
-          id: paper.id,
-          title: paper.title,
-          authors: Array.isArray(paper.authors)
-            ? paper.authors
-            : paper.authors
-              ? [paper.authors]
-              : [],
-          conference: paper.conference || '',
-          year: paper.year || new Date().getFullYear(),
-          field: paper.field || '',
-          keywords: paper.keywords || [],
-          abstract: paper.abstract || '',
-          downloadUrl: paper.file || '#',
-          isInteresting: paper.is_interesting || false,
-          isDownloaded: true, // These are downloaded papers
-          isUploaded: paper.is_uploaded || false,
-          addedDate: paper.added_date || new Date().toISOString(),
-          fileName: paper.file_name,
-          fileSize: paper.file_size,
-          doi: paper.doi,
-          bibtex: paper.bibtex,
-          sourceCode: paper.sourceCode,
-        }))
+        const downloadedPapers = data.map((paper: any) =>
+          mapApiLibraryPaper(paper, { isDownloaded: true }),
+        )
 
         setLibraryPapers(downloadedPapers)
         setFilteredPapers(downloadedPapers)
@@ -582,22 +603,20 @@ function MyLibraryPage() {
 
       // Convert API data format to our Paper format
       const paperObjects = recommendedPapersData.map((paper: any) => {
+        const mapped = mapApiLibraryPaper(paper)
         return {
-          id: paper.id,
-          title: paper.title,
-          authors: Array.isArray(paper.authors) ? paper.authors : ['Unknown'],
+          ...mapped,
           conference:
-            paper.venue_name || paper.venue || paper.conference || 'Unknown',
-          year: paper.year || new Date().getFullYear(),
-          field: paper.field || 'Computer Science',
-          keywords: Array.isArray(paper.keywords) ? paper.keywords : [],
-          abstract: paper.abstract || '',
-          downloadUrl: paper.file || '#',
-          isInteresting: false,
-          isDownloaded: false,
+            paper.venue_name ||
+            (typeof paper.venue === 'string'
+              ? paper.venue
+              : paper.venue?.name) ||
+            paper.conference ||
+            mapped.conference ||
+            'Unknown',
+          field: paper.field || mapped.field || 'Computer Science',
           addedDate:
-            paper.created_at || paper.addedDate || new Date().toISOString(),
-          doi: paper.doi,
+            paper.created_at || paper.addedDate || mapped.addedDate,
         }
       })
 
@@ -617,196 +636,18 @@ function MyLibraryPage() {
     }
   }
 
-  // Sample data
   useEffect(() => {
-    // Fetch user papers from API if auth token exists
-    const fetchUserPapers = async () => {
-      try {
-        // Instead of fetching from an API that's failing, we'll just use sample data
-        // This fixes the TypeError: Failed to fetch error
-        console.log('Using sample data instead of API fetch')
-
-        // Optional: If you want to simulate an API fetch later, uncomment and modify this code:
-        /*
-                const headers = getAuthHeaders();
-                const response = await fetch('your-api-endpoint-here', {
-                    headers,
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    // Process data here
-                }
-                */
-      } catch (error) {
-        console.error('Error fetching papers:', error)
-        // Continue with sample data on error
-      }
-    }
-
-    // This would normally be a fetch from an API
-    const samplePapers: Paper[] = [
-      {
-        id: '1',
-        title: 'Attention Is All You Need',
-        authors: ['Ashish Vaswani', 'Noam Shazeer', 'Niki Parmar'],
-        conference: 'NeurIPS',
-        year: 2024,
-        field: 'Artificial Intelligence',
-        keywords: ['transformer', 'deep learning', 'NLP'],
-        abstract:
-          'The dominant sequence transduction models are based on complex recurrent or convolutional neural networks...',
-        downloadUrl: '#',
-        isInteresting: true,
-        isDownloaded: true,
-        addedDate: '2024-05-15T14:22:30Z',
-      },
-      {
-        id: '2',
-        title:
-          'BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding',
-        authors: ['Jacob Devlin', 'Ming-Wei Chang', 'Kenton Lee'],
-        conference: 'ACL',
-        year: 2025,
-        field: 'Computational Linguistics',
-        keywords: ['BERT', 'transformers', 'language model'],
-        abstract:
-          'We introduce a new language representation model called BERT...',
-        downloadUrl: '#',
-        isInteresting: true,
-        isDownloaded: false,
-        addedDate: '2024-05-10T09:15:45Z',
-      },
-      {
-        id: '3',
-        title: 'Deep Residual Learning for Image Recognition',
-        authors: ['Kaiming He', 'Xiangyu Zhang', 'Shaoqing Ren'],
-        conference: 'CVPR',
-        year: 2025,
-        field: 'Computer Vision & Pattern Recognition',
-        keywords: ['ResNet', 'CNN', 'image recognition'],
-        abstract: 'Deeper neural networks are more difficult to train...',
-        downloadUrl: '#',
-        isInteresting: false,
-        isDownloaded: true,
-        addedDate: '2024-05-12T18:30:15Z',
-      },
-      {
-        id: '4',
-        title:
-          'StyleGAN: A Style-Based Generator Architecture for Generative Adversarial Networks',
-        authors: ['Tero Karras', 'Samuli Laine', 'Timo Aila'],
-        conference: 'SIGGRAPH',
-        year: 2024,
-        field: 'Computer Graphics',
-        keywords: ['GAN', 'generative model', 'style transfer'],
-        abstract:
-          'We propose a new generator architecture for generative adversarial networks...',
-        downloadUrl: '#',
-        isInteresting: true,
-        isDownloaded: true,
-        addedDate: '2024-05-14T11:45:20Z',
-      },
-      {
-        id: '5',
-        title: 'Congestion Control Using Neural Networks',
-        authors: ['Keith Winstein', 'Hari Balakrishnan'],
-        conference: 'SIGCOMM',
-        year: 2023,
-        field: 'Computer Networks & Wireless Communication',
-        keywords: ['congestion control', 'neural networks', 'networking'],
-        abstract:
-          'We present a new approach to congestion control using neural networks...',
-        downloadUrl: '#',
-        isInteresting: true,
-        isDownloaded: false,
-        addedDate: '2024-05-08T16:20:10Z',
-      },
-      {
-        id: '6',
-        title: 'Uploaded Research Paper Example',
-        authors: ['John Smith', 'Jane Doe'],
-        conference: 'CVPR',
-        year: 2023,
-        field: 'Computer Vision & Pattern Recognition',
-        keywords: ['computer vision', 'uploaded paper'],
-        abstract:
-          'This is an example of an uploaded paper with metadata automatically extracted...',
-        downloadUrl: '#',
-        isInteresting: false,
-        isDownloaded: false,
-        isUploaded: true,
-        addedDate: '2024-06-01T10:15:25Z',
-        fileName: 'research_paper.pdf',
-        fileSize: 2458000,
-      },
-    ]
-
-    setLibraryPapers(samplePapers)
-
-    // Call the API fetch function
-    fetchUserPapers()
-
-    // If user is authenticated and on interesting section, fetch interesting papers
     if (activeSection === 'interesting' && hasAuthToken()) {
       fetchInterestingPapers()
     }
 
-    // If user is authenticated and on downloaded section, fetch downloaded papers
     if (activeSection === 'downloaded' && hasAuthToken()) {
       fetchDownloadedPapers()
     }
 
-    // If user is authenticated and on datasets section, fetch interesting datasets
-    if (activeSection === 'datasets' && starredDatasets.length === 0) {
+    if (activeSection === 'datasets' && hasAuthToken()) {
       fetchInterestingDatasets()
     }
-
-    // Sample starred datasets
-    const sampleDatasets: Dataset[] = [
-      {
-        id: '1',
-        name: 'MNIST Database of Handwritten Digits',
-        abbreviation: 'MNIST',
-        description:
-          'The MNIST database of handwritten digits has a training set of 60,000 examples, and a test set of 10,000 examples.',
-        category: 'Image',
-        paperCount: 1250,
-        downloadUrl: '#',
-        addedDate: '2024-05-14T10:30:00Z',
-        tasks: ['Image Classification', 'Pattern Recognition'],
-        language: 'English',
-      },
-      {
-        id: '2',
-        name: 'Imagenet',
-        abbreviation: 'ImageNet',
-        description:
-          'ImageNet is an image database organized according to the WordNet hierarchy, in which each node is depicted by hundreds and thousands of images.',
-        category: 'Image',
-        paperCount: 5280,
-        downloadUrl: '#',
-        addedDate: '2024-05-10T15:45:20Z',
-        tasks: ['Image Classification', 'Object Detection'],
-        language: 'English',
-      },
-      {
-        id: '3',
-        name: 'CIFAR-10',
-        abbreviation: 'CIFAR-10',
-        description:
-          'The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class.',
-        category: 'Image',
-        paperCount: 980,
-        downloadUrl: '#',
-        addedDate: '2024-05-08T09:20:15Z',
-        tasks: ['Image Classification'],
-        language: 'English',
-      },
-    ]
-
-    setStarredDatasets(sampleDatasets)
   }, [activeSection])
 
   // Filter data
@@ -911,44 +752,48 @@ function MyLibraryPage() {
     })
   }
 
-  // Apply filters
   useEffect(() => {
-    // Filter by section first
+    const applyPaperFilters = (papers: Paper[]) => {
+      let result = [...papers]
+
+      if (activeFilters.years.length > 0) {
+        result = result.filter((paper) =>
+          activeFilters.years.includes(paper.year),
+        )
+      }
+
+      if (activeFilters.conferences.length > 0) {
+        result = result.filter((paper) =>
+          activeFilters.conferences.includes(paper.conference),
+        )
+      }
+
+      if (activeFilters.fields.length > 0) {
+        result = result.filter((paper) =>
+          activeFilters.fields.includes(paper.field),
+        )
+      }
+
+      result.sort(
+        (a, b) =>
+          new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+      )
+
+      return result
+    }
+
+    if (activeSection === 'uploaded') {
+      setFilteredPapers(applyPaperFilters([UPLOADED_PAPER_EXAMPLE]))
+      return
+    }
+
     const sectionFilteredPapers = libraryPapers.filter((paper) => {
       if (activeSection === 'interesting') return paper.isInteresting
       if (activeSection === 'downloaded') return paper.isDownloaded
-      if (activeSection === 'uploaded') return paper.isUploaded
       return false
     })
 
-    // Sort by date added (newest first)
-    sectionFilteredPapers.sort(
-      (a, b) =>
-        new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
-    )
-
-    // Apply other filters
-    let result = [...sectionFilteredPapers]
-
-    if (activeFilters.years.length > 0) {
-      result = result.filter((paper) =>
-        activeFilters.years.includes(paper.year),
-      )
-    }
-
-    if (activeFilters.conferences.length > 0) {
-      result = result.filter((paper) =>
-        activeFilters.conferences.includes(paper.conference),
-      )
-    }
-
-    if (activeFilters.fields.length > 0) {
-      result = result.filter((paper) =>
-        activeFilters.fields.includes(paper.field),
-      )
-    }
-
-    setFilteredPapers(result)
+    setFilteredPapers(applyPaperFilters(sectionFilteredPapers))
   }, [activeFilters, libraryPapers, activeSection])
 
   // Clear all filters
@@ -1075,12 +920,13 @@ function MyLibraryPage() {
     const formData = new FormData()
     formData.append('file', files[0])
 
+    let progressInterval: ReturnType<typeof setInterval> | null = null
+
     try {
-      // Upload progress simulation
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 90) {
-            clearInterval(progressInterval)
+            if (progressInterval) clearInterval(progressInterval)
             return 90
           }
           return prev + 10
@@ -1125,49 +971,23 @@ function MyLibraryPage() {
 
       console.log('Received paper data:', paperData)
 
-      // Add new paper to library
-      const newPaper: Paper = {
-        id: paperData.id,
-        title: paperData.title,
-        authors: Array.isArray(paperData.authors)
-          ? paperData.authors
-          : paperData.authors
-            ? [paperData.authors]
-            : [],
-        conference: paperData.conference || '',
-        year: paperData.year || new Date().getFullYear(),
-        field: paperData.field || '',
-        keywords: paperData.keywords || [],
-        abstract: paperData.abstract || '',
-        downloadUrl: paperData.file, // URL to download the file
-        isInteresting:
-          paperData.isInteresting ?? paperData.is_interesting ?? false,
-        isDownloaded:
-          paperData.isDownloaded ?? paperData.is_downloaded ?? false,
-        isUploaded: paperData.isUploaded ?? paperData.is_uploaded ?? true,
-        addedDate: paperData.added_date,
-        fileName: paperData.file_name,
-        fileSize: paperData.file_size,
-        doi: paperData.doi,
-        bibtex: paperData.bibtex,
-        sourceCode: paperData.sourceCode,
-      }
+      if (progressInterval) clearInterval(progressInterval)
 
-      // Add to library
-      setLibraryPapers((prev) => [...prev, newPaper])
-
-      // Complete progress and close modal
       setUploadProgress(100)
       setTimeout(() => {
         setIsUploading(false)
         setIsUploadModalOpen(false)
-        setActiveSection('uploaded')
-        // Reset file input
         if (fileInputRef.current) {
           fileInputRef.current.value = ''
         }
       }, 500)
+
+      toast.success(t('papers.uploadSuccess'))
+      setActiveSection('interesting')
+      void fetchInterestingPapers()
+      void fetchDownloadedPapers()
     } catch (error) {
+      if (progressInterval) clearInterval(progressInterval)
       console.error('Upload failed:', error)
       const message =
         error instanceof Error ? error.message : 'Không thể upload bài báo'
@@ -1649,8 +1469,7 @@ function MyLibraryPage() {
                                           )}
                                         </span>
                                       )}
-                                    {activeSection === 'uploaded' &&
-                                      paper.isUploaded && (
+                                    {activeSection === 'uploaded' && (
                                         <span className='inline-flex items-center text-xs text-purple-600'>
                                           <svg
                                             className='w-4 h-4 mr-1'
