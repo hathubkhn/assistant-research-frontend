@@ -43,21 +43,25 @@ interface DashboardData {
   }>;
 }
 
-interface Task {
+interface Venue {
   id: string;
   name: string;
+  abbreviation?: string | null;
 }
 
 interface Paper {
   id: string;
   title: string;
   authors: string[];
-  publication: string;
-  year: number;
+  venue: Venue | null;
+  year: number | null;
   abstract: string;
-  tasks: Task[];
-  citations: number;
-  isInteresting: boolean;
+  downloadUrl?: string;
+}
+
+const formatVenueLabel = (venue: Venue | null | undefined): string => {
+  if (!venue) return 'Unknown'
+  return venue.abbreviation || venue.name || 'Unknown'
 }
 
 interface FetchDashboardParams {
@@ -620,26 +624,13 @@ export default function Dashboard() {
                         {paper.title}
                       </Typography.Title>
                       <Text type='secondary' style={{ fontSize: '14px' }}>
-                        {paper.authors.join(', ')} • {paper.publication} • {paper.year}
+                        {(paper.authors || []).join(', ') || 'Unknown'} • {formatVenueLabel(paper.venue)} • {paper.year ?? '—'}
                       </Text>
                       <Paragraph style={{ marginTop: '8px', color: '#333' }}>
                         {paper.abstract}
                       </Paragraph>
 
-                      <div style={{ marginTop: '12px' }}>
-                        <Space wrap size='small'>
-                          {paper.tasks?.map((task: any, idx: number) => (
-                            <Tag key={`${paper.id}-task-${idx}`} color='blue'>
-                              {task.name || task.title}
-                            </Tag>
-                          )) || []}
-                        </Space>
-                      </div>
-
-                      <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text type='secondary' style={{ fontSize: '14px' }}>
-                          {t('papers.citations')}: {paper.citations}
-                        </Text>
+                      <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                         <Button
                           type='link'
                           href={paper.downloadUrl}
